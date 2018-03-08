@@ -1,23 +1,17 @@
 # Reference: https://wiki.osdev.org/GCC_Cross-Compiler
+include ../Makefile.common
 BASE_DIR=$(CURDIR)
-BINUTILS_VERSION=2.30
-GCC_VERSION=7.3.0
-
 BINUTILS_DOWNLOAD=ftp://ftp.gnu.org/gnu/binutils//binutils-$(BINUTILS_VERSION).tar.gz
 BINUTILS_SRC=$(BASE_DIR)/binutils-$(BINUTILS_VERSION)
 GCC_DOWNLOAD=ftp://ftp.gnu.org/gnu/gcc/gcc-$(GCC_VERSION)/gcc-$(GCC_VERSION).tar.gz
 GCC_SRC=$(BASE_DIR)/gcc-$(GCC_VERSION)
 GCC_BUILD_DIR=$(BASE_DIR)/build-gcc
 
-# For MacOSX GCC directory
+# For MacOSX GCC directory using home brew.
 export CC=/usr/local/bin/gcc-7
 export CXX=/usr/local/bin/g++-7
 export CPP=/usr/local/bin/cpp-7
 export LD=$(CC)
-
-# TODO Pending use bubackos.conf as configuration
-export TARGET=x86_64-bubackos-elf
-export PREFIX=$(BASE_DIR)/sysroot
 
 .PHONY: all binutils gcc clean
 
@@ -31,7 +25,6 @@ $(BINUTILS_SRC):
 	cd $(abspath $(BINUTILS_SRC)/..) && curl -s $(BINUTILS_DOWNLOAD) | tar -zxv
 
 binutils: $(BINUTILS_SRC)
-	echo "$(PREFIX)/bin/$(TARGET)-ld"
 	cd $(BINUTILS_SRC) && find . -name config.cache -delete
 	cd $(BINUTILS_SRC) && ./configure --prefix=$(PREFIX) --target=$(TARGET) --enable-interwork --enable-multilib --disable-nls --disable-werror
 	$(MAKE) -C $(BINUTILS_SRC)
