@@ -55,7 +55,7 @@ int multiboot_parser(uint64_t magic, uint64_t* addr)
                  ((struct multiboot_tag_module *) tag)->cmdline);
          break;
        case MULTIBOOT_TAG_TYPE_BASIC_MEMINFO:
-         kprintf ("mem_lower = %uKB, mem_upper = %uKB\n",
+         kprintf ("mem_lower = %dKB, mem_upper = %dKB\n",
                  ((struct multiboot_tag_basic_meminfo *) tag)->mem_lower,
                  ((struct multiboot_tag_basic_meminfo *) tag)->mem_upper);
          break;
