@@ -1,0 +1,4 @@
+binutils-*
+gcc-*
+sysroot
+build-gcc
