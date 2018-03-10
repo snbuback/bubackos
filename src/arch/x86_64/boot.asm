@@ -36,6 +36,8 @@ boot:
   or dword eax, 0b011
   mov dword [PDPTE_ADDR], eax
   mov dword [PDPTE_ADDR+4], 0
+
+  ; Page 2806
   ; Set up PD entry, which will point to the first 2MB page (0).  But we
   ; need to set three bits this time, Present, Read/Write and Page Size (to
   ; indicate that this is the last level of paging in use).
@@ -46,10 +48,13 @@ boot:
   mov eax, 0b10100000
   mov cr4, eax
 
+  ; Page 2749
   ; Set master (PML4) page table in CR3.
   mov eax, PML4E_ADDR
   mov cr3, eax
 
+
+  ; Page 4382
   ; Set IA-32e Mode Enable (read: 64-bit mode enable) in the "model-specific
   ; register" (MSR) called Extended Features Enable (EFER).
   mov ecx, 0xc0000080
@@ -81,10 +86,6 @@ k_64_bits:
 multiboot_info:
   dq 0
   dq 0
-
-message_begin:
-  db "Loading..."
-message_end:
 
 ; Global descriptor table entry format
 ; See Intel 64 Software Developers' Manual, Vol. 3A, Figure 3-8

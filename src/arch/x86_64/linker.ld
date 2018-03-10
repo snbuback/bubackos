@@ -1,43 +1,39 @@
-/* The bootloader will look at this image and start execution at the symbol
-   designated at the entry point. */
-ENTRY(boot)
+ENTRY(boot)           /* the name of the entry symbol */
 
-/* Tell where the various sections of the object files will be put in the final
-   kernel image. */
-SECTIONS
-{
-	/* Begin putting sections at 1 MiB, a conventional place for kernels to be
-	   loaded at by the bootloader. */
-	. = 1M;
+BASE_ADDR = 0;
 
-	/* First put the multiboot header, as it is required to be put very early
-	   early in the image or the bootloader won't recognize the file format.
-	   Next we'll put the .text section. */
-	.text BLOCK(4K) : ALIGN(4K)
+. = BASE_ADDR + 0x100000;          /* the code should be relocated to 3 GB + 1 MB */
+
+/* these labels get exported to the code files */
+kernel_virtual_start = .;
+kernel_physical_start = . - BASE_ADDR;
+
+SECTIONS {
+	/* align at 4 KB and load at 1 MB */
+	.text ALIGN (4K) : AT(ADDR(.text)-BASE_ADDR)
 	{
-		*(.multiboot2)
-		*(.text)
+			*(.multiboot2)            /* all text sections from all files */
+	    *(.text)            /* all text sections from all files */
 	}
 
-	/* Read-only data. */
-	.rodata BLOCK(4K) : ALIGN(4K)
+	/* align at 4 KB and load at 1 MB + . */
+	.rodata ALIGN (4K) : AT(ADDR(.rodata)-BASE_ADDR)
 	{
-		*(.rodata)
+	    *(.rodata*)         /* all read-only data sections from all files */
 	}
 
-	/* Read-write data (initialized) */
-	.data BLOCK(4K) : ALIGN(4K)
+	/* align at 4 KB and load at 1 MB + . */
+	.data ALIGN (4K) : AT(ADDR(.data)-BASE_ADDR)
 	{
-		*(.data)
+	    *(.data)            /* all data sections from all files */
 	}
 
-	/* Read-write data (uninitialized) and stack */
-	.bss BLOCK(4K) : ALIGN(4K)
+	/* align at 4 KB and load at 1 MB + . */
+	.bss ALIGN (4K) : AT(ADDR(.bss)-BASE_ADDR)
 	{
-		*(COMMON)
-		*(.bss)
+	    *(COMMON)           /* all COMMON sections from all files */
+	    *(.bss)             /* all bss sections from all files */
 	}
-
-	/* The compiler may produce other sections, put them in the proper place in
-	   in this file, if you'd like to include them in the final kernel. */
 }
+kernel_virtual_end = .;
+kernel_physical_end = . - BASE_ADDR;
