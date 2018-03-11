@@ -48,4 +48,7 @@ loader:
 	@$(MAKE) -C tools/loader all
 
 run:
-	@qemu-system-x86_64 -boot order=d -cdrom dist/loader.iso -hda fat:./dist -no-reboot -no-shutdown -d cpu_reset,guest_errors,unimp,in_asm
+	@qemu-system-x86_64 -boot order=d -cdrom dist/loader.iso -hda fat:./dist -no-reboot -no-shutdown -monitor stdio
+
+run-debug:
+	@qemu-system-x86_64 -boot order=d -cdrom dist/loader.iso -hda fat:./dist -no-reboot -no-shutdown -d cpu_reset,guest_errors,unimp,in_asm,int,page
