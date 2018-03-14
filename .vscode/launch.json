@@ -1,0 +1,23 @@
+{
+    "name": "BubackOS debug",
+    "type": "cppvsdbg",
+    "request": "launch",
+    "program": "make run",
+    "symbolSearchPath": "${workspaceRoot}/src/include",
+    "externalConsole": true,
+    "logging": {
+        "moduleLoad": false,
+        "trace": true
+     },
+    // "visualizerFile": "${workspaceRoot}/my.natvis",
+    "showDisplayString": true,
+    "osx": {
+        "MIMode": "gdb",
+        "miDebuggerPath": "/usr/local/bin/gdb",
+        "miDebuggerServerAddress": "localhost:1234",
+        "debugServerPath": "/usr/local/bin/qemu-system-x86_64",
+        "debugServerArgs": "-boot -S -s order=d -cdrom dist/loader.iso -hda fat:./dist -no-reboot -no-shutdown",
+        "serverStarted": "",
+        "serverLaunchTimeout": 10000,
+     },
+ }

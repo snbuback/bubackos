@@ -17,7 +17,7 @@ assembly_object_files := $(patsubst $(SRC_DIR)/%.asm, build/%.o, $(assembly_sour
 includes_dir := -I$(SRC_DIR)/include -I$(SRC_DIR)/arch/x86_64 -I$(SRC_DIR)/libc/include
 
 
-.PHONY: all clean run iso prepare loader
+.PHONY: all clean run iso prepare loader test
 .SUFFIXES:
 
 all: $(kernel) loader
@@ -52,3 +52,6 @@ run:
 
 run-debug:
 	@qemu-system-x86_64 -boot order=d -cdrom dist/loader.iso -hda fat:./dist -no-reboot -no-shutdown -d cpu_reset,guest_errors,unimp,in_asm,int,page
+
+test:
+	@test/run.py

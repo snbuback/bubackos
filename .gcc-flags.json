@@ -3,6 +3,6 @@
   "gccDefaultCFlags": "-std=gnu11 -ffreestanding -Wall -Wextra -c -fsyntax-only",
   "gccDefaultCppFlags": "-std=c++11 -ffreestanding -Wall -Wextra -fno-exceptions -fno-rtti -c -fsyntax-only",
   "gccErrorLimit": 15,
-  "gccIncludePaths": "src/include,src/arch/x86_64,src/libc/include",
+  "gccIncludePaths": "./src/include,./src/arch/x86_64,./src/libc/include",
   "gccSuppressWarnings": false
 }

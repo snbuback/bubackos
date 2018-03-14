@@ -3,12 +3,15 @@
 #include <stdint.h>
 #include <stddef.h>
 
+#define TAB_SIZE   4
+
 // console
 extern const size_t console__width;
 extern const size_t console__height;
 void console__initialize(void);
 void console__clear(void);
 void console__write(const char* sequence, size_t length, uint8_t color, size_t x, size_t y);
+void console_scroll_up(size_t rows);
 
 // terminal
 void terminal_initialize(void);

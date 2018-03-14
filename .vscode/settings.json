@@ -1,0 +1,8 @@
+{
+    "files.associations": {
+        "*.inc": "cpp",
+        "memory_resource": "cpp",
+        "*.tcc": "cpp"
+    },
+    "python.pythonPath": "/usr/local/opt/python/bin/python3.6"
+}

@@ -1,4 +1,6 @@
+
 #include <kernel/console.h>
+#include <stdlib.h>
 
 volatile size_t terminal_row;
 volatile size_t terminal_column;
@@ -18,22 +20,33 @@ void terminal__set_color(uint8_t fg, uint8_t bg) {
 	terminal_color = vga_entry_color(fg, bg);
 }
 
-static inline void terminal_writesequence(const char* buffer_start, size_t length) {
-	console__write(buffer_start, length, terminal_color, terminal_row, terminal_column);
-	terminal_column += length;
+static void need_scroll() {
+	if (terminal_row >= console__height) {
+		console_scroll_up(1);
+		terminal_row = console__height-1;
+	}
 }
 
 static inline void newline() {
 	terminal_column = 0;
 	terminal_row++;
-	if (terminal_row > 24) {
-		terminal_row = 1;
-		console__write(">>>>", 4, terminal_color, 0, 0);
-	}
+	need_scroll();
+}
+
+static inline void terminal_writesequence(const char* buffer_start, size_t length) {
+	size_t written = 0;
+	do {
+		int chars_to_write = min(console__width - terminal_column, length);
+		console__write(buffer_start+written, chars_to_write, terminal_color, terminal_row, terminal_column);
+		terminal_column += chars_to_write;
+		written += chars_to_write;
+		if (terminal_column >= console__width) {
+			newline();
+		}
+	} while (written < length);
 }
 
 void terminal__write(const char* data, size_t data_length) {
-	// TODO implement automatic new-line and scroll
 	if (data == 0 || data_length == 0) {
 		return;
 	}
@@ -50,6 +63,11 @@ void terminal__write(const char* data, size_t data_length) {
 			case '\r':
 				terminal_writesequence(buffer_start, data + i - buffer_start);
 				terminal_column = 0;
+				buffer_start = (char*) data+i+1;
+				break;
+			case '\t':
+				terminal_writesequence(buffer_start, data + i - buffer_start);
+				terminal_column = ((terminal_column/TAB_SIZE)+1)*TAB_SIZE;
 				buffer_start = (char*) data+i+1;
 				break;
 		}

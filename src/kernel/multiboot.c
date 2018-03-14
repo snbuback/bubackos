@@ -3,8 +3,7 @@
 #include <stdint.h>
 #include <kernel/multiboot2.h>
 #include <system.h>
-
-// TODO Remove this file after a stable boot version
+#include <kernel/logging.h>
 
 /*  Check if MAGIC is valid and print the Multiboot information structure
   pointed by ADDR. */
@@ -13,7 +12,7 @@ int multiboot_parser(uint64_t magic, uint64_t* addr)
  struct multiboot_tag *tag;
  unsigned size;
 
- kprintf("Valores: %x %x\n", addr, magic);
+ LOG_DEBUG("Multiboot arguments: magic=0x%x addr=0x%x", magic, addr);
 
  /*  Clear the screen. */
  // cls ();
@@ -21,17 +20,17 @@ int multiboot_parser(uint64_t magic, uint64_t* addr)
  /*  Am I booted by a Multiboot-compliant boot loader? */
  if ((uint32_t) magic != (uint64_t) MULTIBOOT2_BOOTLOADER_MAGIC)
    {
-     kprintf ("Invalid magic number: 0x%x addr: 0x%x -> %x\n", (unsigned) magic, (unsigned) addr, (uint64_t) MULTIBOOT2_BOOTLOADER_MAGIC);
+     LOG_ERROR("Invalid magic number. Expected 0x%x but 0x%x", (unsigned) magic, (unsigned) MULTIBOOT2_BOOTLOADER_MAGIC);
      return -1;
    }
 
  if (((unsigned int) addr) & 7)
    {
-     kprintf ("Unaligned mbi: 0x%x\n", addr);
+     LOG_ERROR("Unaligned mbi: 0x%x", addr);
      return -1;
    }
  size = *(unsigned *) addr;
- kprintf ("Announced mbi size 0x%x\n", size);
+ LOG_DEBUG ("Announced mbi size 0x%x", size);
  for (tag = (struct multiboot_tag *) ((uint32_t) addr + 8);
       tag->type != MULTIBOOT_TAG_TYPE_END;
       tag = (struct multiboot_tag *) ((multiboot_uint8_t *) tag
@@ -41,26 +40,26 @@ int multiboot_parser(uint64_t magic, uint64_t* addr)
      switch (tag->type)
        {
        case MULTIBOOT_TAG_TYPE_CMDLINE:
-         kprintf ("Command line = %s\n",
+         LOG_INFO("Command line = %s",
                  ((struct multiboot_tag_string *) tag)->string);
          break;
        case MULTIBOOT_TAG_TYPE_BOOT_LOADER_NAME:
-         kprintf ("Boot loader name = %s\n",
+         LOG_INFO("Boot loader name = %s",
                  ((struct multiboot_tag_string *) tag)->string);
          break;
        case MULTIBOOT_TAG_TYPE_MODULE:
-         kprintf ("Module at 0x%x-0x%x. Command line %s\n",
+         LOG_INFO("Module at 0x%x-0x%x. Command line %s",
                  ((struct multiboot_tag_module *) tag)->mod_start,
                  ((struct multiboot_tag_module *) tag)->mod_end,
                  ((struct multiboot_tag_module *) tag)->cmdline);
          break;
        case MULTIBOOT_TAG_TYPE_BASIC_MEMINFO:
-         kprintf ("mem_lower = %dKB, mem_upper = %dKB\n",
+         LOG_INFO("mem_lower = %dKB, mem_upper = %dKB",
                  ((struct multiboot_tag_basic_meminfo *) tag)->mem_lower,
                  ((struct multiboot_tag_basic_meminfo *) tag)->mem_upper);
          break;
        case MULTIBOOT_TAG_TYPE_BOOTDEV:
-         kprintf ("Boot device 0x%x,%u,%u\n",
+         LOG_INFO("Boot device 0x%x,%u,%u",
                  ((struct multiboot_tag_bootdev *) tag)->biosdev,
                  ((struct multiboot_tag_bootdev *) tag)->slice,
                  ((struct multiboot_tag_bootdev *) tag)->part);
@@ -69,16 +68,14 @@ int multiboot_parser(uint64_t magic, uint64_t* addr)
          {
            multiboot_memory_map_t *mmap;
 
-           kprintf ("mmap\n");
-
            for (mmap = ((struct multiboot_tag_mmap *) tag)->entries;
                 (multiboot_uint8_t *) mmap
                   < (multiboot_uint8_t *) tag + tag->size;
                 mmap = (multiboot_memory_map_t *)
                   ((unsigned long) mmap
                    + ((struct multiboot_tag_mmap *) tag)->entry_size))
-             kprintf (" base_addr = 0x%x%x,"
-                     " length = 0x%x%x (%d MB), type = 0x%x\n",
+             LOG_INFO(" base_addr = 0x%x%x,"
+                     " length = 0x%x%x (%d MB), type = 0x%x",
                      (unsigned) (mmap->addr >> 32),
                      (unsigned) (mmap->addr & 0xffffffff),
                      (unsigned) (mmap->len >> 32),
@@ -94,7 +91,7 @@ int multiboot_parser(uint64_t magic, uint64_t* addr)
            struct multiboot_tag_framebuffer *tagfb
              = (struct multiboot_tag_framebuffer *) tag;
            void *fb = (void *) (unsigned long) tagfb->common.framebuffer_addr;
-           kprintf("framebuffer %d \n", (unsigned) tagfb->common.framebuffer_type);
+           LOG_INFO("framebuffer %d", (unsigned) tagfb->common.framebuffer_type);
            break;
 
            switch (tagfb->common.framebuffer_type)
@@ -182,6 +179,6 @@ int multiboot_parser(uint64_t magic, uint64_t* addr)
    }
  tag = (struct multiboot_tag *) ((multiboot_uint8_t *) tag
                                  + ((tag->size + 7) & ~7));
- kprintf ("Total mbi size 0x%x\n", (unsigned) tag - (unsigned) addr);
+ LOG_DEBUG("Total mbi size 0x%x", (unsigned) tag - (unsigned) addr);
  return 0;
 }

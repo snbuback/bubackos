@@ -1,5 +1,6 @@
 #include <system.h>
 #include <string.h>
+#include <kernel/logging.h>
 
 void kernel_main(uint64_t magic, uint64_t *addr)
 {
@@ -11,11 +12,11 @@ void kernel_main(uint64_t magic, uint64_t *addr)
 	/* Initialize terminal interface */
 	terminal_initialize();
 
-	kprintf("Booting at 0x%x\n", &kernel_main);
+	LOG_INFO("Booting at 0x%x", &kernel_main);
 
 	services_initialize();
 
-	kprintf("Terminal Initialized qemu final\n");
+	LOG_DEBUG("Terminal Initialized");
 
 	// SyscallInfo_t logging;
 	// logging.name = "logging";
@@ -25,11 +26,11 @@ void kernel_main(uint64_t magic, uint64_t *addr)
 	// services_call(syscall_logging, "\n**** testing first syscall ****\n");
 
 	if (multiboot_parser(magic, addr) == -1) {
-		kprintf("Try to use a bootloader with multiboot2 support");
+		LOG_ERROR("Try to use a bootloader with multiboot2 support");
 		return;
 	}
 
-	kprintf("mbd=%x magic=%x\n", addr, magic);
-	gdt_install();
-	// kprintf("mem_lower=%d mem_upper=%d\n", mbd->mem_lower, mbd->mem_upper);
+	LOG_DEBUG("linha 1");
+	LOG_DEBUG("linha 2");
+	// LOG_DEBUG("linha 3");
 }
