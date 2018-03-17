@@ -11,8 +11,13 @@ void test_allocate_and_deallocate()
     const size_t total_of_pages = total_of_memory / SYSTEM_PAGE_SIZE;
 
     // to avoid the page allocator write in a invalid page of memory, the kernel should start at the data segment
-    const uintptr_t kernel_page_start = reinterpret_cast<uintptr_t>(malloc(1))/SYSTEM_PAGE_SIZE;
-    const uintptr_t kernel_page_end = kernel_page_start+17;
+    // reinterpret_cast<uintptr_t>(malloc(1))/SYSTEM_PAGE_SIZE;
+    const size_t kernel_number_of_pages = 10;
+    const size_t kernel_size = kernel_number_of_pages * SYSTEM_PAGE_SIZE;
+    const uintptr_t kernel_address = reinterpret_cast<uintptr_t>(malloc(kernel_size));
+
+    const uintptr_t kernel_page_start = kernel_address / SYSTEM_PAGE_SIZE;
+    const uintptr_t kernel_page_end = kernel_page_start + kernel_number_of_pages;
     const uintptr_t page_allocator_end = (kernel_page_end + 1) * SYSTEM_PAGE_SIZE + (total_of_pages * sizeof(page_type));
 
     // alocate memory to cheap the page allocator running as a regular user process

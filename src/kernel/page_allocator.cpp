@@ -5,12 +5,12 @@
 
 uintptr_t PageAllocator::align(uintptr_t addr)
 {
-    return addr & ~(SYSTEM_PAGE_ALIGN - 1);
+    return addr & ~(uintptr_t)(SYSTEM_PAGE_ALIGN - 1);
 }
 
 size_t PageAllocator::page_number(uintptr_t aligned_addr)
 {
-    return aligned_addr >> (SYSTEM_PAGE_ALIGN + 1);
+    return aligned_addr >> SYSTEM_PAGE_ALIGN;
 }
 
 size_t PageAllocator::next_page_available()
@@ -30,11 +30,15 @@ PageAllocator::PageAllocator(size_t t, uintptr_t kernel_start_address, uintptr_t
     total_memory = t;
     total_of_pages = total_memory / SYSTEM_PAGE_SIZE;
 
-    LOG_DEBUG("Kernel from 0x%lx to 0x%lx (aligned from 0x%lx to 0x%lx to page size of %ld)", kernel_start_address, kernel_end_address, align(kernel_start_address), align(kernel_end_address), (int) SYSTEM_PAGE_SIZE);
+    LOG_DEBUG("Page size = %d bytes (align %d)", (int) SYSTEM_PAGE_SIZE, (int) SYSTEM_PAGE_ALIGN);
+    LOG_DEBUG("Kernel from 0x%x to 0x%x", kernel_start_address, kernel_end_address);
+    LOG_DEBUG("Kernel (aligned) from 0x%x to 0x%x", align(kernel_start_address), align(kernel_end_address));
 
     size_t kernel_page_start = page_number(align(kernel_start_address));
     size_t kernel_page_end = page_number(align(kernel_end_address));
-    LOG_DEBUG("k s=%d kernel_page_end=%d", kernel_page_start, kernel_page_end);
+    LOG_DEBUG("size_t=%d al=%d", sizeof(size_t), sizeof(uintptr_t));
+    LOG_DEBUG("%d", (uint64_t) ((uint64_t) kernel_start_address / (uint64_t) 4096));
+    LOG_DEBUG("Kernel page number from %d to %d", kernel_page_start, kernel_page_end);
 
     // the page allocator memory are stored after the kernel pages.
     size_t pa_page_start = kernel_page_end + 1;

@@ -1,4 +1,5 @@
 # Reference: https://wiki.osdev.org/GCC_Cross-Compiler
+include ../bubackos.conf
 include ../Makefile.common
 BASE_DIR=$(CURDIR)
 BINUTILS_DOWNLOAD=ftp://ftp.gnu.org/gnu/binutils//binutils-$(BINUTILS_VERSION).tar.gz
@@ -22,17 +23,17 @@ clean:
 
 ## Binutils
 $(BINUTILS_SRC):
-	cd $(abspath $(BINUTILS_SRC)/..) && curl -s $(BINUTILS_DOWNLOAD) | tar -zxv
+	cd $(abspath $(BINUTILS_SRC)/..) && curl -s $(BINUTILS_DOWNLOAD) | tar -zx
 
 binutils: $(BINUTILS_SRC)
 	cd $(BINUTILS_SRC) && find . -name config.cache -delete
-	cd $(BINUTILS_SRC) && ./configure --prefix=$(PREFIX) --target=$(TARGET) --enable-interwork --enable-multilib --disable-nls --disable-werror
+	cd $(BINUTILS_SRC) && ./configure --prefix=$(PREFIX) --target=$(TARGET) --enable-multilib --disable-nls --disable-werror
 	$(MAKE) -C $(BINUTILS_SRC)
 	$(MAKE) -C $(BINUTILS_SRC) install
 
 ## GCC
 $(GCC_SRC):
-	cd $(abspath $(GCC_SRC)/..) && curl -s $(GCC_DOWNLOAD) | tar -zxv
+	cd $(abspath $(GCC_SRC)/..) && curl -s $(GCC_DOWNLOAD) | tar -zx
 
 gcc: $(GCC_SRC)
 	rm -rf $(GCC_BUILD_DIR) && mkdir -p $(GCC_BUILD_DIR)

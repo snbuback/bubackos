@@ -1,4 +1,6 @@
+include bubackos.conf
 include Makefile.common
+
 
 BASE_DIR=$(CURDIR)
 SRC_DIR=$(CURDIR)/src
@@ -55,3 +57,6 @@ run-debug:
 
 test:
 	@test/run.py
+
+test-debug:
+	@test/run.py -debug

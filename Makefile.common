@@ -1,5 +1,3 @@
-include bubackos.conf
-
 OS_NAME_LOWER=$(shell echo $(OS_NAME) | tr '[:upper:]' '[:lower:]')
 export TARGET=$(OS_ARCH)-$(OS_NAME_LOWER)-elf
 export PREFIX=$(CURDIR)/build-tools/sysroot
@@ -7,4 +5,4 @@ CC=$(PREFIX)/bin/$(TARGET)-gcc
 CPP=$(PREFIX)/bin/$(TARGET)-g++
 AS=$(PREFIX)/bin/$(TARGET)-as
 LD=$(PREFIX)/bin/$(TARGET)-ld
-NASM=/usr/local/bin/nasm
+NASM=nasm
