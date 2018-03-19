@@ -7,7 +7,6 @@
 #include <kernel/services.h>
 
 // temp
-void kprintf(const char *format, ...);
 int multiboot_parser(uint64_t magic, uint64_t* addr);
 
 #endif

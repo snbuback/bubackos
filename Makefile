@@ -15,12 +15,12 @@ s_source_files := $(shell find $(SRC_DIR) -name *.S)
 s_object_files := $(patsubst $(SRC_DIR)/%.S, build/%.o, $(s_source_files))
 assembly_source_files := $(wildcard $(SRC_DIR)/arch/$(arch)/*.asm)
 assembly_object_files := $(patsubst $(SRC_DIR)/%.asm, build/%.o, $(assembly_source_files))
-includes_dir := -I$(SRC_DIR)/include -I$(SRC_DIR)/arch/x86_64 -I$(SRC_DIR)/libc/include
+includes_dir := -I$(SRC_DIR)/include -I$(SRC_DIR)/arch/x86_64 -I$(BUILD_DIR)/include
 LOADER_BUILD_DIR = $(BUILD_DIR)/loader
 LOADER_SRC_DIR = $(BASE_DIR)/loader
 GRUB-MKRESCUE = $(CONTAINER) grub-mkrescue
 
-.PHONY: all clean run iso prepare loader test
+.PHONY: all clean run iso prepare loader test libc
 .SUFFIXES:
 
 all: loader
@@ -33,7 +33,8 @@ prepare:
 	@mkdir -p `dirname $(kernel)`
 
 $(kernel): $(assembly_object_files) $(c_object_files) $(s_object_files) $(linker_script) $(cpp_object_files) prepare
-	$(LD) -n -T $(linker_script) -nostdlib -o $(kernel) $(assembly_object_files) $(c_object_files) $(s_object_files) $(cpp_object_files)
+	$(LD) -n -T $(linker_script) -nostdlib -o $(kernel) $(assembly_object_files) $(c_object_files) $(s_object_files) $(cpp_object_files) \
+		-L$(BUILD_DIR)/lib -lc -lm
 
 build/%.o: src/%.asm prepare
 	$(NASM) -g -felf64 $< -o $@
@@ -69,3 +70,10 @@ test-debug:
 
 docker-build:
 	docker build -t bubackos:latest .
+
+libc:
+	@$(CONTAINER) bash -c "cd libc && \
+	./configure --with-build-sysroot=$(PREFIX) --target=$(TARGET) --prefix=$(PREFIX) && \
+	make && \
+	make install && \
+	cp -a /opt/cross/x86_64-bubackos-elf $(BUILD_DIR)"

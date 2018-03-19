@@ -33,6 +33,12 @@ static inline void newline() {
 	need_scroll();
 }
 
+static inline int min(int a, int b)
+{
+	if (a<b) return a;
+	return b;
+};
+
 static inline void terminal_writesequence(const char* buffer_start, size_t length) {
 	size_t written = 0;
 	do {

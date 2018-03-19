@@ -15,9 +15,11 @@ void kernel_main(uint64_t magic, uint64_t *addr)
 
 	LOG_INFO("Booting at 0x%x", &kernel_main);
 
-	services_initialize();
+	page_allocator_initialize(128*1024*1024);
 
-	LOG_DEBUG("Terminal Initialized");
+	mem_alloc_initialize();
+
+	services_initialize();
 
 	// SyscallInfo_t logging;
 	// logging.name = "logging";
@@ -31,11 +33,7 @@ void kernel_main(uint64_t magic, uint64_t *addr)
 		return;
 	}
 
-	page_allocator_initialize(128*1024*1024);
-
-	mem_alloc_initialize();
-
-	LOG_DEBUG("linha 1");
-	LOG_DEBUG("linha 2");
+	LOG_DEBUG("linha 1 0x%x", malloc(5));
+	LOG_DEBUG("linha 2 0x%x", sbrk(0));
 	// LOG_DEBUG("linha 3");
 }

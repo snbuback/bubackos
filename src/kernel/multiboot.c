@@ -36,7 +36,7 @@ int multiboot_parser(uint64_t magic, uint64_t* addr)
       tag = (struct multiboot_tag *) ((multiboot_uint8_t *) tag
                                       + ((tag->size + 7) & ~7)))
    {
-     // kprintf ("Tag %d (0x%x), Size 0x%x\n", tag->type, tag->type, tag->size);
+     // LOG_DEBUG("Tag %d (0x%x), Size 0x%x\n", tag->type, tag->type, tag->size);
      switch (tag->type)
        {
        case MULTIBOOT_TAG_TYPE_CMDLINE:
