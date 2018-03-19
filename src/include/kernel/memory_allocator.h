@@ -9,7 +9,7 @@ typedef uint64_t memory_handler_t;
 /**
 Initialize the memory allocation module to the amount size of memory
 */
-void mem_alloc_initialize(size_t total_memory);
+void mem_alloc_initialize();
 
 /**
 Creates a new memory allocation block

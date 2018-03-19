@@ -39,10 +39,10 @@ build/%.o: src/%.asm prepare
 	$(NASM) -g -felf64 $< -o $@
 
 build/%.o: src/%.cpp prepare
-	$(CPP) -m64 -g -std=c++11 -ffreestanding -Wall -Wextra -fno-exceptions -mno-red-zone -fno-rtti $(includes_dir) -c $< -o $@
+	$(CPP) -m64 -g -std=c++99 -ffreestanding -Wall -Wextra -fno-exceptions -mno-red-zone -fno-rtti $(includes_dir) -c $< -o $@
 
 build/%.o: src/%.c prepare
-	$(CC) -m64 -g -std=gnu11 -ffreestanding -Wall -mno-red-zone -Wextra $(includes_dir) -c $< -o $@
+	$(CC) -m64 -g -std=gnu99 -ffreestanding -Wall -mno-red-zone -Wextra $(includes_dir) -c $< -o $@
 
 build/%.o: src/%.S prepare
 	$(CC) -m64 -g -Wall $(includes_dir) -c $< -o $@

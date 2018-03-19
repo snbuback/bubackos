@@ -2,7 +2,8 @@
     "files.associations": {
         "*.inc": "cpp",
         "memory_resource": "cpp",
-        "*.tcc": "cpp"
+        "*.tcc": "cpp",
+        "memory_allocator.h": "c"
     },
     "python.pythonPath": "/usr/local/bin/python3"
 }
