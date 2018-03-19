@@ -1,11 +1,10 @@
-include bubackos.conf
-include Makefile.common
-
-
 BASE_DIR=$(CURDIR)
-SRC_DIR=$(CURDIR)/src
+include $(BASE_DIR)/bubackos.conf
+include $(BASE_DIR)/Makefile.common
+
+
 arch ?= x86_64
-kernel := dist/kernel.bin
+kernel := $(BUILD_DIR)/kernel.bin
 linker_script := $(SRC_DIR)/arch/$(arch)/linker.ld
 VPATH = %.asm src
 # cpp_source_files := $(shell find $(SRC_DIR) -name *.cpp)
@@ -17,15 +16,17 @@ s_object_files := $(patsubst $(SRC_DIR)/%.S, build/%.o, $(s_source_files))
 assembly_source_files := $(wildcard $(SRC_DIR)/arch/$(arch)/*.asm)
 assembly_object_files := $(patsubst $(SRC_DIR)/%.asm, build/%.o, $(assembly_source_files))
 includes_dir := -I$(SRC_DIR)/include -I$(SRC_DIR)/arch/x86_64 -I$(SRC_DIR)/libc/include
-
+LOADER_BUILD_DIR = $(BUILD_DIR)/loader
+LOADER_SRC_DIR = $(BASE_DIR)/loader
+GRUB-MKRESCUE = $(CONTAINER) grub-mkrescue
 
 .PHONY: all clean run iso prepare loader test
 .SUFFIXES:
 
-all: $(kernel) loader
+all: loader
 
 clean:
-	@rm -rf build dist
+	@rm -rf build
 
 prepare:
 	@find $(SRC_DIR) -type d | sed -e 's/src/build/' | xargs mkdir -p
@@ -46,17 +47,23 @@ build/%.o: src/%.c prepare
 build/%.o: src/%.S prepare
 	$(CC) -m64 -g -Wall $(includes_dir) -c $< -o $@
 
-loader:
-	@$(MAKE) -C tools/loader all
+loader: loader/boot/grub/grub.cfg $(kernel)
+	@mkdir -p $(LOADER_BUILD_DIR)
+	@cp -a $(LOADER_SRC_DIR)/boot $(LOADER_BUILD_DIR)
+	@cp -a $(kernel) $(LOADER_BUILD_DIR)/boot
+	$(GRUB-MKRESCUE) -o $(BUILD_DIR)/loader.iso $(LOADER_BUILD_DIR)
 
 run:
-	@qemu-system-x86_64 -boot order=d -cdrom dist/loader.iso -hda fat:./dist -no-reboot -no-shutdown -monitor stdio
+	@qemu-system-x86_64 -cdrom $(BUILD_DIR)/loader.iso -no-reboot -no-shutdown -monitor stdio
 
 run-debug:
-	@qemu-system-x86_64 -boot order=d -cdrom dist/loader.iso -hda fat:./dist -no-reboot -no-shutdown -d cpu_reset,guest_errors,unimp,in_asm,int,page
+	@qemu-system-x86_64 -cdrom $(BUILD_DIR)/loader.iso -no-reboot -no-shutdown -d cpu_reset,guest_errors,unimp,in_asm,int,page
 
 test:
 	@test/run.py
 
 test-debug:
 	@test/run.py -debug
+
+docker-build:
+	docker build -t bubackos:latest .

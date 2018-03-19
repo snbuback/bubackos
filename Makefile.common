@@ -1,8 +1,10 @@
 OS_NAME_LOWER=$(shell echo $(OS_NAME) | tr '[:upper:]' '[:lower:]')
+SRC_DIR=$(BASE_DIR)/src
+BUILD_DIR=$(BASE_DIR)/build
 export TARGET=$(OS_ARCH)-$(OS_NAME_LOWER)-elf
-export PREFIX=$(CURDIR)/build-tools/sysroot
-CC=$(PREFIX)/bin/$(TARGET)-gcc
-CPP=$(PREFIX)/bin/$(TARGET)-g++
-AS=$(PREFIX)/bin/$(TARGET)-as
-LD=$(PREFIX)/bin/$(TARGET)-ld
-NASM=nasm
+CONTAINER=docker run --rm -v $(BASE_DIR):$(BASE_DIR) -w $(BASE_DIR) bubackos
+CC=$(CONTAINER) $(TARGET)-gcc
+CPP=$(CONTAINER) $(TARGET)-g++
+AS=$(CONTAINER) $(TARGET)-as
+LD=$(CONTAINER) $(TARGET)-ld
+NASM=$(CONTAINER) nasm
