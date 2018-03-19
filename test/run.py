@@ -25,7 +25,7 @@ def run_test(file_name, debug=False):
         test_file_content = test_file_content.replace("//@test-include", file_content)
         test_file_content = test_file_content.replace("//@test-functions", test_funcs)
         f.write(test_file_content)
-    run_command("x86_64-apple-darwin17.3.0-g++-7 -m64 -std=c++11 -ffreestanding -Wall -Wextra -fno-exceptions -fno-rtti -I$SRC_DIR/include -I$SRC_DIR/arch/x86_64 -I. /tmp/teste.cpp -o /tmp/teste.bin", debug)
+    run_command("g++ -m64 -g -std=c++11 -ffreestanding -Wall -Wextra -fno-exceptions -fno-rtti -I$SRC_DIR/include -I$SRC_DIR/arch/x86_64 -I. /tmp/teste.cpp -o /tmp/teste.bin", debug)
     if debug:
         run_command("gdb /tmp/teste.bin")
     else:

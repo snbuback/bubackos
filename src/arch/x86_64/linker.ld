@@ -1,11 +1,12 @@
 ENTRY(boot)           /* the name of the entry symbol */
 
+kernel_virtual_start = .;
+
 BASE_ADDR = 0;
 
 . = BASE_ADDR + 0x100000;          /* the code should be relocated to 3 GB + 1 MB */
 
 /* these labels get exported to the code files */
-kernel_virtual_start = .;
 kernel_physical_start = . - BASE_ADDR;
 
 SECTIONS {

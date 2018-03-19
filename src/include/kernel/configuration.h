@@ -1,3 +1,4 @@
+#include <stddef.h>
 
 // Defines the size of the pages of memory.
 // The hardware implementation must support at least a multiple of this (ideally this size)

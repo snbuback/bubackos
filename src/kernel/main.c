@@ -1,6 +1,7 @@
 #include <system.h>
 #include <string.h>
 #include <kernel/logging.h>
+#include <kernel/page_allocator.h>
 
 void kernel_main(uint64_t magic, uint64_t *addr)
 {
@@ -29,6 +30,10 @@ void kernel_main(uint64_t magic, uint64_t *addr)
 		LOG_ERROR("Try to use a bootloader with multiboot2 support");
 		return;
 	}
+
+	page_allocator_initialize(128*1024*1024);
+
+	mem_alloc_initialize();
 
 	LOG_DEBUG("linha 1");
 	LOG_DEBUG("linha 2");

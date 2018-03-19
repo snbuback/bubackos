@@ -1,3 +1,4 @@
+#include <kernel/page_allocator.h>
 #include <kernel/memory_allocator.h>
 
 /**
@@ -7,9 +8,8 @@ of memory_handler_t. Each slot with 0 means memory is free.
 
 volatile memory_handler_t* memory_mapping;
 
-void mem_alloc_initialize(size_t total_memory)
+void mem_alloc_initialize()
 {
-
 }
 
 memory_handler_t mem_alloc_create(void)

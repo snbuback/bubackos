@@ -2,7 +2,7 @@
     "name": "BubackOS debug",
     "type": "cppvsdbg",
     "request": "launch",
-    "program": "make run",
+    "program": "docker run --rm -v /Users/snbuback/Projects/bubackos:/Users/snbuback/Projects/bubackos -w /Users/snbuback/Projects/bubackos bubackos make run",
     "symbolSearchPath": "${workspaceRoot}/src/include",
     "externalConsole": true,
     "logging": {
@@ -11,13 +11,13 @@
      },
     // "visualizerFile": "${workspaceRoot}/my.natvis",
     "showDisplayString": true,
-    "osx": {
-        "MIMode": "gdb",
-        "miDebuggerPath": "/usr/local/bin/gdb",
-        "miDebuggerServerAddress": "localhost:1234",
-        "debugServerPath": "/usr/local/bin/qemu-system-x86_64",
-        "debugServerArgs": "-boot -S -s order=d -cdrom dist/loader.iso -hda fat:./dist -no-reboot -no-shutdown",
-        "serverStarted": "",
-        "serverLaunchTimeout": 10000,
-     },
+    // "osx": {
+    //     "MIMode": "gdb",
+    //     "miDebuggerPath": "/usr/local/bin/gdb",
+    //     "miDebuggerServerAddress": "localhost:1234",
+    //     "debugServerPath": "/usr/local/bin/qemu-system-x86_64",
+    //     "debugServerArgs": "-boot -S -s order=d -cdrom dist/loader.iso -hda fat:./dist -no-reboot -no-shutdown",
+    //     "serverStarted": "",
+    //     "serverLaunchTimeout": 10000,
+    //  },
  }

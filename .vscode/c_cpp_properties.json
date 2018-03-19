@@ -3,7 +3,6 @@
         {
             "name": "Mac",
             "includePath": [
-                "${workspaceRoot}/build-tools/sysroot/lib/gcc/x86_64-bubackos-elf/7.3.0/include",
                 "${workspaceRoot}/src/libc/include",
                 "${workspaceRoot}/src/include",
                 "${workspaceRoot}/src/arch/x86_64",
@@ -13,7 +12,6 @@
             "intelliSenseMode": "clang-x64",
             "browse": {
                 "path": [
-                    "${workspaceRoot}/build-tools/sysroot/lib/gcc/x86_64-bubackos-elf/7.3.0/include",
                     "${workspaceRoot}"
                 ],
                 "limitSymbolsToIncludedHeaders": true,

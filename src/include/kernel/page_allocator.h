@@ -3,42 +3,26 @@
 
 #include <stdint.h>
 #include <stddef.h>
+#include <stdbool.h>
 
-enum page_type : uint8_t
-{
-    PAGE_TYPE_FREE,
-    PAGE_TYPE_SYSTEM,
-    PAGE_TYPE_USER
-};
+#define PAGE_TYPE_FREE    0
+#define PAGE_TYPE_SYSTEM  1
+#define PAGE_TYPE_USER    2
 
-class PageAllocator
-{
-  private:
-    size_t total_memory;
-    uint16_t total_of_pages;
-    page_type* pages;
+/* define by the linker */
+extern uintptr_t kernel_virtual_start;
+extern uintptr_t kernel_physical_start;
+extern uintptr_t kernel_virtual_end;
+extern uintptr_t kernel_physical_end;
 
-    uintptr_t align(uintptr_t addr);
+typedef uint8_t page_type;
 
-    size_t page_number(uintptr_t aligned_addr);
+uintptr_t align(uintptr_t addr);
 
-    size_t next_page_available();
-
-  public:
-    PageAllocator(size_t t, uintptr_t kernel_start_address, uintptr_t kernel_end_address);
-
-    /**
-     * Mark memory as system memory (kernel or reserved memory)
-     */
-    bool mark_as_system(uintptr_t addr, size_t total_in_bytes);
-
-    uintptr_t allocate();
-
-    bool mark_as_free(uintptr_t addr);
-
-    page_type page_status(size_t page_number);
-
-    size_t get_total_pages();
-};
-
+void page_allocator_initialize(size_t t);
+bool page_allocator_mark_as_system(uintptr_t addr, size_t total_in_bytes);
+uintptr_t page_allocator_allocate();
+bool page_allocator_mark_as_free(uintptr_t addr);
+page_type page_allocator_page_status(size_t page_number);
+size_t page_allocator_get_total_pages();
 #endif

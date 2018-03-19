@@ -7,8 +7,8 @@ arch ?= x86_64
 kernel := $(BUILD_DIR)/kernel.bin
 linker_script := $(SRC_DIR)/arch/$(arch)/linker.ld
 VPATH = %.asm src
-# cpp_source_files := $(shell find $(SRC_DIR) -name *.cpp)
-# cpp_object_files := $(patsubst $(SRC_DIR)/%.cpp, build/%.o, $(cpp_source_files))
+cpp_source_files := $(shell find $(SRC_DIR) -name *.cpp)
+cpp_object_files := $(patsubst $(SRC_DIR)/%.cpp, build/%.o, $(cpp_source_files))
 c_source_files := $(shell find $(SRC_DIR) -name *.c)
 c_object_files := $(patsubst $(SRC_DIR)/%.c, build/%.o, $(c_source_files))
 s_source_files := $(shell find $(SRC_DIR) -name *.S)
@@ -32,15 +32,15 @@ prepare:
 	@find $(SRC_DIR) -type d | sed -e 's/src/build/' | xargs mkdir -p
 	@mkdir -p `dirname $(kernel)`
 
-$(kernel): $(assembly_object_files) $(c_object_files) $(s_object_files) $(linker_script) prepare
-	$(LD) -n -T $(linker_script) -nostdlib -o $(kernel) $(assembly_object_files) $(c_object_files) $(s_object_files)
+$(kernel): $(assembly_object_files) $(c_object_files) $(s_object_files) $(linker_script) $(cpp_object_files) prepare
+	$(LD) -n -T $(linker_script) -nostdlib -o $(kernel) $(assembly_object_files) $(c_object_files) $(s_object_files) $(cpp_object_files)
 
 build/%.o: src/%.asm prepare
 	$(NASM) -g -felf64 $< -o $@
 
-# build/%.o: src/%.cpp prepare
-# 	$(CPP) -m64 -g -std=c++11 -ffreestanding -Wall -Wextra -fno-exceptions -mno-red-zone -fno-rtti $(includes_dir) -c $< -o $@
-#
+build/%.o: src/%.cpp prepare
+	$(CPP) -m64 -g -std=c++11 -ffreestanding -Wall -Wextra -fno-exceptions -mno-red-zone -fno-rtti $(includes_dir) -c $< -o $@
+
 build/%.o: src/%.c prepare
 	$(CC) -m64 -g -std=gnu11 -ffreestanding -Wall -mno-red-zone -Wextra $(includes_dir) -c $< -o $@
 
@@ -59,11 +59,13 @@ run:
 run-debug:
 	@qemu-system-x86_64 -cdrom $(BUILD_DIR)/loader.iso -no-reboot -no-shutdown -d cpu_reset,guest_errors,unimp,in_asm,int,page
 
+shell:
+	@$(CONTAINER) bash
 test:
-	@test/run.py
+	@$(CONTAINER) test/run.py
 
 test-debug:
-	@test/run.py -debug
+	@$(CONTAINER) test/run.py -debug
 
 docker-build:
 	docker build -t bubackos:latest .

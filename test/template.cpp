@@ -6,6 +6,7 @@ using namespace std;
 
 void kprintf(const char *format, ...) {
     printf(format);
+    fflush(stdout);
 }
 
 void ASSERT(bool expr, string msg)

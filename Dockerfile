@@ -29,4 +29,5 @@ RUN curl -s ftp://ftp.gnu.org/gnu/gcc/gcc-$GCC_VERSION/gcc-$GCC_VERSION.tar.gz |
     make install-gcc && \
     make install-target-libgcc && \
     cd / && rm -rf /build-gcc /gcc-${GCC_VERSION}
-RUN apt-get -y install nasm grub-pc-bin xorriso
+RUN apt-get -y install nasm grub-pc-bin xorriso python3 gdb
+ENV PYTHONUNBUFFERED=1
