@@ -27,4 +27,3 @@ RUN cd /tools && \
 RUN cd /tools && \
     ./build-jerryscript.sh ${JERRYSCRIPT_VERSION} && \
     rm -rf ${BUILD_DIR}
-# TODO: remove some arguments from build-jerryscript that are no more necessary

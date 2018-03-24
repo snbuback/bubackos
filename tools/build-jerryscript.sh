@@ -21,7 +21,7 @@ cd ${BUILD_DIR}/jerryscript-${JERRYSCRIPT_VERSION}
 # Fake crt0 just to the compiler check
 x86_64-elf-gcc -c /tools/crt0.S -o /usr/local/lib/gcc/x86_64-elf/6.3.0/crt0.o
 
-python3 tools/build.py -v --lto=off --jerry-libc=off --jerry-cmdline=off --jerry-libm=off --toolchain=/tools/toolchain_bubackos.cmake
+python3 tools/build.py -v --clean --lto=off --jerry-libc=off --jerry-cmdline=off --jerry-libm=off --toolchain=/tools/toolchain_bubackos.cmake
 mkdir -p /usr/local/x86_64-elf/include/jerryscript && cp -v build/lib/*.a /usr/local/x86_64-elf/lib/ && cp -rv jerry-core/include/* jerry-ext/include/* /usr/local/x86_64-elf/include/jerryscript
 
 # fix the include files
