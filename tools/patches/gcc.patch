@@ -1,0 +1,128 @@
+diff --git a/config.sub b/config.sub
+index 41146e1..db8a454 100755
+--- a/config.sub
++++ b/config.sub
+@@ -1399,7 +1399,7 @@ case $os in
+ 	      | -morphos* | -superux* | -rtmk* | -rtmk-nova* | -windiss* \
+ 	      | -powermax* | -dnix* | -nx6 | -nx7 | -sei* | -dragonfly* \
+ 	      | -skyos* | -haiku* | -rdos* | -toppers* | -drops* | -es* \
+-	      | -onefs* | -tirtos* | -phoenix*)
++	      | -onefs* | -tirtos* | -phoenix* | -bubackos*)
+ 	# Remember, each alternative MUST END IN *, to match a version number.
+ 		;;
+ 	-qnx*)
+diff --git a/fixincludes/mkfixinc.sh b/fixincludes/mkfixinc.sh
+index 0d96c8c..87fd657 100755
+--- a/fixincludes/mkfixinc.sh
++++ b/fixincludes/mkfixinc.sh
+@@ -11,6 +11,7 @@ target=fixinc.sh
+ 
+ # Check for special fix rules for particular targets
+ case $machine in
++    *-bubackos* | \
+     i?86-*-cygwin* | \
+     i?86-*-mingw32* | \
+     x86_64-*-mingw32* | \
+diff --git a/gcc/config.gcc b/gcc/config.gcc
+index 1d5b23f..7fa2940 100644
+--- a/gcc/config.gcc
++++ b/gcc/config.gcc
+@@ -612,6 +612,18 @@ x86_cpus="generic intel"
+ 
+ # Common parts for widely ported systems.
+ case ${target} in
++i[34567]86-*-bubackos*)
++    tm_file="${tm_file} i386/unix.h i386/att.h dbxelf.h elfos.h glibc-stdint.h i386/i386elf.h bubackos.h"
++    gas=yes
++    gnu_ld=yes
++    default_use_cxa_atexit=yes
++    ;;
++x86_64-*-bubackos*)
++    tm_file="${tm_file} i386/unix.h i386/att.h dbxelf.h elfos.h glibc-stdint.h i386/i386elf.h i386/x86-64.h bubackos.h"
++    gas=yes
++    gnu_ld=yes
++    default_use_cxa_atexit=yes
++    ;;
+ *-*-darwin*)
+   tmake_file="t-darwin ${cpu_type}/t-darwin"
+   tm_file="${tm_file} darwin.h"
+diff --git a/gcc/config/bubackos.h b/gcc/config/bubackos.h
+new file mode 100644
+index 0000000..63803e9
+--- /dev/null
++++ b/gcc/config/bubackos.h
+@@ -0,0 +1,33 @@
++/* Useful if you wish to make target-specific GCC changes. */
++#undef TARGET_BUBACKOS
++#define TARGET_BUBACKOS 1
++ 
++/* Default arguments you want when running your
++   i686-myos-gcc/x86_64-myos-gcc toolchain */
++#undef LIB_SPEC
++#define LIB_SPEC "-lc" /* link against C standard library */
++ 
++/* Files that are linked before user code.
++   The %s tells GCC to look for these files in the library directory. */
++#undef STARTFILE_SPEC
++#define STARTFILE_SPEC "crt0.o%s crti.o%s crtbegin.o%s"
++ 
++/* Files that are linked after user code. */
++#undef ENDFILE_SPEC
++#define ENDFILE_SPEC "crtend.o%s crtn.o%s"
++ 
++/* Don't automatically add extern "C" { } around header files. */
++#undef  NO_IMPLICIT_EXTERN_C
++#define NO_IMPLICIT_EXTERN_C 1
++ 
++/* Additional predefined macros. */
++#undef TARGET_OS_CPP_BUILTINS
++#define TARGET_OS_CPP_BUILTINS()      \
++  do {                                \
++    builtin_define ("__bubackos__");      \
++    builtin_define ("__unix__");      \
++    builtin_assert ("system=bubackos");   \
++    builtin_assert ("system=unix");   \
++    builtin_assert ("system=posix");   \
++  } while(0);
++
+diff --git a/libgcc/config.host b/libgcc/config.host
+index 124f2ce..feb7e40 100644
+--- a/libgcc/config.host
++++ b/libgcc/config.host
+@@ -581,12 +581,20 @@ x86_64-*-darwin*)
+ i[34567]86-*-elfiamcu)
+ 	tmake_file="$tmake_file i386/t-crtstuff t-softfp-sfdftf i386/32/t-softfp i386/32/t-iamcu i386/t-softfp t-softfp t-dfprules"
+ 	;;
++i[34567]86-*-bubackos*)
++    extra_parts="$extra_parts crti.o crtbegin.o crtend.o crtn.o"
++    tmake_file="$tmake_file i386/t-crtstuff t-crtstuff-pic t-libgcc-pic"
++	;;
+ i[34567]86-*-elf*)
+ 	tmake_file="$tmake_file i386/t-crtstuff t-crtstuff-pic t-libgcc-pic"
+ 	;;
+ x86_64-*-elf* | x86_64-*-rtems*)
+ 	tmake_file="$tmake_file i386/t-crtstuff t-crtstuff-pic t-libgcc-pic"
+ 	;;
++x86_64-*-bubackos*)
++    extra_parts="$extra_parts crti.o crtbegin.o crtend.o crtn.o"
++    tmake_file="$tmake_file i386/t-crtstuff t-crtstuff-pic t-libgcc-pic"
++	;;
+ i[34567]86-*-dragonfly*)
+ 	tmake_file="${tmake_file} i386/t-dragonfly i386/t-crtstuff"
+ 	md_unwind_header=i386/dragonfly-unwind.h
+diff --git a/libstdc++-v3/crossconfig.m4 b/libstdc++-v3/crossconfig.m4
+index ece1256..6ba95c6 100644
+--- a/libstdc++-v3/crossconfig.m4
++++ b/libstdc++-v3/crossconfig.m4
+@@ -270,6 +270,11 @@ case "${host}" in
+     AC_DEFINE(HAVE_TANF)
+     AC_DEFINE(HAVE_TANHF)
+     ;;
++  *-bubackos*)
++    GLIBCXX_CHECK_COMPILER_FEATURES
++    GLIBCXX_CHECK_LINKER_FEATURES
++    GLIBCXX_CHECK_MATH_SUPPORT
++    GLIBCXX_CHECK_STDLIB_SUPPORT
+   *)
+     AC_MSG_ERROR([No support for this host/target combination.])
+    ;;

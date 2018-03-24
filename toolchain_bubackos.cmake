@@ -1,0 +1,5 @@
+set(CMAKE_SYSTEM_NAME BubackOS)
+set(CMAKE_SYSTEM_PROCESSOR x86-64)
+set(CMAKE_C_COMPILER x86_64-bubackos-elf-gcc)
+set(FLAGS_COMMON_ARCH -m64 -g -std=c99 -D_GNU_SOURCE=1 -D_FORTIFY_SOURCE=1 -ffreestanding -mno-red-zone -I/Users/snbuback/Projects/bubackos/build/include)
+SET(CMAKE_SHARED_LIBRARY_LINK_C_FLAGS "--sysroot=/opt/cross -L/Users/snbuback/Projects/bubackos/build/lib -lgcc")

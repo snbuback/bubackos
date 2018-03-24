@@ -1,33 +1,23 @@
 FROM debian:stretch
-ARG BINUTILS_VERSION=2.28
-ARG GCC_VERSION=6.3.0
-ARG PREFIX=/opt/cross
-ENV CROSS_TRIPLE x86_64-bubackos-elf
-ENV PATH ${PATH}:${PREFIX}/bin
-ENV LD_LIBRARY_PATH ${PREFIX}/lib:${LD_LIBRARY_PATH}
+ARG BINUTILS_VERSION
+ARG GCC_VERSION
+ARG NEWLIB_VERSION
+ARG SYSROOT
+ARG CROSS_TRIPLE
+ENV PYTHONUNBUFFERED=1
+ENV BUILD_DIR=/build-tools
+ENV CROSS_TRIPLE=${CROSS_TRIPLE}
 
 # Upgrade and requirements
-RUN apt-get update && \
-    apt-get -y upgrade && \
-    apt-get -y install bash curl wget pkg-config build-essential make automake autogen \
-        tar xz-utils bzip2 gzip file rsync sed vim binutils gcc
-# BINUTILS
-RUN curl -s ftp://ftp.gnu.org/gnu/binutils//binutils-${BINUTILS_VERSION}.tar.gz | tar -zx && \
-    cd binutils-${BINUTILS_VERSION} && \
-    ./configure --target=${CROSS_TRIPLE} --prefix=${PREFIX} --disable-nls --disable-werror && \
-    make && \
-    make install && \
-    cd / && rm -rf binutils-${BINUTILS_VERSION}
-# GCC
-RUN curl -s ftp://ftp.gnu.org/gnu/gcc/gcc-$GCC_VERSION/gcc-$GCC_VERSION.tar.gz | tar -zx && \
-    cd /gcc-${GCC_VERSION} && ./contrib/download_prerequisites && \
-    mkdir -p /build-gcc && \
-    cd /build-gcc && \
-    /gcc-${GCC_VERSION}/configure --target=${CROSS_TRIPLE} --prefix=${PREFIX} --disable-nls --enable-languages=c,c++ --without-headers && \
-    make all-gcc && \
-    make all-target-libgcc && \
-    make install-gcc && \
-    make install-target-libgcc && \
-    cd / && rm -rf /build-gcc /gcc-${GCC_VERSION}
-RUN apt-get -y install nasm grub-pc-bin xorriso python3 gdb git libtool
-ENV PYTHONUNBUFFERED=1
+RUN apt-get -qq update && \
+    apt-get -qq -y upgrade && \
+    apt-get -qq -y install bash curl wget pkg-config build-essential make automake autogen \
+        tar xz-utils bzip2 gzip file rsync sed vim binutils gcc nasm grub-pc-bin xorriso python3 \
+        gdb git libtool cmake automake1.11 autoconf2.64
+
+ADD tools /tools
+RUN cd /tools && \
+    ./build-binutils.sh ${BINUTILS_VERSION} && \
+    ./build-gcc.sh ${GCC_VERSION} && \
+    ./build-newlib.sh ${GCC_VERSION} ${NEWLIB_VERSION} && \
+    rm -rf ${BUILD_DIR}

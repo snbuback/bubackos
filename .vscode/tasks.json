@@ -4,27 +4,26 @@
     "version": "2.0.0",
     "tasks": [
         {
-            "label": "build",
+            "label": "Run",
             "type": "shell",
             "command": "docker run --rm -v /Users/snbuback/Projects/bubackos:/Users/snbuback/Projects/bubackos -w /Users/snbuback/Projects/bubackos bubackos make && make run",
-            "group": {
-                "kind": "build",
-                "isDefault": true
-            }
         },
         {
-            "label": "run",
+            "label": "Just run",
             "type": "shell",
             "command": "make run",
             "group": "none",
             "problemMatcher": []
         },
         {
-            "label": "build",
+            "label": "Build",
             "type": "shell",
             "command": "docker run --rm -v /Users/snbuback/Projects/bubackos:/Users/snbuback/Projects/bubackos -w /Users/snbuback/Projects/bubackos bubackos make",
-            "group": "build",
-            "problemMatcher": []
+            "problemMatcher": [],
+            "group": {
+                "kind": "build",
+                "isDefault": true
+            }
         }
     ]
 }

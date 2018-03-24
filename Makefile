@@ -20,7 +20,7 @@ LOADER_BUILD_DIR = $(BUILD_DIR)/loader
 LOADER_SRC_DIR = $(BASE_DIR)/loader
 GRUB-MKRESCUE = $(CONTAINER) grub-mkrescue
 
-.PHONY: all clean run iso prepare loader test libc
+.PHONY: all clean run iso prepare loader test libc jslib
 .SUFFIXES:
 
 all: loader
@@ -69,7 +69,12 @@ test-debug:
 	@$(CONTAINER) test/run.py -debug
 
 docker-build:
-	docker build -t bubackos:latest .
+	docker build --build-arg SYSROOT=$(SYSROOT) \
+	--build-arg CROSS_TRIPLE=$(TARGET) \
+	--build-arg BINUTILS_VERSION=$(BINUTILS_VERSION) \
+	--build-arg GCC_VERSION=$(GCC_VERSION) \
+	--build-arg NEWLIB_VERSION=$(NEWLIB_VERSION) \
+	-t bubackos:latest .
 
 libc:
 	@$(CONTAINER) bash -c "cd libc && \
@@ -77,3 +82,7 @@ libc:
 	make && \
 	make install && \
 	cp -a /opt/cross/x86_64-bubackos-elf $(BUILD_DIR)"
+
+jslib:
+	export LDFLAGS="--sysroot=/opt/cross -L/Users/snbuback/Projects/bubackos/build/lib -lgcc -nostdlib"
+	python3 tools/build.py -v --lto=off --jerry-libc=off --jerry-cmdline=off --jerry-libm=off --toolchain=../toolchain_bubackos.cmake
