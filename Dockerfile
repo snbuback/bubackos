@@ -2,6 +2,7 @@ FROM debian:stretch
 ARG BINUTILS_VERSION
 ARG GCC_VERSION
 ARG NEWLIB_VERSION
+ARG JERRYSCRIPT_VERSION
 ARG SYSROOT
 ARG CROSS_TRIPLE
 ENV PYTHONUNBUFFERED=1
@@ -21,3 +22,9 @@ RUN cd /tools && \
     ./build-gcc.sh ${GCC_VERSION} && \
     ./build-newlib.sh ${GCC_VERSION} ${NEWLIB_VERSION} && \
     rm -rf ${BUILD_DIR}
+
+# jerryscript
+RUN cd /tools && \
+    ./build-jerryscript.sh ${JERRYSCRIPT_VERSION} && \
+    rm -rf ${BUILD_DIR}
+# TODO: remove some arguments from build-jerryscript that are no more necessary

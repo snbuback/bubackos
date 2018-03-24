@@ -34,7 +34,7 @@ prepare:
 
 $(kernel): $(assembly_object_files) $(c_object_files) $(s_object_files) $(linker_script) $(cpp_object_files) prepare
 	$(LD) -n -T $(linker_script) -nostdlib -o $(kernel) $(assembly_object_files) $(c_object_files) $(s_object_files) $(cpp_object_files) \
-		-L$(BUILD_DIR)/lib -lc -lm
+		-ljerry-core -ljerry-ext -ljerry-port-default-minimal -lg -lm -L/usr/local/x86_64-elf/lib
 
 build/%.o: src/%.asm prepare
 	$(NASM) -g -felf64 $< -o $@
@@ -58,7 +58,7 @@ run:
 	@qemu-system-x86_64 -cdrom $(BUILD_DIR)/loader.iso -no-reboot -no-shutdown -monitor stdio
 
 run-debug:
-	@qemu-system-x86_64 -cdrom $(BUILD_DIR)/loader.iso -no-reboot -no-shutdown -d cpu_reset,guest_errors,unimp,in_asm,int,page
+	@qemu-system-x86_64 -cdrom $(BUILD_DIR)/loader.iso -no-reboot -no-shutdown -monitor stdio -d cpu_reset,guest_errors,unimp,in_asm,int,page
 
 shell:
 	@$(CONTAINER) bash
@@ -74,15 +74,9 @@ docker-build:
 	--build-arg BINUTILS_VERSION=$(BINUTILS_VERSION) \
 	--build-arg GCC_VERSION=$(GCC_VERSION) \
 	--build-arg NEWLIB_VERSION=$(NEWLIB_VERSION) \
+	--build-arg JERRYSCRIPT_VERSION=$(JERRYSCRIPT_VERSION) \
 	-t bubackos:latest .
-
-libc:
-	@$(CONTAINER) bash -c "cd libc && \
-	./configure --with-build-sysroot=$(PREFIX) --target=$(TARGET) --prefix=$(PREFIX) && \
-	make && \
-	make install && \
-	cp -a /opt/cross/x86_64-bubackos-elf $(BUILD_DIR)"
-
-jslib:
-	export LDFLAGS="--sysroot=/opt/cross -L/Users/snbuback/Projects/bubackos/build/lib -lgcc -nostdlib"
-	python3 tools/build.py -v --lto=off --jerry-libc=off --jerry-cmdline=off --jerry-libm=off --toolchain=../toolchain_bubackos.cmake
+	# build sysroot (just to auto-complete in visual studio)
+	@$(CONTAINER) bash -c 'rm -rf $(SYSROOT) && \
+		mkdir -p $(SYSROOT)/gcc && cp -a /usr/local/lib/gcc/x86_64-elf/6.3.0/include $(SYSROOT)/gcc && \
+		mkdir -p $(SYSROOT)/platform && cp -a /usr/local/x86_64-elf/include $(SYSROOT)/platform/'

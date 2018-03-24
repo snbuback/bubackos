@@ -4,6 +4,8 @@
 #include <kernel/multiboot2.h>
 #include <system.h>
 #include <kernel/logging.h>
+#undef LOG_INFO
+#define LOG_INFO(fmt, args...)
 
 /*  Check if MAGIC is valid and print the Multiboot information structure
   pointed by ADDR. */

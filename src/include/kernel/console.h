@@ -17,5 +17,5 @@ void console_scroll_up(size_t rows);
 void terminal_initialize(void);
 void terminal__set_color(uint8_t fg, uint8_t bg);
 void terminal__write(const char* data, size_t data_length);
-
+void terminal__print(const char* data);
 #endif

@@ -80,3 +80,9 @@ void terminal__write(const char* data, size_t data_length) {
 	}
 	terminal_writesequence(buffer_start, data + i - buffer_start);
 }
+
+void terminal__print(const char* data)
+{
+	terminal__write(data, strlen(data));
+}
+

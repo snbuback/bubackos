@@ -3,7 +3,9 @@
         "*.inc": "cpp",
         "memory_resource": "cpp",
         "*.tcc": "cpp",
-        "memory_allocator.h": "c"
+        "memory_allocator.h": "c",
+        "logging.h": "c",
+        "config.h": "c"
     },
     "python.pythonPath": "/usr/local/bin/python3"
 }

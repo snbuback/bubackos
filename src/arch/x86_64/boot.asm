@@ -20,20 +20,33 @@ boot:
 %define PML4E_ADDR 0x8000
 %define PDPTE_ADDR 0x9000
 %define PDE_ADDR 0xa000
+
+  ; clean memory around page tables
+  mov eax, 12288  ; 4*4096
+
+  ; loop
+.loop:
+  or eax, eax ; Fast compare to 0
+  jz .cleaned
+  mov byte [PML4E_ADDR + eax], 0
+  dec eax
+  jmp .loop
+.cleaned:
+
   ; Set up PML4 entry, which will point to PDPT entry.
   mov dword eax, PDPTE_ADDR
   ; The low 12 bits of the PML4E entry are zeroed out when it's dereferenced,
   ; and used to encode metadata instead. Here we're setting the Present and
   ; Read/Write bits. You might also want to set the User bit, if you want a
   ; page to remain accessible in user-mode code.
-  or dword eax, 0b011  ; Would be 0b111 to set User bit also
+  or dword eax, 0b111  ; Would be 0b111 to set User bit also
   mov dword [PML4E_ADDR], eax
   ; Although we're in 32-bit mode, the table entry is 64 bits. We can just zero
   ; out the upper bits in this case.
   mov dword [PML4E_ADDR+4], 0
   ; Set up PDPT entry, which will point to PD entry.
   mov dword eax, PDE_ADDR
-  or dword eax, 0b011
+  or dword eax, 0b111
   mov dword [PDPTE_ADDR], eax
   mov dword [PDPTE_ADDR+4], 0
 
@@ -41,8 +54,13 @@ boot:
   ; Set up PD entry, which will point to the first 2MB page (0).  But we
   ; need to set three bits this time, Present, Read/Write and Page Size (to
   ; indicate that this is the last level of paging in use).
-  mov dword [PDE_ADDR], 0b10000011
-  mov dword [PDE_ADDR+4], 0
+  mov dword [PDE_ADDR], 0b10000111
+
+  mov dword [PDE_ADDR+8], 0x200000
+  or  dword [PDE_ADDR+8], 0b10000011
+
+  mov dword [PDE_ADDR+16], 0x400000
+  or  dword [PDE_ADDR+16], 0b10000111
 
   ; Enable PGE and PAE bits of CR4 to get 64-bit paging available.
   mov eax, 0b10100000
