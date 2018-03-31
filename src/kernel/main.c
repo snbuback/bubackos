@@ -11,7 +11,7 @@ void jerryx_port_handler_print_char (char c) {
 
 int js_engine (void)
 {
-const jerry_char_t script[] = "print('Hello, World from js!');";
+const jerry_char_t script[] = "var x=5; print('Hello, World from js! x=' + x + ';');";
   size_t script_size = strlen ((const char *) script);
 
   /* Initialize engine */
@@ -22,7 +22,7 @@ const jerry_char_t script[] = "print('Hello, World from js!');";
                                   jerryx_handler_print);
 
   /* Setup Global scope code */
-  jerry_value_t parsed_code = jerry_parse (script, script_size, false);
+  jerry_value_t parsed_code = jerry_parse (script, script_size, true);
 
   if (!jerry_value_has_error_flag (parsed_code))
   {

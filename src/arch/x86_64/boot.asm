@@ -4,6 +4,8 @@ section .text
 bits 32
 boot:
   ; save grub parameters in the data section
+  mov ebp, stack_end
+  mov esp, stack_end
   mov dword	[multiboot_info], eax
   mov dword	[multiboot_info+4], ebx
 
@@ -97,9 +99,22 @@ k_64_bits:
   mov dword rdi, [multiboot_info]
   mov dword rsi, [multiboot_info+4]
 
+  call enable_sse
+
   extern kernel_main
   call kernel_main
   hlt                ; If so, halt.
+
+enable_sse:
+  ;now enable SSE and the like
+  mov rax, cr0
+  and ax, 0xFFFB		;clear coprocessor emulation CR0.EM
+  or ax, 0x2			;set coprocessor monitoring  CR0.MP
+  mov cr0, rax
+  mov rax, cr4
+  or ax, 3 << 9		;set CR4.OSFXSR and CR4.OSXMMEXCPT at the same time
+  mov cr4, rax
+  ret
 
 multiboot_info:
   dq 0
@@ -136,3 +151,8 @@ gdt_end:
 ; Very important - mark the sector as bootable.
 times 512 - 2 - ($ - $$) db 0 ; zero-pad the 512-byte sector to the last 2 bytes
 dw 0xaa55 ; Magic "boot signature"
+
+SECTION .bss
+stack_begin:
+    RESB 16*1024 ; Reserve stack space
+stack_end:

@@ -16,7 +16,7 @@ RUN apt-get -qq update && \
         tar xz-utils bzip2 gzip file rsync sed vim binutils gcc nasm grub-pc-bin xorriso python3 \
         gdb git libtool cmake automake1.11 autoconf2.64
 
-ADD tools /tools
+ADD tools/build-gcc.sh tools/build-binutils.sh tools/build-newlib.sh /tools/
 RUN cd /tools && \
     ./build-binutils.sh ${BINUTILS_VERSION} && \
     ./build-gcc.sh ${GCC_VERSION} && \
@@ -24,6 +24,7 @@ RUN cd /tools && \
     rm -rf ${BUILD_DIR}
 
 # jerryscript
+ADD tools/crt0.S tools/build-jerryscript.sh tools/toolchain_bubackos.cmake /tools/
 RUN cd /tools && \
     ./build-jerryscript.sh ${JERRYSCRIPT_VERSION} && \
     rm -rf ${BUILD_DIR}

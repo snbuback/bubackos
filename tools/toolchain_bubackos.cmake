@@ -1,5 +1,5 @@
 SET(CMAKE_SYSTEM_NAME Generic)
-set(CMAKE_SYSTEM_PROCESSOR x86-64)
+set(CMAKE_SYSTEM_PROCESSOR x86_64)
 set(CMAKE_C_COMPILER x86_64-elf-gcc)
-set(FLAGS_COMMON_ARCH -m64 -g -std=c99 -mno-red-zone)
+set(FLAGS_COMMON_ARCH -O0 -m64 -mno-red-zone -march=nehalem)
 set(CMAKE_SHARED_LIBRARY_LINK_C_FLAGS "")

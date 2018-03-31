@@ -27,6 +27,17 @@ This OS is my personal training exercise about how to write an operational syste
 tools: tools like create iso image
 build-tools: gcc and binutils to build the kernel
 
+## Debugging
+make run-debug
+
+* In docker:
+
+gdb
+
+    file build/kernel.bin 
+    target remote docker.for.mac.localhost:1234
+    break kernel_main
+
 
 ## References
 * https://wiki.osdev.org/Main_Page

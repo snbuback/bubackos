@@ -40,10 +40,10 @@ build/%.o: src/%.asm prepare
 	$(NASM) -g -felf64 $< -o $@
 
 build/%.o: src/%.cpp prepare
-	$(CPP) -m64 -g -std=c++99 -ffreestanding -Wall -Wextra -fno-exceptions -mno-red-zone -fno-rtti $(includes_dir) -c $< -o $@
+	$(CPP) -m64 -g -march=nehalem -std=c++99 -ffreestanding -Wall -Wextra -fno-exceptions -mno-red-zone -fno-rtti $(includes_dir) -c $< -o $@
 
 build/%.o: src/%.c prepare
-	$(CC) -m64 -g -std=gnu99 -ffreestanding -Wall -mno-red-zone -Wextra $(includes_dir) -c $< -o $@
+	$(CC) -m64 -g -march=nehalem -std=gnu99 -ffreestanding -Wall -mno-red-zone -Wextra $(includes_dir) -c $< -o $@
 
 build/%.o: src/%.S prepare
 	$(CC) -m64 -g -Wall $(includes_dir) -c $< -o $@
@@ -55,10 +55,10 @@ loader: loader/boot/grub/grub.cfg $(kernel)
 	$(GRUB-MKRESCUE) -o $(BUILD_DIR)/loader.iso $(LOADER_BUILD_DIR)
 
 run:
-	@qemu-system-x86_64 -cdrom $(BUILD_DIR)/loader.iso -no-reboot -no-shutdown -monitor stdio
+	@qemu-system-x86_64 -cpu Nehalem -cdrom $(BUILD_DIR)/loader.iso -no-reboot -no-shutdown -monitor stdio
 
 run-debug:
-	@qemu-system-x86_64 -cdrom $(BUILD_DIR)/loader.iso -no-reboot -no-shutdown -monitor stdio -d cpu_reset,guest_errors,unimp,in_asm,int,page
+	@qemu-system-x86_64 -cpu Nehalem -cdrom $(BUILD_DIR)/loader.iso -no-reboot -no-shutdown -monitor stdio -s -d cpu_reset,guest_errors,unimp,in_asm,int,page
 
 shell:
 	@$(CONTAINER) bash
