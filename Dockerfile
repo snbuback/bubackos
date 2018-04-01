@@ -28,3 +28,5 @@ ADD tools/crt0.S tools/build-jerryscript.sh tools/toolchain_bubackos.cmake /tool
 RUN cd /tools && \
     ./build-jerryscript.sh ${JERRYSCRIPT_VERSION} && \
     rm -rf ${BUILD_DIR}
+
+RUN apt-get -qq -y install gawk

@@ -15,6 +15,7 @@ SECTIONS {
 
 		*(.multiboot2)
 		*(.text)
+		*(.js)
 
 		__ADDR_CODE_END = .;
 	}

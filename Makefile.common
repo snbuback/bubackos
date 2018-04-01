@@ -1,5 +1,6 @@
 OS_NAME_LOWER=$(shell echo $(OS_NAME) | tr '[:upper:]' '[:lower:]')
 SRC_DIR=$(BASE_DIR)/src
+JS_DIR=$(BASE_DIR)/js
 BUILD_DIR=$(BASE_DIR)/build
 TARGET=$(OS_ARCH)-elf
 PREFIX=/opt/cross
@@ -16,4 +17,5 @@ CC=$(CONTAINER) $(TARGET)-gcc
 CPP=$(CONTAINER) $(TARGET)-g++
 AS=$(CONTAINER) $(TARGET)-as
 LD=$(CONTAINER) $(TARGET)-ld
+OBJCOPY=$(CONTAINER) $(TARGET)-objcopy
 NASM=$(CONTAINER) nasm

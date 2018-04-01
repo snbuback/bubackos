@@ -1,0 +1,27 @@
+<!doctype html>
+
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>BubackOS test page</title>
+</head>
+<body>
+    <div id="console">
+        <p>js loaded.</p>
+    </div>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/2.2.4/jquery.min.js"></script>
+    <script type="text/javascript">
+    var platform = {
+        getTotalMemory: function() {
+            return 122*1024*1024;
+        }
+    }
+    function print(x) {
+        var $p = $("<p>sas</p>");
+        $p.html(x);
+        console.log($p);
+        $("#console").append($p);
+    }
+    </script>
+    <script type="text/javascript" src="start.js"></script>
+</body>

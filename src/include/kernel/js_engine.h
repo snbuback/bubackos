@@ -3,7 +3,7 @@
 #include <system.h>
 
 bool js_engine_initialize(platform_t *platform);
-
-void start_cpu0(void);
+bool js_engine_module_load(const char* module_name, const char* source_code, size_t size);
+bool js_engine_eval(const char* str_to_eval);
 
 #endif

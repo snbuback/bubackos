@@ -87,23 +87,35 @@ bool js_engine_initialize(platform_t *platform) {
     return true;
 }
 
-void start_cpu0(void) {
-  const jerry_char_t script[] = "print('total memory=' + (platform.getTotalMemory()/1024/1024) + 'MB');";
-  size_t script_size = strlen ((const char *) script);
+bool js_engine_module_load(const char* module_name, const char* source_code, size_t size)
+{
+    bool loaded = false;
+    /* Setup Global scope code */
+    jerry_value_t parsed_code = jerry_parse_named_resource(module_name, strlen(module_name), source_code, size, true);
 
-  /* Setup Global scope code */
-  jerry_value_t parsed_code = jerry_parse (script, script_size, true);
+    if (!jerry_value_has_error_flag (parsed_code))
+    {
+        /* Execute the parsed source code in the Global scope */
+        jerry_value_t ret_value = jerry_run (parsed_code);
+        if (!jerry_value_has_error_flag (ret_value)) {
+            loaded = true;
+        }
+        /* Returned value must be freed */
+        jerry_release_value (ret_value);
+    }
 
-  if (!jerry_value_has_error_flag (parsed_code))
-  {
-    /* Execute the parsed source code in the Global scope */
-    jerry_value_t ret_value = jerry_run (parsed_code);
-
-    /* Returned value must be freed */
-    jerry_release_value (ret_value);
-  }
-
-  /* Parsed source code must be freed */
-  jerry_release_value (parsed_code);
+    /* Parsed source code must be freed */
+    jerry_release_value (parsed_code);
+    return loaded;
 }
 
+bool js_engine_eval(const char* str_to_eval)
+{
+    bool success = false;
+    jerry_value_t ret_val = jerry_eval (str_to_eval, strlen(str_to_eval), true);
+    if (!jerry_value_has_error_flag (ret_val)) {
+        success = true;
+    }
+    jerry_release_value (ret_val);
+    return success;
+}
