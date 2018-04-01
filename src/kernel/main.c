@@ -2,43 +2,13 @@
 #include <string.h>
 #include <kernel/logging.h>
 #include <kernel/page_allocator.h>
-#include <jerryscript/jerryscript.h>
-#include <jerryscript/jerryscript-ext/handler.h>
 
-void jerryx_port_handler_print_char (char c) {
-	terminal__write(&c, 1);
+void basic_logging(const char* tag, const char* text, char log_level) {
+	printf("LOG %d %10s: %s\n", (unsigned) log_level, tag, text);
 }
 
-int js_engine (void)
-{
-const jerry_char_t script[] = "var x=5; print('Hello, World from js! x=' + x + ';');";
-  size_t script_size = strlen ((const char *) script);
-
-  /* Initialize engine */
-  jerry_init (JERRY_INIT_EMPTY);
-
-  /* Register 'print' function from the extensions */
-  jerryx_handler_register_global ((const jerry_char_t *) "print",
-                                  jerryx_handler_print);
-
-  /* Setup Global scope code */
-  jerry_value_t parsed_code = jerry_parse (script, script_size, true);
-
-  if (!jerry_value_has_error_flag (parsed_code))
-  {
-    /* Execute the parsed source code in the Global scope */
-    jerry_value_t ret_value = jerry_run (parsed_code);
-
-    /* Returned value must be freed */
-    jerry_release_value (ret_value);
-  }
-
-  /* Parsed source code must be freed */
-  jerry_release_value (parsed_code);
-
-  /* Cleanup engine */
-  jerry_cleanup ();
-
+void halt(void) {
+	asm("hlt");
 }
 
 void kernel_main(uint64_t magic, uint64_t *addr)
@@ -59,27 +29,26 @@ void kernel_main(uint64_t magic, uint64_t *addr)
 		, __ADDR_KERNEL_START, __ADDR_KERNEL_END, __ADDR_KERNEL_BASE, stack_base
 	);
 
-	LOG_INFO("js_engine=%d", js_engine());
-
-	// page_allocator_initialize(128*1024*1024);
-
-	mem_alloc_initialize();
-
-	services_initialize();
-
-	// SyscallInfo_t logging;
-	// logging.name = "logging";
-	// logging.call = (Syscall) log_info;
-	//
-	// servicehandler_t syscall_logging = services_register(logging);
-	// services_call(syscall_logging, "\n**** testing first syscall ****\n");
-
 	if (multiboot_parser(magic, addr) == -1) {
 		LOG_ERROR("Try to use a bootloader with multiboot2 support");
 		return;
 	}
 
-	// LOG_DEBUG("linha 1 0x%x", malloc(5));
-	// LOG_DEBUG("linha 2 0x%x", sbrk(0));
-	// LOG_DEBUG("Goodbye");
+	platform_t platform;
+	// memory configuration
+	platform.total_memory = 128*1024*1024; // FIXME
+	platform.heap_address = __ADDR_KERNEL_END + 1; // FIXME align
+
+	// logging
+	platform.logging_func = basic_logging;
+
+	// console
+	platform.console.width = 80;
+	platform.console.height = 25;
+	platform.console.write_func = console__write;
+
+	// cpu specific functions
+	platform.halt = halt;
+
+	bubackos_init(&platform);
 }

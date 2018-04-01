@@ -3,6 +3,12 @@
 
 // Logging with file printf("... %s:%d:%s(): " fmt "\n", __FILE__, __LINE__, __func__, ##args)
 
+#define LOG_LEVEL_DEBUG   1
+#define LOG_LEVEL_INFO    2
+#define LOG_LEVEL_WARN    3
+#define LOG_LEVEL_ERROR   4
+#define LOG_LEVEL_FATAL   5
+
 #ifdef SYSTEM_DEBUG
   #define LOG_DEBUG(fmt, args...) printf("DEBUG " fmt "\n", ##args)
 #else
