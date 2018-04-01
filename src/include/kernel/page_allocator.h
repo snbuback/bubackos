@@ -9,11 +9,10 @@
 #define PAGE_TYPE_SYSTEM  1
 #define PAGE_TYPE_USER    2
 
-/* define by the linker */
-extern uintptr_t kernel_virtual_start;
-extern uintptr_t kernel_physical_start;
-extern uintptr_t kernel_virtual_end;
-extern uintptr_t kernel_physical_end;
+/* defined by the linker */
+extern uintptr_t __ADDR_KERNEL_START[];
+extern uintptr_t __ADDR_KERNEL_END[];
+extern uintptr_t __ADDR_KERNEL_BASE[];
 
 typedef uint8_t page_type;
 

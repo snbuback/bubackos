@@ -33,20 +33,20 @@ size_t page_allocator_next_page_available()
 void page_allocator_initialize(size_t t)
 {
     // TODO FIXME this code
-    // uintptr_t kernel_start_address = kernel_physical_start;
-    uintptr_t kernel_start_address = &page_allocator_initialize;
-    uintptr_t kernel_end_address = kernel_start_address + 1*1024*1024;  // TODO 1MB to kernel! Fixed size
-
+    uintptr_t kernel_start_address = 0;//kernel_physical_start;
+    // uintptr_t kernel_start_address = &page_allocator_initialize;
+    uintptr_t kernel_end_address = 0;//kernel_virtual_end;
+    
     total_memory = t;
     total_of_pages = total_memory / SYSTEM_PAGE_SIZE;
 
-    // LOG_DEBUG("Page size = %d bytes (align %d) total pages=%d", (int) SYSTEM_PAGE_SIZE, (int) SYSTEM_PAGE_ALIGN, total_of_pages);
-    // LOG_DEBUG("Kernel from 0x%x to 0x%x", kernel_start_address, kernel_end_address);
-    // LOG_DEBUG("Kernel (aligned) from 0x%x to 0x%x", align(kernel_start_address), align(kernel_end_address));
+    LOG_DEBUG("Page size = %d bytes (align %d) total pages=%d", (int) SYSTEM_PAGE_SIZE, (int) SYSTEM_PAGE_ALIGN, total_of_pages);
+    LOG_DEBUG("Kernel from 0x%x to 0x%x", kernel_start_address, kernel_end_address);
+    LOG_DEBUG("Kernel (aligned) from 0x%x to 0x%x", align(kernel_start_address), align(kernel_end_address));
 
     size_t kernel_page_start = page_allocator_page_number(align(kernel_start_address));
     size_t kernel_page_end = page_allocator_page_number(align(kernel_end_address));
-    // LOG_DEBUG("Kernel page number from %d to %d", kernel_page_start, kernel_page_end);
+    LOG_DEBUG("Kernel page number from %d to %d", kernel_page_start, kernel_page_end);
 
     // the page allocator memory are stored after the kernel pages.
     size_t pa_page_start = kernel_page_end + 1;

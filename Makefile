@@ -55,10 +55,10 @@ loader: loader/boot/grub/grub.cfg $(kernel)
 	$(GRUB-MKRESCUE) -o $(BUILD_DIR)/loader.iso $(LOADER_BUILD_DIR)
 
 run:
-	@qemu-system-x86_64 -cpu Nehalem -cdrom $(BUILD_DIR)/loader.iso -no-reboot -no-shutdown -monitor stdio
+	@qemu-system-x86_64 -m 128 -cpu Nehalem -cdrom $(BUILD_DIR)/loader.iso -no-reboot -no-shutdown -monitor stdio
 
 run-debug:
-	@qemu-system-x86_64 -cpu Nehalem -cdrom $(BUILD_DIR)/loader.iso -no-reboot -no-shutdown -monitor stdio -s -d cpu_reset,guest_errors,unimp,in_asm,int,page
+	@qemu-system-x86_64 -m 128 -cpu Nehalem -cdrom $(BUILD_DIR)/loader.iso -no-reboot -no-shutdown -monitor stdio -s -d cpu_reset,guest_errors,unimp,in_asm,int,page
 
 shell:
 	@$(CONTAINER) bash

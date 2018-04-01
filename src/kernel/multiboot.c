@@ -4,6 +4,8 @@
 #include <kernel/multiboot2.h>
 #include <system.h>
 #include <kernel/logging.h>
+#undef LOG_DEBUG
+#define LOG_DEBUG(fmt, args...)
 #undef LOG_INFO
 #define LOG_INFO(fmt, args...)
 
@@ -38,7 +40,6 @@ int multiboot_parser(uint64_t magic, uint64_t* addr)
       tag = (struct multiboot_tag *) ((multiboot_uint8_t *) tag
                                       + ((tag->size + 7) & ~7)))
    {
-     // LOG_DEBUG("Tag %d (0x%x), Size 0x%x\n", tag->type, tag->type, tag->size);
      switch (tag->type)
        {
        case MULTIBOOT_TAG_TYPE_CMDLINE:
@@ -76,8 +77,8 @@ int multiboot_parser(uint64_t magic, uint64_t* addr)
                 mmap = (multiboot_memory_map_t *)
                   ((unsigned long) mmap
                    + ((struct multiboot_tag_mmap *) tag)->entry_size))
-             LOG_INFO(" base_addr = 0x%x%x,"
-                     " length = 0x%x%x (%d MB), type = 0x%x",
+             LOG_INFO(" base_addr=0x%x%x,"
+                     " length=0x%x%x (%dMB), 0x%x",
                      (unsigned) (mmap->addr >> 32),
                      (unsigned) (mmap->addr & 0xffffffff),
                      (unsigned) (mmap->len >> 32),
@@ -177,10 +178,13 @@ int multiboot_parser(uint64_t magic, uint64_t* addr)
            break;
          }
 
+       default:
+        LOG_DEBUG("Tag %d (0x%x), Size 0x%x unrecognized", tag->type, tag->type, tag->size);
+        break;
        }
    }
  tag = (struct multiboot_tag *) ((multiboot_uint8_t *) tag
                                  + ((tag->size + 7) & ~7));
- LOG_DEBUG("Total mbi size 0x%x", (unsigned) tag - (unsigned) addr);
+//  LOG_DEBUG("Total mbi size 0x%x", (unsigned) tag - (unsigned) addr);
  return 0;
 }

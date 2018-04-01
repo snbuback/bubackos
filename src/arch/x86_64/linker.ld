@@ -1,40 +1,38 @@
-ENTRY(boot)           /* the name of the entry symbol */
+ENTRY(boot)
 
-kernel_virtual_start = .;
+__ADDR_KERNEL_BASE = 1M;
 
-BASE_ADDR = 0;
-
-. = BASE_ADDR + 0x100000;          /* the code should be relocated to 3 GB + 1 MB */
-
-/* these labels get exported to the code files */
-kernel_physical_start = . - BASE_ADDR;
+/* Use nm -nS ./kernel.bin to ensure the __ADDR_KERNEL_START and __ADDR_KERNEL_END points to the limits of the kernel */
 
 SECTIONS {
+	. = __ADDR_KERNEL_BASE;
+	__ADDR_KERNEL_START = ABSOLUTE(.);
+
 	/* align at 4 KB and load at 1 MB */
-	.text ALIGN (4K) : AT(ADDR(.text)-BASE_ADDR)
+	.text ALIGN(4K):
 	{
-			*(.multiboot2)            /* all text sections from all files */
-	    *(.text)            /* all text sections from all files */
+		__ADDR_CODE_START = .;
+
+		*(.multiboot2)
+		*(.text)
+
+		__ADDR_CODE_END = .;
 	}
 
-	/* align at 4 KB and load at 1 MB + . */
-	.rodata ALIGN (4K) : AT(ADDR(.rodata)-BASE_ADDR)
+	/* all orphan sections comes here: https://sourceware.org/binutils/docs/ld/Location-Counter.html#Location-Counter */
+	. = .;
+
+	.data ALIGN(4K):
 	{
-	    *(.rodata*)         /* all read-only data sections from all files */
+		__ADDR_DATA_START = .;
+		
+		*(.rodata)
+		*(.data)
+		*(COMMON)
+		*(.bss)
+
+		__ADDR_DATA_END = .;
+		__ADDR_KERNEL_END = ABSOLUTE(.);
 	}
 
-	/* align at 4 KB and load at 1 MB + . */
-	.data ALIGN (4K) : AT(ADDR(.data)-BASE_ADDR)
-	{
-	    *(.data)            /* all data sections from all files */
-	}
-
-	/* align at 4 KB and load at 1 MB + . */
-	.bss ALIGN (4K) : AT(ADDR(.bss)-BASE_ADDR)
-	{
-	    *(COMMON)           /* all COMMON sections from all files */
-	    *(.bss)             /* all bss sections from all files */
-	}
 }
-kernel_virtual_end = .;
-kernel_physical_end = . - BASE_ADDR;

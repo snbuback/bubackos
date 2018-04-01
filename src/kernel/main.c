@@ -43,19 +43,25 @@ const jerry_char_t script[] = "var x=5; print('Hello, World from js! x=' + x + '
 
 void kernel_main(uint64_t magic, uint64_t *addr)
 {
+	uintptr_t stack_base = 0;
+	asm ("movq %%rbp, %0; "
+		:"=r"(stack_base)
+	);
 
 	console__initialize();
-
 	console__clear();
-
-	/* Initialize terminal interface */
 	terminal_initialize();
 
-	LOG_INFO("Booting at 0x%x", &kernel_main);
+	LOG_INFO("Booting BubackOS\n"
+		"	kernel loaded address=%p\n"
+		"	kernel end address   =%p\n"
+		"	stack base address   =%p\n"
+		, __ADDR_KERNEL_START, __ADDR_KERNEL_END, __ADDR_KERNEL_BASE, stack_base
+	);
 
 	LOG_INFO("js_engine=%d", js_engine());
 
-	page_allocator_initialize(128*1024*1024);
+	// page_allocator_initialize(128*1024*1024);
 
 	mem_alloc_initialize();
 
@@ -73,7 +79,7 @@ void kernel_main(uint64_t magic, uint64_t *addr)
 		return;
 	}
 
-	LOG_DEBUG("linha 1 0x%x", malloc(5));
-	LOG_DEBUG("linha 2 0x%x", sbrk(0));
-	LOG_DEBUG("Goodbye");
+	// LOG_DEBUG("linha 1 0x%x", malloc(5));
+	// LOG_DEBUG("linha 2 0x%x", sbrk(0));
+	// LOG_DEBUG("Goodbye");
 }

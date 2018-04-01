@@ -7,12 +7,14 @@
 #include <kernel/console.h>
 #include <kernel/logging.h>
 
+// #define DEBUG_MEMORY
+
 static char mem[500*1024];
 size_t pos = 0;
 
 void * sbrk (ptrdiff_t incr)
 {
-#ifdef SYSTEM_DEBUG
+#ifdef DEBUG_MEMORY
   char num_as_hex[50];  // Maximum number as string
   terminal__print("Allocated ");
   utoa(incr, num_as_hex, 10);
@@ -22,7 +24,7 @@ void * sbrk (ptrdiff_t incr)
   pos += incr;
   void *addr = mem + pos;
 
-#ifdef SYSTEM_DEBUG
+#ifdef DEBUG_MEMORY
   terminal__print(" bytes at 0x");
   utoa(addr, num_as_hex, 16);
   terminal__print(num_as_hex);
