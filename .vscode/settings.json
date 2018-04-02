@@ -5,7 +5,12 @@
         "*.tcc": "cpp",
         "memory_allocator.h": "c",
         "logging.h": "c",
-        "config.h": "c"
+        "config.h": "c",
+        "jerryscript.h": "c",
+        "system.h": "c",
+        "js_engine.h": "c",
+        "multiboot2.h": "c",
+        "console.h": "c"
     },
     "python.pythonPath": "/usr/local/bin/python3"
 }

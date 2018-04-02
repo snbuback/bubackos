@@ -15,6 +15,5 @@ void bubackos_init(platform_t *platform) {
 
   platform->logging_func("init", "shuting down", LOG_LEVEL_INFO);
   platform->halt();
-  while (true) {};
 
-} __attribute__ ((noreturn));;
+};

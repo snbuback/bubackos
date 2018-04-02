@@ -35,39 +35,40 @@ prepare:
 	@mkdir -p `dirname $(kernel)`
 
 $(kernel): $(assembly_object_files) $(c_object_files) $(s_object_files) $(linker_script) $(cpp_object_files) $(js_object_files) prepare
-	$(LD) -n -T $(linker_script) -nostdlib -o $(kernel) \
+	@$(LD) -n -T $(linker_script) -nostdlib -o $(kernel) \
 		$(assembly_object_files) $(c_object_files) $(s_object_files) $(cpp_object_files) $(js_object_files) \
 		-L/usr/local/x86_64-elf/lib -ljerry-core -ljerry-ext -ljerry-port-default-minimal -lg -lm
 
 build/%.o: src/%.asm prepare
-	$(NASM) -g -felf64 $< -o $@
+	@$(NASM) -g -felf64 $< -o $@
 
 build/%.o: src/%.cpp prepare
-	$(CPP) -m64 -g -march=nehalem -std=c++99 -ffreestanding -Wall -Wextra -fno-exceptions -mno-red-zone -fno-rtti $(includes_dir) -c $< -o $@
+	@$(CPP) -m64 -g -march=nehalem -std=c++99 -ffreestanding -Wall -Wextra -fno-exceptions -mno-red-zone -fno-rtti $(includes_dir) -c $< -o $@
 
 build/%.o: src/%.c prepare
-	$(CC) -m64 -g -march=nehalem -std=gnu99 -ffreestanding -Wall -mno-red-zone -Wextra $(includes_dir) -c $< -o $@
+	@$(CC) -m64 -g -march=nehalem -std=gnu99 -ffreestanding -Wall -mno-red-zone -Wextra $(includes_dir) -c $< -o $@
 
 build/%.o: src/%.S prepare
-	$(CC) -m64 -g -Wall $(includes_dir) -c $< -o $@
+	@$(CC) -m64 -g -Wall $(includes_dir) -c $< -o $@
 
 build/%.o: js/%.js prepare
-	$(OBJCOPY) -I binary -O elf64-x86-64 -B i386:x86-64 --rename-section .data=.js $< $@
+	@$(OBJCOPY) -I binary -O elf64-x86-64 -B i386:x86-64 --rename-section .data=.js $< $@
 
 $(SRC_DIR)/kernel/gen_load_all_js_module.c: gen_js_load_all.awk $(js_object_files)
-	find js -name \*.js | awk -f gen_js_load_all.awk > $(SRC_DIR)/gen_load_all_js_module.c
+	@find js -name \*.js | awk -f gen_js_load_all.awk > $(SRC_DIR)/gen_load_all_js_module.c
 
 loader: loader/boot/grub/grub.cfg $(kernel)
 	@mkdir -p $(LOADER_BUILD_DIR)
 	@cp -a $(LOADER_SRC_DIR)/boot $(LOADER_BUILD_DIR)
 	@cp -a $(kernel) $(LOADER_BUILD_DIR)/boot
-	$(GRUB-MKRESCUE) -o $(BUILD_DIR)/loader.iso $(LOADER_BUILD_DIR)
+	@$(GRUB-MKRESCUE) -o $(BUILD_DIR)/loader.iso $(LOADER_BUILD_DIR)
 
 run:
 	@qemu-system-x86_64 -m 128 -cpu Nehalem -cdrom $(BUILD_DIR)/loader.iso -no-reboot -no-shutdown -monitor stdio
 
 run-debug:
-	@qemu-system-x86_64 -m 128 -cpu Nehalem -cdrom $(BUILD_DIR)/loader.iso -no-reboot -no-shutdown -monitor stdio -s -d cpu_reset,guest_errors,unimp,in_asm,int,page
+	#in_asm,
+	@qemu-system-x86_64 -m 128 -cpu Nehalem -cdrom $(BUILD_DIR)/loader.iso -no-reboot -no-shutdown -monitor stdio -s -d cpu_reset,guest_errors,unimp,int,page
 
 shell:
 	@$(CONTAINER) bash

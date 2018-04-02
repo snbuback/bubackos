@@ -1,6 +1,6 @@
-
 #include <kernel/console.h>
 #include <stdlib.h>
+#include <string.h>
 
 volatile size_t terminal_row;
 volatile size_t terminal_column;

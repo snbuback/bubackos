@@ -1,6 +1,7 @@
 #include <stddef.h>
 #include <stdint.h>
 #include <string.h>
+#include <stdlib.h>
 #include <sys/config.h>
 #include <sys/stat.h>
 #include <kernel/page_allocator.h>
@@ -8,8 +9,9 @@
 #include <kernel/logging.h>
 
 // #define DEBUG_MEMORY
+#pragma GCC diagnostic ignored "-Wunused-parameter"
 
-static char mem[500*1024];
+static uint8_t mem[500*1024];
 size_t pos = 0;
 
 void * sbrk (ptrdiff_t incr)
@@ -17,20 +19,20 @@ void * sbrk (ptrdiff_t incr)
 #ifdef DEBUG_MEMORY
   char num_as_hex[50];  // Maximum number as string
   terminal__print("Allocated ");
-  utoa(incr, num_as_hex, 10);
+  utoa((unsigned int) incr, num_as_hex, 10);
   terminal__print(num_as_hex);
 #endif
 
   pos += incr;
-  void *addr = mem + pos;
+  uintptr_t addr = (uintptr_t) (mem + pos);
 
 #ifdef DEBUG_MEMORY
   terminal__print(" bytes at 0x");
-  utoa(addr, num_as_hex, 16);
+  utoa((unsigned int) addr, num_as_hex, 16);
   terminal__print(num_as_hex);
   terminal__print(".\n");
 #endif
-  return addr;
+  return (void*) addr;
 }
 
 int close (int fd)

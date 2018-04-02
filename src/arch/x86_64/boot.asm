@@ -96,8 +96,8 @@ boot:
 bits 64
 k_64_bits:
 
-  mov dword rdi, [multiboot_info]
-  mov dword rsi, [multiboot_info+4]
+  mov qword rdi, [multiboot_info]
+  mov qword rsi, [multiboot_info+4]
 
   call enable_sse
 

@@ -1,12 +1,19 @@
 'use strict';
-/**
- * Global objects are slow to call, so building the object as local before set as global
- */
+
 var console = function() {
+    // logging levels from kernel/logging.h
     return {
+        debug: function(msg) {
+            platform.logging(1, msg);
+        },
         info: function(msg) {
-            print('Console INFO :' + msg);
+            platform.logging(2, msg);
+        },
+        warn: function(msg) {
+            platform.logging(3, msg);
+        },
+        error: function(msg) {
+            platform.logging(4, msg);
         }
     }
 }();
-print('console loaded');

@@ -17,7 +17,7 @@
 
 #define LOG_INFO(fmt, args...) printf("INFO  " fmt "\n", ##args)
 
-#define LOG_WARNING(fmt, args...) printf("WARN  " fmt "\n", #args)
+#define LOG_WARNING(fmt, args...) printf("WARN  " fmt "\n", ##args)
 
 #define LOG_ERROR(fmt, args...) printf("ERROR " fmt "\n", ##args)
 

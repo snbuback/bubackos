@@ -11,7 +11,7 @@ void halt(void) {
 	asm("hlt");
 }
 
-void kernel_main(uint64_t magic, uint64_t *addr)
+void kernel_main(uint64_t magic, uintptr_t addr)
 {
 	uintptr_t stack_base = 0;
 	asm ("movq %%rbp, %0; "
@@ -25,19 +25,19 @@ void kernel_main(uint64_t magic, uint64_t *addr)
 	LOG_INFO("Booting BubackOS\n"
 		"	kernel loaded address=%p\n"
 		"	kernel end address   =%p\n"
-		"	stack base address   =%p\n"
-		, __ADDR_KERNEL_START, __ADDR_KERNEL_END, __ADDR_KERNEL_BASE, stack_base
+		"	stack base address   =%p"
+		, (void*) __ADDR_KERNEL_START, (void*) __ADDR_KERNEL_END, (void*) stack_base
 	);
 
-	if (multiboot_parser(magic, addr) == -1) {
+	platform_t platform;
+	if (multiboot_parser(magic, addr, &platform) == -1) {
 		LOG_ERROR("Try to use a bootloader with multiboot2 support");
 		return;
 	}
 
-	platform_t platform;
 	// memory configuration
-	platform.total_memory = 128*1024*1024; // FIXME
-	platform.heap_address = __ADDR_KERNEL_END + 1; // FIXME align
+	// platform.total_memory = 1*1024*1024; // FIXME
+	platform.heap_address = ((uintptr_t) __ADDR_KERNEL_END) + 1; // FIXME align
 
 	// logging
 	platform.logging_func = basic_logging;

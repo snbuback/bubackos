@@ -1,5 +1,7 @@
 #include <kernel/gdt.h>
 
+#pragma GCC diagnostic ignored "-Wpointer-to-int-cast"
+
 /* Defines a GDT entry.  We say packed, because it prevents the
  * compiler from doing things that it thinks is best, i.e.
  * optimization, etc. */

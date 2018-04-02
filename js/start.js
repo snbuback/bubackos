@@ -5,11 +5,8 @@
 var OS = function() {
     return {
         start: function() {
-            print('total memory=' + (platform.getTotalMemory()/1024/1024) + 'MB');
-            console.info('ola');
-            print('js engine working :-)');
+            console.debug('total memory=' + (platform.getTotalMemory()/1024/1024) + 'MB');
+            console.info('js engine working :-)');
         }
     }
 }();
-
-print('start loaded');

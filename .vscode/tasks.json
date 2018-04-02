@@ -7,6 +7,13 @@
             "label": "Run",
             "type": "shell",
             "command": "docker run --rm -v /Users/snbuback/Projects/bubackos:/Users/snbuback/Projects/bubackos -w /Users/snbuback/Projects/bubackos bubackos make && make run-debug",
+            "presentation": {
+                "reveal": "always",
+                "panel": "dedicated"
+            },
+            "problemMatcher": [
+                "$gcc", "$jshint"
+            ]
         },
         {
             "label": "Just run",

@@ -26,12 +26,14 @@ uint32_t task_create(memory_handler_t memory_handler) {
   task_t* task = __get_task(task_handler);
   task->task_handler = task_handler;
   task->memory_handler = memory_handler;
+  return 0; // TODO
 }
 
 bool task_start(task_handler_t task_handler, void* start_code_address) {
   task_t* task = __get_task(task_handler);
   task->next_address = start_code_address;
   task->ready = true;
+  return true;
 }
 
 void task_switch(task_handler_t task_handler) {

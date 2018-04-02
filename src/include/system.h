@@ -4,10 +4,6 @@
 #include <kernel/gdt.h>
 #include <kernel/memory_allocator.h>
 #include <kernel/console.h>
-#include <kernel/services.h>
-
-// temp
-int multiboot_parser(uint64_t magic, uint64_t* addr);
 
 typedef size_t console_pos_t;
 typedef uint8_t text_color_t;
@@ -29,6 +25,7 @@ typedef struct {
     // missing context switch
 } platform_t;
 
-void bubackos_init(platform_t *platform) __attribute__((noreturn));
+void bubackos_init(platform_t *platform);
+int multiboot_parser(uint64_t magic, uintptr_t addr, platform_t* platform);
 
 #endif
