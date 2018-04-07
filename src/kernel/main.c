@@ -15,15 +15,15 @@ static void basic_logging(int log_level, const char* tag, const char* text) {
 void intel_start(uint64_t magic, uintptr_t addr)
 {
 	// is necessary to initialize the terminal soon as possible to enable basic logging function
-	terminal_initialize();
-	log_set_level(LOG_DEBUG);
+	console_initialize();
+	log_set_level(LOG_TRACE);
 	// page_allocator_initialize();
 
 	platform_t platform;
 	// console
 	platform.console.width = 80;
 	platform.console.height = 25;
-	platform.console.write_func = console__write;
+	platform.console.write_func = console_raw_write;
 
 	// logging
 	platform.logging_func = &basic_logging;

@@ -18,19 +18,19 @@ void * sbrk (ptrdiff_t incr)
 {
 #ifdef DEBUG_MEMORY
   char num_as_hex[50];  // Maximum number as string
-  terminal__print("Allocated ");
+  console_print("Allocated ");
   utoa((unsigned int) incr, num_as_hex, 10);
-  terminal__print(num_as_hex);
+  console_print(num_as_hex);
 #endif
 
   pos += incr;
   uintptr_t addr = (uintptr_t) (mem + pos);
 
 #ifdef DEBUG_MEMORY
-  terminal__print(" bytes at 0x");
+  console_print(" bytes at 0x");
   utoa((unsigned int) addr, num_as_hex, 16);
-  terminal__print(num_as_hex);
-  terminal__print(".\n");
+  console_print(num_as_hex);
+  console_print(".\n");
 #endif
   return (void*) addr;
 }
@@ -44,7 +44,7 @@ int close (int fd)
 _READ_WRITE_RETURN_TYPE write (int fd, const void *buf, size_t cnt)
 {
   if (fd < 3) {
-    terminal__write(buf, cnt);
+    console_write(buf, cnt);
     return cnt;
   }
 	log_warn("write called");

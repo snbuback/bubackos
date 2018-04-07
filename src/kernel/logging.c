@@ -51,6 +51,6 @@ void logging(int level, const char* tag, const char* fmt, ...)
         buf[final_size] = '\n';
         buf[final_size + 1] = 0;
 
-        terminal__print(buf);
+        console_print(buf);
     }
 }
