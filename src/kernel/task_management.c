@@ -2,14 +2,13 @@
 #include <kernel/logging.h>
 #include <kernel/task_management.h>
 #include <kernel/configuration.h>
-#include <system.h>
 
 task_t tasks[SYSTEM_LIMIT_OF_TASKS];
 volatile task_handler_t last_task_handler = 0;
 
 
 void task_management_initialize(void) {
-  LOG_DEBUG("task_management_initialization started");
+  log_debug("task_management_initialization started");
 }
 
 task_handler_t __allocate_new_task(void) {

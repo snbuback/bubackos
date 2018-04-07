@@ -18,7 +18,7 @@ typedef uint8_t page_type;
 
 uintptr_t align(uintptr_t addr);
 
-void page_allocator_initialize(size_t t);
+void page_allocator_initialize();
 bool page_allocator_mark_as_system(uintptr_t addr, size_t total_in_bytes);
 uintptr_t page_allocator_allocate();
 bool page_allocator_mark_as_free(uintptr_t addr);

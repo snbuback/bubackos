@@ -1,54 +1,52 @@
-#include <system.h>
-#include <string.h>
 #include <kernel/logging.h>
+#include <kernel/platform.h>
 #include <kernel/page_allocator.h>
+#include <kernel/multiboot2.h>
+#include <kernel/bubackos.h>
 
-void basic_logging(const char* tag, const char* text, char log_level) {
-	printf("LOG %d %10s: %s\n", (unsigned) log_level, tag, text);
-}
-
-void halt(void) {
+static void __halt(void) {
 	asm("hlt");
 }
 
-void kernel_main(uint64_t magic, uintptr_t addr)
+static void basic_logging(int log_level, const char* tag, const char* text) {
+	logging(log_level, tag, text);
+}
+
+void intel_start(uint64_t magic, uintptr_t addr)
 {
-	uintptr_t stack_base = 0;
-	asm ("movq %%rbp, %0; "
-		:"=r"(stack_base)
-	);
-
-	console__initialize();
-	console__clear();
+	// is necessary to initialize the terminal soon as possible to enable basic logging function
 	terminal_initialize();
-
-	LOG_INFO("Booting BubackOS\n"
-		"	kernel loaded address=%p\n"
-		"	kernel end address   =%p\n"
-		"	stack base address   =%p"
-		, (void*) __ADDR_KERNEL_START, (void*) __ADDR_KERNEL_END, (void*) stack_base
-	);
+	log_set_level(LOG_DEBUG);
+	// page_allocator_initialize();
 
 	platform_t platform;
-	if (multiboot_parser(magic, addr, &platform) == -1) {
-		LOG_ERROR("Try to use a bootloader with multiboot2 support");
-		return;
-	}
-
-	// memory configuration
-	// platform.total_memory = 1*1024*1024; // FIXME
-	platform.heap_address = ((uintptr_t) __ADDR_KERNEL_END) + 1; // FIXME align
-
-	// logging
-	platform.logging_func = basic_logging;
-
 	// console
 	platform.console.width = 80;
 	platform.console.height = 25;
 	platform.console.write_func = console__write;
 
-	// cpu specific functions
-	platform.halt = halt;
+	// logging
+	platform.logging_func = &basic_logging;
 
-	bubackos_init(&platform);
+	// cpu specific functions
+	platform.halt = __halt;
+
+	// memory configuration
+	platform.heap_address = ((uintptr_t) __ADDR_KERNEL_END) + 1; // FIXME align
+
+	uintptr_t stack_base = 0;
+	asm ("movq %%rbp, %0; "
+		:"=r"(stack_base)
+	);
+	log_info("Booting BubackOS");
+	log_debug("	kernel loaded address=%p", (void*) __ADDR_KERNEL_START);
+	log_debug("	kernel end address   =%p", (void*) __ADDR_KERNEL_END);
+	log_debug("	stack base address   =%p", (void*) stack_base);
+
+	if (multiboot_parser(magic, addr, &platform) == -1) {
+		log_error("Try to use a bootloader with multiboot2 support");
+		return;
+	}
+
+	bubackos_init(platform);
 }

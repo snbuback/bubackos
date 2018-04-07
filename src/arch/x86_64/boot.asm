@@ -101,8 +101,8 @@ k_64_bits:
 
   call enable_sse
 
-  extern kernel_main
-  call kernel_main
+  extern intel_start
+  call intel_start
   hlt                ; If so, halt.
 
 enable_sse:

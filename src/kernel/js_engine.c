@@ -1,6 +1,6 @@
-#include <system.h>
 #include <string.h>
 #include <kernel/js_engine.h>
+#include <kernel/platform.h>
 #include <kernel/logging.h>
 #include <jerryscript/jerryscript.h>
 #include <jerryscript/jerryscript-ext/handler.h>
@@ -35,11 +35,11 @@ static jerry_value_t platform_logging(const jerry_value_t func_value, const jerr
         if (jerry_value_is_number(args_p[0]) && jerry_value_is_string(args_p[1])) {
             platform_t *platform = get_platform_from_jsobject(this_value);
             // convert arguments
-            char log_level = (char) jerry_get_number_value(args_p[0]);
+            int log_level = (int) jerry_get_number_value(args_p[0]);
             jerry_size_t req_sz = jerry_get_string_size (args_p[1]);
             jerry_char_t str_buf_p[req_sz];
             jerry_string_to_char_buffer(args_p[1], str_buf_p, req_sz);
-            platform->logging_func("js", (const char*) str_buf_p, log_level);
+            platform->logging_func(log_level, "js", (const char*) str_buf_p);
             return jerry_create_boolean(true);
         }
     }
@@ -128,7 +128,7 @@ bool js_engine_module_load(const char* module_name, const char* source_code, siz
 
     /* Parsed source code must be freed */
     jerry_release_value (parsed_code);
-    LOG_INFO("Loading module %s: %d", module_name, loaded);
+    log_info("Loading module %s: %d", module_name, loaded);
     return loaded;
 }
 

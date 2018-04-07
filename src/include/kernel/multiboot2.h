@@ -21,6 +21,8 @@
 
 #ifndef MULTIBOOT_HEADER
 #define MULTIBOOT_HEADER 1
+#include <stdint.h>
+#include <kernel/platform.h>
 
 /*  How many bytes from the start of the file we search for the header. */
 #define MULTIBOOT_SEARCH                        32768
@@ -411,6 +413,8 @@ struct multiboot_tag_load_base_addr
  multiboot_uint32_t size;
  multiboot_uint32_t load_base_addr;
 };
+
+int multiboot_parser(uint64_t magic, uintptr_t addr, platform_t *platform);
 
 #endif /*  ! ASM_FILE */
 

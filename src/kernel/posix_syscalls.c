@@ -37,7 +37,7 @@ void * sbrk (ptrdiff_t incr)
 
 int close (int fd)
 {
-	LOG_WARNING("close called");
+	log_warn("close called");
   return 0;
 }
 
@@ -47,25 +47,25 @@ _READ_WRITE_RETURN_TYPE write (int fd, const void *buf, size_t cnt)
     terminal__write(buf, cnt);
     return cnt;
   }
-	LOG_WARNING("write called");
+	log_warn("write called");
   return 0;
 }
 
 _READ_WRITE_RETURN_TYPE read (int fd, void *buf, size_t cnt)
 {
-  LOG_WARNING("read called");
+  log_warn("read called");
   return 0;
 }
 
 off_t lseek (int fd, off_t pos, int whence)
 {
-	LOG_WARNING("lseek called");
+	log_warn("lseek called");
   return 0;
 }
 
 int fstat (int fd, struct stat *pstat)
 {
-	//LOG_WARNING("fstat called");  ERROR if logging is enabled
+	//log_warn("fstat called");  ERROR if logging is enabled
   return 0;
 }
 
@@ -75,17 +75,17 @@ int isatty (int fd) {
 
 // required by jerryscript
 int gettimeofday(void) {
-	LOG_WARNING("gettimeofday called");
+	log_warn("gettimeofday called");
 	return 0;
 }
 
 void _exit(void) {
-	LOG_WARNING("_exit called");
+	log_warn("_exit called");
 }
 
 int error_no = 0;
 int* __errno(void) {
-	LOG_WARNING("__errno called");
+	log_warn("__errno called");
 	return &error_no;
 }
 

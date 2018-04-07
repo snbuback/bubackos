@@ -9,10 +9,6 @@ static inline uint16_t vga_entry(unsigned char uc, uint8_t color) {
 	return (uint16_t) uc | (uint16_t) color << 8;
 }
 
-void console__initialize(void) {
-	// nothing to do for now
-}
-
 void __console_clear(size_t row_start, size_t col_start, size_t row_end, size_t col_end) {
 	for (size_t y = row_start; y < row_end; y++) {
 		for (size_t x = col_start; x < col_end; x++) {

@@ -1,24 +1,21 @@
-#include <kernel/configuration.h>
-#include <stdio.h>
+#ifndef LOG_H
+#define LOG_H
 
-// Logging with file printf("... %s:%d:%s(): " fmt "\n", __FILE__, __LINE__, __func__, ##args)
+#include <stdarg.h>
 
-#define LOG_LEVEL_DEBUG   1
-#define LOG_LEVEL_INFO    2
-#define LOG_LEVEL_WARN    3
-#define LOG_LEVEL_ERROR   4
-#define LOG_LEVEL_FATAL   5
+enum { LOG_TRACE, LOG_DEBUG, LOG_INFO, LOG_WARN, LOG_ERROR, LOG_FATAL };
 
-#ifdef SYSTEM_DEBUG
-  #define LOG_DEBUG(fmt, args...) printf("DEBUG " fmt "\n", ##args)
-#else
-  #define LOG_DEBUG(...) /* Don't do anything */
+#define log_trace(...) logging(LOG_TRACE, __FILE__, __VA_ARGS__)
+#define log_debug(...) logging(LOG_DEBUG, __FILE__, __VA_ARGS__)
+#define log_info(...)  logging(LOG_INFO,  __FILE__, __VA_ARGS__)
+#define log_warn(...)  logging(LOG_WARN,  __FILE__, __VA_ARGS__)
+#define log_error(...) logging(LOG_ERROR, __FILE__, __VA_ARGS__)
+#define log_fatal(...) logging(LOG_FATAL, __FILE__, __VA_ARGS__)
+#define LOGGING_MAX_LINE 80
+
+void log_set_level(int level);
+void log_set_quiet(int enable);
+
+void logging(int level, const char *tag, const char *fmt, ...);
+
 #endif
-
-#define LOG_INFO(fmt, args...) printf("INFO  " fmt "\n", ##args)
-
-#define LOG_WARNING(fmt, args...) printf("WARN  " fmt "\n", ##args)
-
-#define LOG_ERROR(fmt, args...) printf("ERROR " fmt "\n", ##args)
-
-#define DEBUG_MEMORY

@@ -10,7 +10,10 @@
         "system.h": "c",
         "js_engine.h": "c",
         "multiboot2.h": "c",
-        "console.h": "c"
+        "console.h": "c",
+        "string.h": "c",
+        "page_allocator.h": "c",
+        "platform.h": "c"
     },
     "python.pythonPath": "/usr/local/bin/python3"
 }

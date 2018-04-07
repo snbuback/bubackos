@@ -1,3 +1,4 @@
+// Very basic terminal functions
 #include <kernel/console.h>
 #include <stdlib.h>
 #include <string.h>
@@ -7,6 +8,7 @@ volatile size_t terminal_column;
 volatile uint8_t terminal_color;
 
 void terminal_initialize(void) {
+	console__clear();
 	terminal_row = 0;
 	terminal_column = 0;
 	terminal__set_color(15, 0);
