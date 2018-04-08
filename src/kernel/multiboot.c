@@ -4,6 +4,7 @@
 #include <stddef.h>
 #include <stdint.h>
 #include <kernel/platform.h>
+#include <algorithms/node.h>
 
 /*  Check if MAGIC is valid and print the Multiboot information structure
   pointed by ADDR. */
@@ -24,6 +25,11 @@ int multiboot_parser(uint64_t magic, uintptr_t addr, platform_t *platform)
         log_error("Unaligned mbi: %p", (void*) addr);
         return -1;
     }
+
+    // prepare platform->memory_info
+    platform->memory_info.total_memory = 0;
+    platform->memory_info.memory_segments = NULL;
+
     log_trace("Announced mbi size 0x%x", *(unsigned*) addr);
     for (tag = (struct multiboot_tag*)(addr + 8);
          tag->type != MULTIBOOT_TAG_TYPE_END;
@@ -47,7 +53,7 @@ int multiboot_parser(uint64_t magic, uintptr_t addr, platform_t *platform)
             log_trace("mem_lower = %dKB, mem_upper = %dKB",
                 ((struct multiboot_tag_basic_meminfo*)tag)->mem_lower,
                 ((struct multiboot_tag_basic_meminfo*)tag)->mem_upper);
-            platform->total_memory = ((((struct multiboot_tag_basic_meminfo*)tag)->mem_upper) + ((struct multiboot_tag_basic_meminfo*)tag)->mem_lower) * 1024;
+            platform->memory_info.total_memory = ((((struct multiboot_tag_basic_meminfo*)tag)->mem_upper) + ((struct multiboot_tag_basic_meminfo*)tag)->mem_lower) * 1024;
             break;
         case MULTIBOOT_TAG_TYPE_BOOTDEV:
             log_trace("Boot device 0x%x,%u,%u",
@@ -60,13 +66,23 @@ int multiboot_parser(uint64_t magic, uintptr_t addr, platform_t *platform)
 
             for (mmap = ((struct multiboot_tag_mmap*)tag)->entries;
                  (multiboot_uint8_t*)mmap < (multiboot_uint8_t*)tag + tag->size;
-                 mmap = (multiboot_memory_map_t*)((unsigned long)mmap + ((struct multiboot_tag_mmap*)tag)->entry_size))
-                log_trace(
-                    " base_addr=0x%x%x,"
-                    " length=0x%x%x (%dMB), 0x%x",
-                    (unsigned)(mmap->addr >> 32), (unsigned)(mmap->addr & 0xffffffff),
-                    (unsigned)(mmap->len >> 32), (unsigned)(mmap->len & 0xffffffff),
-                    (unsigned)(mmap->len / 1024 / 1024), (unsigned)mmap->type);
+                 mmap = (multiboot_memory_map_t*)((unsigned long)mmap + ((struct multiboot_tag_mmap*)tag)->entry_size)) {
+                // log_trace(
+                //     " base_addr=0x%x%x,"
+                //     " length=0x%x%x (%dMB), 0x%x",
+                //     (unsigned)(mmap->addr >> 32), (unsigned)(mmap->addr & 0xffffffff),
+                //     (unsigned)(mmap->len >> 32), (unsigned)(mmap->len & 0xffffffff),
+                //     (unsigned)(mmap->len / 1024 / 1024), (unsigned)mmap->type);
+                if (mmap->type == MULTIBOOT_MEMORY_AVAILABLE) {
+                    continue;
+                }
+                Node *new_node = list_new(mmap);
+                if (platform->memory_info.memory_segments == NULL) {
+                    platform->memory_info.memory_segments = new_node;
+                } else {
+                    list_append(platform->memory_info.memory_segments, new_node);
+                }
+            }
         } break;
         case MULTIBOOT_TAG_TYPE_FRAMEBUFFER: {
             multiboot_uint32_t color;

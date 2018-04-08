@@ -68,7 +68,7 @@ static void need_scroll() {
 
 static inline void newline() {
 	terminal_column = 0;
-	terminal_row++;
+	++terminal_row;
 	need_scroll();
 }
 

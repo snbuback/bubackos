@@ -4,14 +4,15 @@
 #include <stdlib.h>
 #include <sys/config.h>
 #include <sys/stat.h>
+#include <errno.h>
 #include <kernel/page_allocator.h>
 #include <kernel/console.h>
 #include <kernel/logging.h>
+#include <kernel/platform.h>
 
 // #define DEBUG_MEMORY
 #pragma GCC diagnostic ignored "-Wunused-parameter"
 
-static uint8_t mem[500*1024];
 size_t pos = 0;
 
 void * sbrk (ptrdiff_t incr)
@@ -24,7 +25,9 @@ void * sbrk (ptrdiff_t incr)
 #endif
 
   pos += incr;
-  uintptr_t addr = (uintptr_t) (mem + pos);
+  uintptr_t addr = (uintptr_t) (platform.memory_info.heap_address + pos);
+
+  // FIXME mark pages as allocated
 
 #ifdef DEBUG_MEMORY
   console_print(" bytes at 0x");
@@ -89,4 +92,12 @@ int* __errno(void) {
 	return &error_no;
 }
 
+int kill(int pid, int sig) {
+  errno = EINVAL;
+  return -1;
+}
+
+int getpid(void) {
+  return 1;
+}
 

@@ -26,7 +26,7 @@ static jerry_value_t platform_get_total_memory(const jerry_value_t func_value,
                  const jerry_length_t args_cnt)
 {
   platform_t *platform = get_platform_from_jsobject(this_value);
-  return jerry_create_number(platform->total_memory);
+  return jerry_create_number(platform->memory_info.total_memory);
 }
 
 static jerry_value_t platform_logging(const jerry_value_t func_value, const jerry_value_t this_value, const jerry_value_t *args_p, const jerry_length_t args_cnt)
