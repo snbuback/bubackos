@@ -1,6 +1,0 @@
-[submodule "libc"]
-	path = libc
-	url = git://sourceware.org/git/newlib-cygwin.git
-[submodule "jerryscript"]
-	path = jerryscript
-	url = https://github.com/jerryscript-project/jerryscript.git
