@@ -28,15 +28,15 @@ tools: tools like create iso image
 build-tools: gcc and binutils to build the kernel
 
 ## Debugging
-make run-debug
 
-* In docker:
+To start a qemu in debug mode
 
-gdb
+    make run-debug
 
-    file build/kernel.bin 
-    target remote docker.for.mac.localhost:1234
-    break kernel_main
+To start the gdb inside the docker
+
+    make gdb
+
 
 ## Useful qemu commands
 * info mem - show the active virtual memory mappings

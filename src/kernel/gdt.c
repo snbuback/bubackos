@@ -34,7 +34,6 @@ typedef struct
 } __attribute__((packed)) gdt_ptr;
 
 gdt_entry gdt[GDT_MAXIMUM_SIZE];
-gdt_ptr gdt_address;
 volatile uint16_t last_id = 1;
 
 /* Setup a descriptor in the Global Descriptor Table */
@@ -58,21 +57,26 @@ uint16_t gdt_set_gate(uint64_t base, uint32_t limit, uint8_t type, uint8_t ring)
     /* Finally, set up the granularity and access flags */
     gdt[num].available = 1;
     gdt[num].longmode = 1; // 64 bits
-    gdt[num].op_size = 0; // 64 bits
+    gdt[num].op_size = 0; // 64 bits (in the manual said should set as 16 bit when in longmode)
     gdt[num].granularity = 1; // limit is 4kb multiples
-    gdt[num].type = type & 0x0F;
-    gdt[num].ring = ring & 0x03;
+    gdt[num].type = type;
+    gdt[num].ring = ring;
     gdt[num].present = 1;
     return num;
 }
 
-void _gdt_flush(void)
+/* Setup the GDT pointer and limit */
+void gdt_flush(void)
 {
-	log_debug("Flushing GDT table");
-    /* Setup the GDT pointer and limit */
+    gdt_ptr gdt_address;
     gdt_address.limit = (sizeof(gdt_entry) * last_id) - 1;
     gdt_address.base = (uint64_t)&gdt;
-	asm volatile("lgdt %0" : : "m" (gdt_address));
+	log_debug("Flushing GDT table at %p, size of %d", gdt_address.base, gdt_address.limit);
+	asm volatile(
+        "lgdt %0"
+        :   // output operands
+        : "m" (gdt_address) //input operands
+    );
 }
 
 /** Should be called by main.  This will setup the special GDT
@@ -85,26 +89,15 @@ void gdt_install()
     /* Clear GDT table. Also insert the NULL GDT */
     memset(gdt, 0, sizeof(gdt));
 
-    /* The second entry is our Code Segment.  The base address
-	 * is 0, the limit is 4 gigabytes, it uses 4 kilobyte
-	 * granularity, uses 32-bit opcodes, and is a Code Segment
-	 * descriptor.  Please check the table above in the tutorial
-	 * in order to see exactly what each value means */
-    gdt_set_gate(0, GDT_MAXIMUM_MEMORY, GDT_TYPE_SEG_CODE_EXRD, GDT_RING_SYSTEM);
-
-    /* The third entry is our Data Segment.  It's exactly the
-	 * same as our code segment, but the descriptor type in
-	 * this entry's access byte says it's a Data Segment */
-    gdt_set_gate(0, GDT_MAXIMUM_MEMORY, GDT_TYPE_SEG_DATA_RDWR, GDT_RING_SYSTEM);
-
-    /* Install the user mode segments into the GDT */
-    gdt_set_gate(0, GDT_MAXIMUM_MEMORY, GDT_TYPE_SEG_CODE_EXRD, GDT_RING_USER);
-    gdt_set_gate(0, GDT_MAXIMUM_MEMORY, GDT_TYPE_SEG_CODE_EXRD, GDT_RING_USER);
+    gdt_set_gate(0x0, GDT_MAXIMUM_MEMORY, GDT_TYPE_SEG_CODE_EXRD, GDT_RING_SYSTEM);
+    gdt_set_gate(0x0, GDT_MAXIMUM_MEMORY, GDT_TYPE_SEG_DATA_RDWR, GDT_RING_SYSTEM);
+    gdt_set_gate(0x0, GDT_MAXIMUM_MEMORY, GDT_TYPE_SEG_CODE_EXRD, GDT_RING_USER);
+    gdt_set_gate(0x0, GDT_MAXIMUM_MEMORY, GDT_TYPE_SEG_DATA_RDWR, GDT_RING_USER);
 
     /* Install the TSS into the GDT */
     //tss_install(5, 0x10, 0x0);
 
     /* Flush our the old GDT / TSS and install the new changes! */
-    _gdt_flush();
+    gdt_flush();
     //_tss_flush();
 }

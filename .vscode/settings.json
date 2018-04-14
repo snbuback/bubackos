@@ -16,7 +16,8 @@
         "platform.h": "c",
         "node.h": "c",
         "stdbool.h": "c",
-        "gdt.h": "c"
+        "gdt.h": "c",
+        "idt.h": "c"
     },
     "python.pythonPath": "/usr/local/bin/python3"
 }

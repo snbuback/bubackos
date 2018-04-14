@@ -12,6 +12,8 @@ void bubackos_init(platform_t platform) {
 
   js_engine_eval("OS.start()");
 
+  // __asm__("sti");
+
   log_info("shuting down");
   platform.halt();
 

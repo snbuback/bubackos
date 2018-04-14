@@ -6,7 +6,7 @@
         {
             "label": "Run",
             "type": "shell",
-            "command": "docker run --rm -v /Users/snbuback/Projects/bubackos:/Users/snbuback/Projects/bubackos -w /Users/snbuback/Projects/bubackos bubackos make && make run-debug",
+            "command": "docker run --rm -v /Users/snbuback/Projects/bubackos:/Users/snbuback/Projects/bubackos -w /Users/snbuback/Projects/bubackos bubackos make && make run",
             "presentation": {
                 "reveal": "always",
                 "panel": "dedicated"

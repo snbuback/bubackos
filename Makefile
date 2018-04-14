@@ -64,14 +64,17 @@ loader: loader/boot/grub/grub.cfg $(kernel)
 	@$(GRUB-MKRESCUE) -o $(BUILD_DIR)/loader.iso $(LOADER_BUILD_DIR)
 
 run:
-	@qemu-system-x86_64 -m 128 -cpu Nehalem -cdrom $(BUILD_DIR)/loader.iso -no-reboot -no-shutdown -monitor stdio
+	@qemu-system-x86_64 -m 128 -cpu Nehalem -cdrom $(BUILD_DIR)/loader.iso -no-reboot -no-shutdown -monitor stdio -d cpu_reset,guest_errors,unimp,int,page
 
 run-debug:
-	#in_asm,
-	@qemu-system-x86_64 -m 128 -cpu Nehalem -cdrom $(BUILD_DIR)/loader.iso -no-reboot -no-shutdown -monitor stdio -s -d cpu_reset,guest_errors,unimp,int,page
+	@qemu-system-x86_64 -m 128 -cpu Nehalem -cdrom $(BUILD_DIR)/loader.iso -no-reboot -no-shutdown -monitor stdio -S -s -d cpu_reset,guest_errors,unimp,int,page,in_asm
 
 shell:
 	@$(CONTAINER) bash
+
+gdb:
+	@$(CONTAINER) gdb -iex 'file build/kernel.bin' -iex 'target remote docker.for.mac.localhost:1234' -iex 'break intel_start'  -iex 'continue'
+
 test:
 	@$(CONTAINER) test/run.py
 

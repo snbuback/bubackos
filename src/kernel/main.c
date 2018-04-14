@@ -5,11 +5,13 @@
 #include <kernel/bubackos.h>
 #include <kernel/console.h>
 #include <kernel/gdt.h>
+// #include <kernel/idt.h>
 
 platform_t platform;
 
 static void __halt(void) {
-	asm("hlt");
+	for (;;);
+	// asm("hlt");
 }
 
 static void platform_logging(int log_level, const char* tag, const char* text) {
@@ -23,6 +25,7 @@ void intel_start(uint64_t magic, uintptr_t addr)
 	log_set_level(LOG_DEBUG);
 
 	gdt_install();
+	// idt_install();
 
 	// console
 	platform.console.width = 80;
@@ -66,7 +69,6 @@ void intel_start(uint64_t magic, uintptr_t addr)
 
 	// reinitialize the head to the next page available
 	// FIXME Pagination needs work to implement this
-
 
 	bubackos_init(platform);
 }
