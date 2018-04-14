@@ -14,7 +14,9 @@
         "string.h": "c",
         "page_allocator.h": "c",
         "platform.h": "c",
-        "node.h": "c"
+        "node.h": "c",
+        "stdbool.h": "c",
+        "gdt.h": "c"
     },
     "python.pythonPath": "/usr/local/bin/python3"
 }

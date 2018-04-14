@@ -38,6 +38,10 @@ gdb
     target remote docker.for.mac.localhost:1234
     break kernel_main
 
+## Useful qemu commands
+* info mem - show the active virtual memory mappings
+* info tlb - show virtual to physical memory mappings
+* info registers
 
 ## References
 * https://wiki.osdev.org/Main_Page

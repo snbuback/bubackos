@@ -4,6 +4,7 @@
 #include <kernel/multiboot2.h>
 #include <kernel/bubackos.h>
 #include <kernel/console.h>
+#include <kernel/gdt.h>
 
 platform_t platform;
 
@@ -19,7 +20,9 @@ void intel_start(uint64_t magic, uintptr_t addr)
 {
 	// is necessary to initialize the terminal soon as possible to enable basic logging function
 	console_initialize();
-	log_set_level(LOG_TRACE);
+	log_set_level(LOG_DEBUG);
+
+	gdt_install();
 
 	// console
 	platform.console.width = 80;
