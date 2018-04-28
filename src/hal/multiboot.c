@@ -1,9 +1,9 @@
-#include <kernel/logging.h>
-#include <kernel/multiboot2.h>
+#include <core/logging.h>
+#include <hal/multiboot2.h>
 #include <stdbool.h>
 #include <stddef.h>
 #include <stdint.h>
-#include <kernel/platform.h>
+#include <core/platform.h>
 #include <algorithms/node.h>
 
 /*  Check if MAGIC is valid and print the Multiboot information structure

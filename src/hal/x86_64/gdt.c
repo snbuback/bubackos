@@ -1,10 +1,10 @@
 #include <stdbool.h>
 #include <string.h>
 #include <stdlib.h>
-#include <kernel/configuration.h>
-#include <kernel/logging.h>
-#include <kernel/gdt.h>
-#include <kernel/tss.h>
+#include <core/configuration.h>
+#include <core/logging.h>
+#include <hal/gdt.h>
+#include <hal/tss.h>
 
 #pragma GCC diagnostic ignored "-Wpointer-to-int-cast"
 

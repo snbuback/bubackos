@@ -22,7 +22,7 @@
 #ifndef MULTIBOOT_HEADER
 #define MULTIBOOT_HEADER 1
 #include <stdint.h>
-#include <kernel/platform.h>
+#include <core/platform.h>
 
 /*  How many bytes from the start of the file we search for the header. */
 #define MULTIBOOT_SEARCH                        32768

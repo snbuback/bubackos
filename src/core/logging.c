@@ -1,5 +1,5 @@
-#include <kernel/console.h>
-#include <kernel/logging.h>
+#include <hal/console.h>
+#include <core/logging.h>
 #include <stdarg.h>
 #include <stdio.h>
 #include <stdlib.h>

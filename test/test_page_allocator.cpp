@@ -1,7 +1,7 @@
 #include <stddef.h>
 #include <unistd.h>
-#include <kernel/configuration.h>
-#include <kernel/page_allocator.h>
+#include <core/configuration.h>
+#include <core/page_allocator.h>
 
 #include "src/kernel/page_allocator.cpp"
 

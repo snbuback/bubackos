@@ -1,7 +1,7 @@
 // Very basic terminal functions
 #include <stdlib.h>
 #include <string.h>
-#include <kernel/console.h>
+#include <hal/console.h>
 
 volatile size_t terminal_row;
 volatile size_t terminal_column;

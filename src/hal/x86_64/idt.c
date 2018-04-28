@@ -1,8 +1,8 @@
 #include <stdint.h>
 #include <string.h>
-#include <kernel/gdt.h>
-#include <kernel/idt.h>
-#include <kernel/logging.h>
+#include <hal/gdt.h>
+#include <hal/idt.h>
+#include <core/logging.h>
 
 typedef enum
 {

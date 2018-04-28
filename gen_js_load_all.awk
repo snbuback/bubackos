@@ -1,5 +1,5 @@
 BEGIN {
-    print "#include <kernel/js_engine.h>"
+    print "#include <javascript/js_engine.h>"
     print "void gen_load_all_modules() {"
 }
 

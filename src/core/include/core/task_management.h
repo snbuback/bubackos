@@ -1,5 +1,5 @@
 #include <stdint.h>
-#include <kernel/memory_allocator.h>
+#include <core/memory_allocator.h>
 
 typedef uint64_t task_handler_t;
 

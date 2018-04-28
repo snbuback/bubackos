@@ -1,5 +1,5 @@
-#include <kernel/logging.h>
-#include <kernel/js_engine.h>
+#include <core/logging.h>
+#include <javascript/js_engine.h>
 
 // generated automatically during the build stage
 extern void gen_load_all_modules(void);

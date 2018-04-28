@@ -1,8 +1,8 @@
 #include <string.h>
 #include <stdlib.h>
-#include <kernel/configuration.h>
-#include <kernel/page_allocator.h>
-#include <kernel/logging.h>
+#include <core/configuration.h>
+#include <core/page_allocator.h>
+#include <core/logging.h>
 
 size_t total_of_pages;
 size_t total_memory;

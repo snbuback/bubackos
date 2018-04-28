@@ -1,7 +1,7 @@
 #ifndef __KERNEL_JS_ENGINE_H
 #define __KERNEL_JS_ENGINE_H
 #include <stdbool.h>
-#include <kernel/platform.h>
+#include <core/platform.h>
 
 bool js_engine_initialize(platform_t *platform);
 bool js_engine_module_load(const char* module_name, const char* source_code, size_t size);

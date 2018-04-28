@@ -5,10 +5,10 @@
 #include <sys/config.h>
 #include <sys/stat.h>
 #include <errno.h>
-#include <kernel/page_allocator.h>
-#include <kernel/console.h>
-#include <kernel/logging.h>
-#include <kernel/platform.h>
+#include <core/page_allocator.h>
+#include <hal/console.h>
+#include <core/logging.h>
+#include <core/platform.h>
 
 // #define DEBUG_MEMORY
 #pragma GCC diagnostic ignored "-Wunused-parameter"

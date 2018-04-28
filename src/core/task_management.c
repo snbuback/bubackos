@@ -1,7 +1,7 @@
 #include <stdbool.h>
-#include <kernel/logging.h>
-#include <kernel/task_management.h>
-#include <kernel/configuration.h>
+#include <core/logging.h>
+#include <core/task_management.h>
+#include <core/configuration.h>
 
 task_t tasks[SYSTEM_LIMIT_OF_TASKS];
 volatile task_handler_t last_task_handler = 0;

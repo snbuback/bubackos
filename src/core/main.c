@@ -1,11 +1,11 @@
-#include <kernel/logging.h>
-#include <kernel/platform.h>
-#include <kernel/page_allocator.h>
-#include <kernel/multiboot2.h>
-#include <kernel/bubackos.h>
-#include <kernel/console.h>
-#include <kernel/gdt.h>
-#include <kernel/idt.h>
+#include <core/logging.h>
+#include <core/platform.h>
+#include <core/page_allocator.h>
+#include <hal/multiboot2.h>
+#include <javascript/bubackos.h>
+#include <hal/console.h>
+#include <hal/gdt.h>
+#include <hal/idt.h>
 
 platform_t platform;
 
