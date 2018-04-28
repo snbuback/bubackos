@@ -118,10 +118,14 @@ static inline void outb(uint16_t port, uint8_t val)
      * %1 expands to %dx because  port  is a uint16_t.  %w1 could be used if we had the port number a wider C type */
 }
 
-void interrupt_handler(uint64_t number1, uint64_t number2)
+void interrupt_handler(uint64_t interrupt, uint64_t param)
 {
-    log_info("Interruption %d (0x%x) / (%d) 0x%x generated", number1, number1, number2, number2);
-    outb(0x70, inb(0x70)&0x7F);
+    if (interrupt == 8) {
+        // timer
+        outb(0x70, inb(0x70)&0x7F);
+    } else {
+        log_info("Interruption %d (0x%x) / (%d) 0x%x generated", interrupt, interrupt, param, param);
+    }
     return;
 }
 
