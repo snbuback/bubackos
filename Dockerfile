@@ -29,4 +29,11 @@ RUN cd /tools && \
     ./build-jerryscript.sh ${JERRYSCRIPT_VERSION} && \
     rm -rf ${BUILD_DIR}
 
-RUN apt-get -qq -y install gawk
+# Improve
+RUN apt-get -qq -y install gawk openjdk-8-jdk
+
+# Initialize gradew
+ENV GRADLE_OPTS=-Dorg.gradle.daemon=false
+ADD settings.gradle gradlew /tools/builder/
+ADD gradle /tools/builder/gradle/
+RUN cd /tools/builder/ && chmod +x ./gradlew && ls -la ; ./gradlew -version
