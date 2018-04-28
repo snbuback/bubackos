@@ -1,49 +1,22 @@
-#include <kernel/logging.h>
-#include <kernel/gdt.h>
 #include <stdbool.h>
 #include <string.h>
+#include <stdlib.h>
+#include <kernel/configuration.h>
+#include <kernel/logging.h>
+#include <kernel/gdt.h>
+#include <kernel/tss.h>
 
 #pragma GCC diagnostic ignored "-Wpointer-to-int-cast"
 
-/* Defines a GDT entry.  We say packed, because it prevents the
- * compiler from doing things that it thinks is best, i.e.
- * optimization, etc. */
-
-typedef struct {
-    unsigned limit_0_15 : 16;
-    unsigned base_0_15 : 16;
-    unsigned base_16_23 : 8;
-    unsigned type : 5; // includes the type and the next bit and is 1 only for code/data segments
-    unsigned ring : 2;
-    unsigned present : 1;
-    unsigned limit_16_19 : 4;
-    unsigned available : 1;
-    unsigned longmode : 1;
-    unsigned op_size : 1;
-    unsigned granularity : 1;
-    unsigned base_24_31 : 8;
-    unsigned base_32_63 : 32;
-    unsigned : 32;
-} __attribute__((packed)) gdt_entry;
-
-/* Special pointer which includes the limit: The max bytes taken up by the GDT, minus 1.*/
-typedef struct
-{
-    uint16_t limit;
-    uint64_t base;
-} __attribute__((packed)) gdt_ptr;
-
 gdt_entry gdt[GDT_MAXIMUM_SIZE];
-volatile uint16_t last_id = 1;
+tss_entry_t tss_entry;
 
 /* Setup a descriptor in the Global Descriptor Table */
-uint16_t gdt_set_gate(uint64_t base, uint32_t limit, uint8_t type, uint8_t ring)
+static uint16_t gdt_set_gate(uint16_t num, uint64_t base, uint32_t limit, uint8_t type, uint8_t ring)
 {
+    // log_debug("Installing GDT %d at %p sizeof %x type %x ring %d", num, base, limit, type, ring);
     // this code only works for 64 bits GDT. Also granulatiry if always 1, that means limit are multiples of 4kb
     limit = limit >> 12;
-
-    // next available entry
-    uint16_t num = last_id++;
 
     gdt[num].base_0_15 = (base & 0xFFFF);
     gdt[num].base_16_23 = (base >> 16) & 0xFF;
@@ -65,39 +38,31 @@ uint16_t gdt_set_gate(uint64_t base, uint32_t limit, uint8_t type, uint8_t ring)
     return num;
 }
 
-/* Setup the GDT pointer and limit */
-void gdt_flush(void)
-{
-    gdt_ptr gdt_address;
-    gdt_address.limit = (sizeof(gdt_entry) * last_id) - 1;
-    gdt_address.base = (uint64_t)&gdt;
-	log_debug("Flushing GDT table at %p, size of %d", gdt_address.base, gdt_address.limit);
-	asm volatile(
-        "lgdt %0"
-        :   // output operands
-        : "m" (gdt_address) //input operands
-    );
+extern uintptr_t stack_end;
+static void tss_set(tss_entry_t *tss) {
+    log_info("TSS installed at %p size 0x%x", &tss, sizeof *tss);
+    tss->rsp0 = (uint64_t) malloc(SYSTEM_STACKSIZE);
+    tss->rsp1 = (uint64_t) malloc(SYSTEM_STACKSIZE);
+    tss->rsp2 = (uint64_t) malloc(SYSTEM_STACKSIZE);
 }
 
-/** Should be called by main.  This will setup the special GDT
- * pointer, set up the 6 entries in our GDT, and then finally
- * call gdt_flush() in our assembler file in order to tell
- * the processor where the new GDT is and update the new segment
- * registers. */
 void gdt_install()
 {
     /* Clear GDT table. Also insert the NULL GDT */
     memset(gdt, 0, sizeof(gdt));
 
-    gdt_set_gate(0x0, GDT_MAXIMUM_MEMORY, GDT_TYPE_SEG_CODE_EXRD, GDT_RING_SYSTEM);
-    gdt_set_gate(0x0, GDT_MAXIMUM_MEMORY, GDT_TYPE_SEG_DATA_RDWR, GDT_RING_SYSTEM);
-    gdt_set_gate(0x0, GDT_MAXIMUM_MEMORY, GDT_TYPE_SEG_CODE_EXRD, GDT_RING_USER);
-    gdt_set_gate(0x0, GDT_MAXIMUM_MEMORY, GDT_TYPE_SEG_DATA_RDWR, GDT_RING_USER);
-
-    /* Install the TSS into the GDT */
-    //tss_install(5, 0x10, 0x0);
+    gdt_set_gate(GDT_ENTRY_KERNEL_CS, 0x0, GDT_MAXIMUM_MEMORY, GDT_TYPE_SEG_CODE_EXRD, GDT_RING_SYSTEM);
+    gdt_set_gate(GDT_ENTRY_KERNEL_DS, 0x0, GDT_MAXIMUM_MEMORY, GDT_TYPE_SEG_DATA_RDWR, GDT_RING_SYSTEM);
+    gdt_set_gate(GDT_ENTRY_USER_CS, 0x0, GDT_MAXIMUM_MEMORY, GDT_TYPE_SEG_CODE_EXRD, GDT_RING_USER);
+    gdt_set_gate(GDT_ENTRY_USER_DS, 0x0, GDT_MAXIMUM_MEMORY, GDT_TYPE_SEG_DATA_RDWR, GDT_RING_USER);
+    gdt_set_gate(GDT_ENTRY_TSS, (uint64_t) &tss_entry, sizeof(tss_entry), GDT_TYPE_TSS_AVAILABLE, GDT_RING_SYSTEM);
+    tss_set(&tss_entry);
 
     /* Flush our the old GDT / TSS and install the new changes! */
-    gdt_flush();
-    //_tss_flush();
+    uint16_t gdt_limit = (sizeof(gdt_entry) * GDT_MAXIMUM_SIZE) - 1;
+	// log_debug("Flushing GDT table at %p, size of %x", &gdt, gdt_limit);
+    gdt_flush((uintptr_t) &gdt, gdt_limit);
+
+	// log_debug("Flushing TSS table using entry %d", GDT_ENTRY_TSS);
+    tss_flush(GDT_SEGMENT(GDT_ENTRY_TSS));
 }

@@ -86,15 +86,26 @@ boot:
   mov eax, cr0
   or eax, 0x80000000
   mov cr0, eax
-
   ; Load Global Descriptor Table (outdated access control, but needs to be set)
   lgdt [gdt_hdr]
 
-  ; Jump into 64-bit zone.
-  jmp 0x08:k_64_bits
+  ; Adjust all register segment to a value compatible with 64 bits GDT table.
+  ; This is very important since in 64 mode you can't change the CS register anymore (there is no segment in 64bits)
+
+  ; adjust data segment
+  mov eax, 0x20
+  mov ds, eax
+  mov es, eax
+  mov ss, eax
+  mov fs, eax
+  mov gs, eax
+
+  ; Jump into 64-bit zone. Adjust cs segment
+  jmp 0x10:k_64_bits
 
 bits 64
 k_64_bits:
+
 
   mov qword rdi, [multiboot_info]
   mov qword rsi, [multiboot_info+4]
@@ -103,7 +114,12 @@ k_64_bits:
 
   extern intel_start
   call intel_start
+	; xchgw %bx, %bx
+  sti
+
+loop:
   hlt                ; If so, halt.
+  jmp loop
 
 enable_sse:
   ;now enable SSE and the like
@@ -137,13 +153,15 @@ multiboot_info:
 %define RING0 0b10101001 ; Flags set: Granularity, 64-bit, Present, S; Ring=00
                    ; Note: Ring is determined by bits 1 and 2 (the only "00")
 
-; Global descriptor table (loaded by lgdt instruction)
+; Global descriptor table (loaded by lgdt instruction) - should be compatible with 64 bits table
 gdt_hdr:
   dw gdt_end - gdt - 1
   dd gdt
 gdt:
   GDT_ENTRY 0, 0, 0, 0
+  GDT_ENTRY 0, 0, 0, 0 ; need to compatibility with 64 bits table
   GDT_ENTRY 0, 0xffffff, RING0, EXECUTE_READ
+  GDT_ENTRY 0, 0, 0, 0 ; need to compatibility with 64 bits table
   GDT_ENTRY 0, 0xffffff, RING0, READ_WRITE
   ; You'd want to have entries for other rings here, if you were using them.
 gdt_end:

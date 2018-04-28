@@ -5,7 +5,7 @@
 #include <kernel/bubackos.h>
 #include <kernel/console.h>
 #include <kernel/gdt.h>
-// #include <kernel/idt.h>
+#include <kernel/idt.h>
 
 platform_t platform;
 
@@ -25,7 +25,7 @@ void intel_start(uint64_t magic, uintptr_t addr)
 	log_set_level(LOG_DEBUG);
 
 	gdt_install();
-	// idt_install();
+	idt_install();
 
 	// console
 	platform.console.width = 80;
@@ -71,4 +71,10 @@ void intel_start(uint64_t magic, uintptr_t addr)
 	// FIXME Pagination needs work to implement this
 
 	bubackos_init(platform);
+
+
+	// log_info("Calling int 8");
+	// asm volatile("int $0x8");
+
+	log_info("ready");
 }

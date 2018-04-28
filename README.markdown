@@ -37,6 +37,13 @@ To start the gdb inside the docker
 
     make gdb
 
+### Breakpoint in bochs
+
+Intel: ```xchg bx, bx```
+GAS: ```xchgw %bx, %bx```
+
+Requires parameter ```magic_break: enabled=1```
+
 
 ## Useful qemu commands
 * info mem - show the active virtual memory mappings
