@@ -33,7 +33,6 @@ RUN cd /tools && \
 RUN apt-get -qq -y install gawk openjdk-8-jdk
 
 # Initialize gradew
-ENV GRADLE_OPTS=-Dorg.gradle.daemon=false
 ADD settings.gradle gradlew /tools/builder/
 ADD gradle /tools/builder/gradle/
 RUN cd /tools/builder/ && chmod +x ./gradlew && ls -la ; ./gradlew -version
