@@ -1,5 +1,5 @@
-#ifndef __KERNEL_PLATFORM_H
-#define __KERNEL_PLATFORM_H
+#ifndef __HAL_PLATFORM_H
+#define __HAL_PLATFORM_H
 
 #include <stdint.h>
 #include <stdlib.h>
@@ -25,12 +25,6 @@ typedef struct {
 typedef struct {
     memory_info_t memory_info;
     text_console_t console;
-    void (*logging_func)(int log_level, const char* tag, const char* text);
-    void (*halt)(void);
-    // missing memory map
-    // missing context switch
 } platform_t;
-
-extern platform_t platform;
 
 #endif

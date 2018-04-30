@@ -1,9 +1,9 @@
-.globl boot
+.globl boot_hal
 
 #define DEBUGGER      xchgw %bx, %bx
 
 .text
-boot:
+boot_hal:
 .code32
   /* save grub parameters in the data section */
   mov     $stack_end, %ebp

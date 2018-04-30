@@ -5,10 +5,13 @@
 #include <stdlib.h>
 #include <string.h>
 
-static struct {
+typedef struct {
     int level;
     int quiet;
-} L;
+} logging_config_t;
+
+// The default values here are utilized by the HAL module during startup
+static logging_config_t L = { .level = LOG_WARN, .quiet = 0 };
 
 static const char* level_names[] = {
     "TRACE", "DEBUG", "INFO", "WARN", "ERROR", "FATAL"
@@ -53,4 +56,9 @@ void logging(int level, const char* tag, const char* fmt, ...)
 
         console_print(buf);
     }
+}
+
+void logging_init() {
+    log_set_level(LOG_DEBUG);
+    log_set_quiet(0);
 }

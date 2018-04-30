@@ -6,13 +6,14 @@
         {
             "label": "Run",
             "type": "shell",
-            "command": "docker run --rm -v /Users/snbuback/Projects/bubackos:/Users/snbuback/Projects/bubackos -w /Users/snbuback/Projects/bubackos bubackos make && make run",
+            "command": "make run",
             "presentation": {
                 "reveal": "always",
-                "panel": "dedicated"
+                "panel": "shared"
             },
             "problemMatcher": [
-                "$gcc", "$jshint"
+                "$gcc",
+                "$jshint"
             ]
         },
         {
@@ -25,7 +26,7 @@
         {
             "label": "Build",
             "type": "shell",
-            "command": "docker run --rm -v /Users/snbuback/Projects/bubackos:/Users/snbuback/Projects/bubackos -w /Users/snbuback/Projects/bubackos bubackos make",
+            "command": "make",
             "problemMatcher": [],
             "group": {
                 "kind": "build",

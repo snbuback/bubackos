@@ -8,12 +8,11 @@
 #include <core/page_allocator.h>
 #include <hal/console.h>
 #include <core/logging.h>
-#include <core/platform.h>
 
 // #define DEBUG_MEMORY
 #pragma GCC diagnostic ignored "-Wunused-parameter"
 
-size_t pos = 0;
+volatile uintptr_t pos = (uintptr_t) __ADDR_KERNEL_END + 1;
 
 void * sbrk (ptrdiff_t incr)
 {
@@ -25,7 +24,7 @@ void * sbrk (ptrdiff_t incr)
 #endif
 
   pos += incr;
-  uintptr_t addr = (uintptr_t) (platform.memory_info.heap_address + pos);
+  uintptr_t addr = (uintptr_t) (pos);
 
   // FIXME mark pages as allocated
 

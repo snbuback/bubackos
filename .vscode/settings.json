@@ -1,8 +1,5 @@
 {
     "files.associations": {
-        "*.inc": "cpp",
-        "memory_resource": "cpp",
-        "*.tcc": "cpp",
         "memory_allocator.h": "c",
         "logging.h": "c",
         "config.h": "c",

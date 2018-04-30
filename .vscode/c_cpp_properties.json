@@ -3,22 +3,22 @@
         {
             "name": "Mac",
             "includePath": [
-                "${workspaceRoot}/sysroot/gcc/include",
-                "${workspaceRoot}/sysroot/platform/include",
-                "${workspaceRoot}/src/include",
-                "${workspaceRoot}/src/arch/x86_64"
+                "${workspaceFolder}/sysroot/gcc/include",
+                "${workspaceFolder}/sysroot/platform/include",
+                "${workspaceFolder}/src/kernel/headers",
+                "${workspaceFolder}/kernel/src/kernel/headers"
             ],
             "defines": [],
             "intelliSenseMode": "clang-x64",
             "browse": {
                 "path": [
-                    "${workspaceRoot}"
+                    "${workspaceFolder}/kernel/src/kernel"
                 ],
                 "limitSymbolsToIncludedHeaders": true,
                 "databaseFilename": ""
             },
             "compilerPath": "/usr/bin/clang",
-            "cStandard": "c11",
+            "cStandard": "c99",
             "cppStandard": "c++17"
         }
     ],

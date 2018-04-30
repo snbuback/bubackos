@@ -1,4 +1,4 @@
-ENTRY(boot)
+ENTRY(boot_hal)
 
 __ADDR_KERNEL_BASE = 1M;
 

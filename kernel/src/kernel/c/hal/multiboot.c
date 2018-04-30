@@ -3,7 +3,7 @@
 #include <stdbool.h>
 #include <stddef.h>
 #include <stdint.h>
-#include <core/platform.h>
+#include <hal/platform.h>
 #include <algorithms/node.h>
 
 /*  Check if MAGIC is valid and print the Multiboot information structure
