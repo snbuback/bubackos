@@ -36,10 +36,11 @@ bool task_start(task_handler_t task_handler, void* start_code_address) {
 }
 
 void task_switch(task_handler_t task_handler) {
-  task_t* task = __get_task(task_handler);
+  log_debug("Switching to task %p", &task_handler);
+  // task_t* task = __get_task(task_handler);
 
-  _platform_task_switch(task->next_address);
-  return;
+  // _platform_task_switch(task->next_address);
+  // return;
 }
 
 void task_destroy(task_handler_t task_handler) {

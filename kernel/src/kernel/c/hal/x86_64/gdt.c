@@ -38,9 +38,8 @@ static uint16_t gdt_set_gate(uint16_t num, uint64_t base, uint32_t limit, uint8_
     return num;
 }
 
-extern uintptr_t stack_end;
 static void tss_set(tss_entry_t *tss) {
-    log_info("TSS installed at %p size 0x%x", &tss, sizeof *tss);
+    log_trace("TSS installed at %p size 0x%x", &tss, sizeof *tss);
     tss->rsp0 = (uint64_t) malloc(SYSTEM_STACKSIZE);
     tss->rsp1 = (uint64_t) malloc(SYSTEM_STACKSIZE);
     tss->rsp2 = (uint64_t) malloc(SYSTEM_STACKSIZE);
@@ -60,9 +59,9 @@ void gdt_install()
 
     /* Flush our the old GDT / TSS and install the new changes! */
     uint16_t gdt_limit = (sizeof(gdt_entry) * GDT_MAXIMUM_SIZE) - 1;
-	// log_debug("Flushing GDT table at %p, size of %x", &gdt, gdt_limit);
+	log_info("Flushing GDT table at %p, size of %x", &gdt, gdt_limit);
     gdt_flush((uintptr_t) &gdt, gdt_limit);
 
-	// log_debug("Flushing TSS table using entry %d", GDT_ENTRY_TSS);
+	log_debug("Flushing TSS table using entry %d", GDT_ENTRY_TSS);
     tss_flush(GDT_SEGMENT(GDT_ENTRY_TSS));
 }

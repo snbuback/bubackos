@@ -1,89 +1,25 @@
+/* About arguments here: https://www.nasm.us/doc/nasmdo11.html and http://cons.mit.edu/fa17/x86-64-architecture-guide.html*/
+/* Summary:
+Register order: RDI, RSI, RDX, RCX, R8, R9
+Return in RAX
+
+Register to save: RBX, RBP, and R12–R15
+
+func:
+	pushq	%rbp
+	movq	%rsp, %rbp
+  ...
+  leave
+  ret
+
+*/
+
 #define NUM_SAVED_REGS 15
 #define REGISTER_SIZE 	8
 
-	.text
-	.code64
+.text
+.code64
 	.extern interrupt_handler
-
-#
-	.global int_doublefault
-	.extern int_doublefault_handler
-int_doublefault:
-	call int_doublefault_handler
-	iretq
-
-	.global int_generalfault
-	.extern int_generalfault_handler
-int_generalfault:
-	call int_generalfault_handler
-	iretq
-
-	.global int_test
-	.extern hi
-int_test:
-
-	/* save registers */
-	/*push %rax
-	push %rcx
-	push %rdx
-	push %rsi
-	push %rdi
-	push %r8
-	push %r9
-	push %r10
-	push %r11*/
-
-	/*movq (9*8)(%rsp), %rsi
-	movq %rsp, %rdi
-	addq $(10*8), %rdi
-	subq $8, %rsp*/
-	call hi
-	/*add $8, %rsp*/
-
-	/* restore */
-	/*pop %r11
-	pop %r10
-	pop %r9
-	pop %r8
-	pop %rdi
-	pop %rsi
-	pop %rdx
-	pop %rcx
-	pop %rax*/
-
-/*	add $8, %rsp
-	add $8, %rsp
-	add $8, %rsp*/
-	xchgw %bx, %bx
-	iretq
-
-
-/*global InvalidTSS
-extern HandleIT
-InvalidTSS:
-	call HandleIT
-	iret
-
-global SegmentNotPresent
-extern HandleSNP
-SegmentNotPresent:
-	call HandleSNP
-	iret
-
-global GeneralProtectionFault
-extern HandleGPF
-GeneralProtectionFault:
-	call HandleGPF
-	iret
-
-global PageFault
-extern HandlePF
-PageFault:
-	mov eax, cr2
-	mov [regInfo], eax
-	call HandlePF
-	iret
-*/
 
 .macro interrupt num:req, errorcode=1
 .global intr\num
@@ -142,6 +78,14 @@ intr_handler:
 	movq	((NUM_SAVED_REGS+1)*REGISTER_SIZE)(%rsp), %rsi
 	call	interrupt_handler
 
+	# remove the interruption number and code
+	addq $(REGISTER_SIZE*2), %rsp
+
+	// ack int
+	movb $0x20, %al
+	outb %al, $0x20
+
+	// restore and return
 	popq %rdi;
 	popq %rsi;
 	popq %rbp;
@@ -157,11 +101,15 @@ intr_handler:
 	popq %rcx;
 	popq %rbx;
 	popq %rax;
-
-	# remove the interruption number and code
-	addq $(REGISTER_SIZE*2), %rsp
-	movb $0x20, %al
-	outb %al, $0x20
-	# iret restore rip, cs, eflags, rsp, ss
 	iretq
+
+/* void idt_flush(uintptr_t base, uint16_t limit); */
+.globl idt_flush
+idt_flush:
+  enter $10, $0
+  movq  %rsi, -10(%rbp)
+  movq  %rdi, -8(%rbp)
+  lidt (%rsp)
+  leave
+  ret
 

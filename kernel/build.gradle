@@ -47,7 +47,7 @@ model {
     }
     binaries {
         all {
-            cCompiler.args "-g", "-march=nehalem", "-std=gnu99", "-ffreestanding",  "-Wall", "-mno-red-zone", "-Wextra"
+            cCompiler.args "-g", "-march=nehalem", "-std=gnu99", "-ffreestanding",  "-Wall", "-Werror", "-mno-red-zone", "-Wextra"
             linker.args "-nostdlib", "-n", "-T", "src/kernel/c/hal/x86_64/linker.ld", "-L/usr/local/x86_64-elf/lib", "-ljerry-core", "-ljerry-ext", "-ljerry-port-default-minimal", "-lg", "-lm"
     }   }
 }

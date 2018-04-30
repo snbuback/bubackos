@@ -4,37 +4,6 @@
 #include <hal/idt.h>
 #include <core/logging.h>
 
-typedef enum
-{
-	TASK_GATE_286 = 0x5,
-	INTERRUPT_GATE_286 = 0x6,
-	TRAP_GATE_286 = 0x7,
-	INTERRUPT_GATE_386 = 0xE,
-	TRAP_GATE_386 = 0xF
-} enum_gate_type;
-
-
-/* Defines an IDT entry */
-typedef struct {
-    unsigned base_0_15 : 16;
-    unsigned segment : 16;
-    unsigned ist : 3;
-    unsigned : 5;
-    enum_gate_type type : 4;
-    unsigned : 1;
-    unsigned ring : 2;
-    unsigned present : 1;
-    unsigned base_16_31 : 16;
-    unsigned base_32_63 : 32;
-    unsigned : 32;
-} __attribute__((packed)) idt_entry;
-
-typedef struct
-{
-    uint16_t limit;
-    uint64_t base;
-} __attribute__((packed)) idt_ptr;
-
 /** Declare an IDT of 256 entries.  Although we will only use the
  * first 32 entries in this tutorial, the rest exists as a bit
  * of a trap.  If any undefined IDT entry is hit, it normally
@@ -60,32 +29,6 @@ void idt_set_gate(unsigned char num, uintptr_t base, enum_gate_type type)
     idt[num].present = 1;
 }
 
-bool are_interrupts_enabled()
-{
-    unsigned long flags;
-    asm volatile ( "pushf\n\t"
-                   "pop %0"
-                   : "=g"(flags) );
-    return flags & (1 << 9);
-}
-
-struct interrupt_frame {
-    uintptr_t ip;
-    uintptr_t cs;
-    uintptr_t flags;
-    uintptr_t sp;
-    uintptr_t ss;
-};
-
-void int_doublefault_handler() {
-    log_info("Double fault");
-}
-
-void int_generalfault_handler() {
-    log_info("General fault");
-    asm volatile ("cli; hlt;");
-}
-
 static inline uint8_t inb(uint16_t port)
 {
     uint8_t ret;
@@ -108,7 +51,7 @@ void interrupt_handler(uint64_t interrupt, uint64_t param)
 {
     if (interrupt == 8) {
         // timer
-        outb(0x70, inb(0x70)&0x7F);
+        log_debug("timer");
     } else {
         log_info("Interruption %d (0x%x) / (%d) 0x%x generated", interrupt, interrupt, param, param);
     }
@@ -118,7 +61,6 @@ void interrupt_handler(uint64_t interrupt, uint64_t param)
 /* Installs the IDT */
 void idt_install()
 {
-    /* Clear out the entire IDT, initializing it to zeros */
     log_debug("IDT Table at %p of size %d bytes", &idt, sizeof(idt));
 
     extern uintptr_t intr0; idt_set_gate(0, (uintptr_t)&intr0, INTERRUPT_GATE_386);
@@ -141,9 +83,5 @@ void idt_install()
     extern uintptr_t intr17; idt_set_gate(17, (uintptr_t)&intr17, INTERRUPT_GATE_386);
     extern uintptr_t intr18; idt_set_gate(18, (uintptr_t)&intr18, INTERRUPT_GATE_386);
 
-    idt_flush(&idt, sizeof(idt) - 1);
-}
-
-void hi() {
-    log_info("hi");
+    idt_flush((uintptr_t) &idt, sizeof(idt) - 1);
 }

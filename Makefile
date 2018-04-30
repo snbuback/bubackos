@@ -32,10 +32,10 @@ clean:
 # @find js -name \*.js | awk -f gen_js_load_all.awk > $@
 
 build:
-	@$(CONTAINER) ./gradlew --info build
+	@$(CONTAINER) ./gradlew build
 
 iso:
-	@$(CONTAINER) ./gradlew --info iso
+	@$(CONTAINER) ./gradlew iso
 
 run:
 	@qemu-system-x86_64 -m 128 -cpu Nehalem -cdrom $(BUILD_DIR)/bubackos.iso -no-reboot -no-shutdown -monitor stdio -d cpu_reset,guest_errors,unimp,page

@@ -1,5 +1,5 @@
-#ifndef __GDT_H
-#define __GDT_H
+#ifndef __HAL_GDT_H
+#define __HAL_GDT_H
 #include <stdint.h>
 #include <stdbool.h>
 
@@ -73,6 +73,8 @@ typedef struct {
 } __attribute__((packed)) gdt_entry;
 
 void gdt_install();
+
+// assembly functions
 void gdt_flush(uintptr_t base, uint16_t limit);
 void tss_flush(uint16_t gdt_entry_number);
 

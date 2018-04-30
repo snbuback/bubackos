@@ -17,7 +17,7 @@
 #define ASM_FILE        1
 #include <hal/multiboot2.h>
 
-.section        .multiboot2
+.section .multiboot2
 
         /*  Align 64 bits boundary. */
         .align  8
