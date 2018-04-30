@@ -35,6 +35,17 @@ gdt_flush:
   leave
   ret
 
+  .globl idt_flush
+/* void idt_flush(uintptr_t base, uint16_t limit); */
+idt_flush:
+  enter $10, $0
+  movq  %rsi, -10(%rbp)
+  movq  %rdi, -8(%rbp)
+  lidt (%rsp)
+  leave
+  ret
+
+
   .globl tss_flush
 /* void tss_flush(uint16_t gdt_entry_number); */
 tss_flush:

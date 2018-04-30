@@ -2,7 +2,7 @@
 #include <core/platform.h>
 #include <core/page_allocator.h>
 #include <hal/multiboot2.h>
-#include <javascript/bubackos.h>
+// #include <javascript/bubackos.h>
 #include <hal/console.h>
 #include <hal/gdt.h>
 #include <hal/idt.h>
@@ -20,13 +20,6 @@ static void platform_logging(int log_level, const char* tag, const char* text) {
 
 void intel_start(uint64_t magic, uintptr_t addr)
 {
-	// is necessary to initialize the terminal soon as possible to enable basic logging function
-	console_initialize();
-	log_set_level(LOG_DEBUG);
-
-	gdt_install();
-	idt_install();
-
 	// console
 	platform.console.width = 80;
 	platform.console.height = 25;
@@ -39,6 +32,10 @@ void intel_start(uint64_t magic, uintptr_t addr)
 	platform.halt = __halt;
 
 	platform.memory_info.heap_address = ((uintptr_t) __ADDR_KERNEL_END) + 1; // FIXME align
+
+	// is necessary to initialize the terminal soon as possible to enable basic logging function
+	console_initialize();
+	log_set_level(LOG_DEBUG);
 
 	uintptr_t stack_base = 0;
 	asm ("movq %%rbp, %0; "
@@ -67,10 +64,13 @@ void intel_start(uint64_t magic, uintptr_t addr)
 	// mark pages of the kernel
 	page_allocator_mark_as_system((uintptr_t) __ADDR_KERNEL_START, (size_t) __ADDR_KERNEL_END - (size_t) __ADDR_KERNEL_START);
 
+	gdt_install();
+	idt_install();
+
 	// reinitialize the head to the next page available
 	// FIXME Pagination needs work to implement this
 
-	bubackos_init(platform);
+	// bubackos_init(platform);
 
 
 	// log_info("Calling int 8");

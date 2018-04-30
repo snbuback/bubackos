@@ -1,0 +1,53 @@
+apply plugin: "c"
+apply plugin: "assembler"
+
+model {
+    platforms {
+        intel {
+            architecture "x86_64"
+        }
+    }
+    toolChains {
+        gcc(Gcc) {
+            eachPlatform {
+                assembler.executable = 'x86_64-elf-gcc'
+                assembler.withArguments { args ->
+                    args.remove "-x"  // this arguments is breaking the as
+                    args.remove "assembler"  // this arguments is breaking the as
+                    args << "-I/Users/snbuback/Projects/bubackos/kernel/src/kernel/headers"
+                    // args.remove "-m64"  // this arguments is breaking the linker
+                    // args << "-m32"
+                }
+                cCompiler.executable = 'x86_64-elf-gcc'
+                linker.executable = 'x86_64-elf-ld'
+                linker.withArguments { args ->
+                    args.remove "-m64"  // this arguments is breaking the linker
+                }
+            }
+        }
+    }
+    components {
+        kernel(NativeExecutableSpec) {
+            targetPlatform "intel"
+            sources {
+                asm {
+                    source {
+                        srcDirs "src/kernel/c"
+                        include "**/*.S"
+                    }
+                }
+                c {
+                    source {
+                        srcDirs "src/kernel/c"
+                        include "**/*.c"
+                    }
+                }
+            }
+        }
+    }
+    binaries {
+        all {
+            cCompiler.args "-g", "-march=nehalem", "-std=gnu99", "-ffreestanding",  "-Wall", "-mno-red-zone", "-Wextra"
+            linker.args "-nostdlib", "-n", "-T", "src/kernel/c/hal/x86_64/linker.ld", "-L/usr/local/x86_64-elf/lib", "-ljerry-core", "-ljerry-ext", "-ljerry-port-default-minimal", "-lg", "-lm"
+    }   }
+}

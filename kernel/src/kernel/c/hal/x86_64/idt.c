@@ -41,7 +41,7 @@ typedef struct
  * will caused an "Unhandled Interrupt" exception.  Any descriptor
  * for which the 'presence' bit is cleared (0) will generate an
  * "Unhandled Interrupt" exception */
-static idt_entry idt[256];
+static idt_entry idt[256] = {};
 
 /* Use this function to set an entry in the IDT.  A lot simpler
  * than twiddling with the GDT ;) */
@@ -67,20 +67,6 @@ bool are_interrupts_enabled()
                    "pop %0"
                    : "=g"(flags) );
     return flags & (1 << 9);
-}
-
-void idt_flush()
-{
-    idt_ptr idt_address;
-    /* Setup the GDT pointer and limit */
-    idt_address.limit = sizeof(idt) - 1;
-    idt_address.base = (uint64_t)&idt;
-
-    log_debug("Flushing IDT table at %p size of %d bytes (0x%x)", idt_address.base, idt_address.limit, idt_address.limit);
-
-    __asm__("lidt %0"
-            :
-            : "m"(idt_address));
 }
 
 struct interrupt_frame {
@@ -132,8 +118,8 @@ void interrupt_handler(uint64_t interrupt, uint64_t param)
 /* Installs the IDT */
 void idt_install()
 {
-    /* Clear out the entire IDT, initalizing it to zeros */
-    memset(idt, 0, sizeof(idt));
+    /* Clear out the entire IDT, initializing it to zeros */
+    log_debug("IDT Table at %p of size %d bytes", &idt, sizeof(idt));
 
     extern uintptr_t intr0; idt_set_gate(0, (uintptr_t)&intr0, INTERRUPT_GATE_386);
     extern uintptr_t intr1; idt_set_gate(1, (uintptr_t)&intr1, INTERRUPT_GATE_386);
@@ -155,7 +141,7 @@ void idt_install()
     extern uintptr_t intr17; idt_set_gate(17, (uintptr_t)&intr17, INTERRUPT_GATE_386);
     extern uintptr_t intr18; idt_set_gate(18, (uintptr_t)&intr18, INTERRUPT_GATE_386);
 
-    idt_flush();
+    idt_flush(&idt, sizeof(idt) - 1);
 }
 
 void hi() {

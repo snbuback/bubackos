@@ -4,3 +4,5 @@ dist
 sysroot
 gen_load_all_js_module.c
 .gradle
+.settings
+.project

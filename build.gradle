@@ -4,3 +4,17 @@
  * This is a general purpose Gradle build.
  * Learn how to create Gradle builds at https://guides.gradle.org/creating-new-gradle-builds/
  */
+allprojects {
+
+}
+
+subprojects {
+    version = '0.1'
+}
+
+task iso(type:Exec, dependsOn: ':kernel:build') {
+    description 'Build the kernel image'
+
+    commandLine "/bin/bash", "-c", "mkdir -p build/loader && cp -a loader/boot build/loader && cp kernel/build/exe/kernel/kernel build/loader/boot/kernel.bin && \
+    grub-mkrescue -o build/loader.iso build/loader"
+}

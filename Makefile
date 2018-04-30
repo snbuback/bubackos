@@ -61,11 +61,11 @@ gen_load_all_js_module: $(SRC_DIR)/loader/javascript/gen_load_all_js_module.c
 $(SRC_DIR)/loader/javascript/gen_load_all_js_module.c: gen_js_load_all.awk $(js_object_files)
 	@find js -name \*.js | awk -f gen_js_load_all.awk > $@
 
-loader: loader/boot/grub/grub.cfg $(kernel)
-	@mkdir -p $(LOADER_BUILD_DIR)
-	@cp -a $(LOADER_SRC_DIR)/boot $(LOADER_BUILD_DIR)
-	@cp -a $(kernel) $(LOADER_BUILD_DIR)/boot
-	@$(GRUB-MKRESCUE) -o $(BUILD_DIR)/loader.iso $(LOADER_BUILD_DIR)
+loader: loader/boot/grub/grub.cfg
+	mkdir -p $(LOADER_BUILD_DIR)
+	cp -a $(LOADER_SRC_DIR)/boot $(LOADER_BUILD_DIR)
+	cp -a $(kernel) $(LOADER_BUILD_DIR)/boot
+	$(GRUB-MKRESCUE) -o $(BUILD_DIR)/loader.iso $(LOADER_BUILD_DIR)
 
 run:
 	@qemu-system-x86_64 -m 128 -cpu Nehalem -cdrom $(BUILD_DIR)/loader.iso -no-reboot -no-shutdown -monitor stdio -d cpu_reset,guest_errors,unimp,page
@@ -77,7 +77,7 @@ shell:
 	@$(CONTAINER) bash
 
 gdb:
-	@$(CONTAINER) gdb -iex 'file build/kernel.bin' -iex 'target remote docker.for.mac.localhost:1234' -iex 'break intel_start'  -iex 'continue'
+	@$(CONTAINER) gdb -iex 'file build/loader/boot/kernel.bin' -iex 'target remote docker.for.mac.localhost:1234' -iex 'break intel_start'  -iex 'continue'
 
 test:
 	@$(CONTAINER) test/run.py

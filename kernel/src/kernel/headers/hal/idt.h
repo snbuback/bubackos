@@ -4,5 +4,5 @@
 
 void idt_install();
 bool are_interrupts_enabled();
-
+void idt_flush(uintptr_t base, uint16_t limit);
 #endif
