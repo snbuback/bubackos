@@ -14,19 +14,18 @@ subprojects {
 
 
 task prepareIso(type: Copy, dependsOn: ':kernel:build') {
-    from('loader/boot')
+    from('bootloader/boot')
     from('kernel/build/exe/kernel/kernel') {
-        rename 'kernel', 'boot/kernel.bin'
+        rename 'kernel', 'bubackos.elf'
     }
-    into "$project.buildDir/loader"
+    into "$project.buildDir/bootloader/boot"
 }
 
 task iso(type:Exec, dependsOn: prepareIso) {
     description 'Build the kernel image'
-    // outputs = file("$project.buildDir/loader.iso")
+    inputs.files "$project.buildDir/bootloader/boot"
+    outputs.files "$project.buildDir/bubackos.iso"
 
-    // commandLine "/bin/bash", "-c", "mkdir -p build/loader && cp -a loader/boot build/loader && cp kernel/build/exe/kernel/kernel build/loader/boot/kernel.bin && \
-    // grub-mkrescue -o build/loader.iso build/loader"
-    commandLine "grub-mkrescue", "-o", "build/loader.iso", "build/loader"
+    commandLine "grub-mkrescue", "-o", "build/bubackos.iso", "$project.buildDir/bootloader"
 
 }

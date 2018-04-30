@@ -5,7 +5,6 @@
 .text
 boot:
 .code32
-  DEBUGGER
   /* save grub parameters in the data section */
   mov     $stack_end, %ebp
   mov     $stack_end, %esp
@@ -141,7 +140,6 @@ enable_sse:
   ret
 
 k_64bits:
-  DEBUGGER
   popq   %rsi
   popq   %rdi
 
