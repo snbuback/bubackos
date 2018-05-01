@@ -2,6 +2,8 @@
 #define __HAL_IDT_H
 #include <stdint.h>
 
+#define IDT_TOTAL_INTERRUPTIONS     256
+
 typedef enum
 {
 	TASK_GATE_286 = 0x5,
@@ -33,8 +35,10 @@ typedef struct
 } __attribute__((packed)) idt_ptr;
 
 void idt_install();
+void idt_set_gate(unsigned char num, uintptr_t base, enum_gate_type type);
 
 // assembly functions
+void idt_fill_table();
 void idt_flush(uintptr_t base, uint16_t limit);
 
 #endif

@@ -13,48 +13,16 @@ func:
   ret
 
 */
-
 #define NUM_SAVED_REGS 15
 #define REGISTER_SIZE 	8
 
+.extern interrupt_handler
 .text
 .code64
-	.extern interrupt_handler
-
-.macro interrupt num:req, errorcode=1
-.global intr\num
-intr\num\():
-.if \errorcode
-	pushq $0
-.endif
-	pushq $\num
-	jmp intr_handler
-.endm
-
-
-	interrupt 0
-	interrupt 1
-	interrupt 2
-	interrupt 3
-	interrupt 4
-	interrupt 5
-	interrupt 6
-	interrupt 7
-	interrupt 8
-	interrupt 9
-	interrupt 10, 0
-	interrupt 11, 0
-	interrupt 12, 0
-	interrupt 13, 0
-	interrupt 14, 0
-	interrupt 15
-	interrupt 16
-	interrupt 17, 0
-	interrupt 18
-
 
 # List of registers from here: https://github.com/torvalds/linux/blob/v4.8/arch/x86/include/uapi/asm/ptrace.h
 # Remember that the stack grows from bottom to top
+.globl intr_handler
 intr_handler:
 	pushq %rax;
 	pushq %rbx;
@@ -81,7 +49,7 @@ intr_handler:
 	# remove the interruption number and code
 	addq $(REGISTER_SIZE*2), %rsp
 
-	// ack int
+	// ack int (PIC_MASTER_CMD, PIC_CMD_EOI)
 	movb $0x20, %al
 	outb %al, $0x20
 
@@ -106,10 +74,9 @@ intr_handler:
 /* void idt_flush(uintptr_t base, uint16_t limit); */
 .globl idt_flush
 idt_flush:
-  enter $10, $0
-  movq  %rsi, -10(%rbp)
-  movq  %rdi, -8(%rbp)
-  lidt (%rsp)
-  leave
-  ret
-
+	enter $10, $0
+	movq  %rsi, -10(%rbp)
+	movq  %rdi, -8(%rbp)
+	lidt (%rsp)
+	leave
+	ret
