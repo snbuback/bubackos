@@ -2,7 +2,7 @@ megs: 128
 romimage: file="/usr/share/bochs/BIOS-bochs-latest"
 vgaromimage: file ="/usr/share/bochs/VGABIOS-lgpl-latest"
 floppya: 1_44=/dev/loop0, status=inserted
-ata1-master: type=cdrom, path=./build/loader.iso, status=inserted
+ata1-master: type=cdrom, path=./build/bubackos.iso, status=inserted
 display_library: x, options="gui_debug"
 boot: cdrom
 log: /tmp/bochsout.txt

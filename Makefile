@@ -47,7 +47,7 @@ shell:
 	@$(CONTAINER) bash
 
 gdb:
-	@$(CONTAINER) gdb -iex 'file build/loader/boot/bubackos.elf' -iex 'target remote docker.for.mac.localhost:1234' -iex 'break intel_start'  -iex 'continue'
+	@$(CONTAINER) gdb -iex 'file build/bootloader/boot/bubackos.elf' -iex 'target remote docker.for.mac.localhost:1234' -iex 'break intel_start'  -iex 'continue'
 
 docker-build:
 	docker build --build-arg SYSROOT=$(SYSROOT) \

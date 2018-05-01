@@ -19,6 +19,7 @@ time_t hal_current_time();
 bool hal_lock(lock_t lock);
 void hal_unlock(lock_t lock);
 void hal_platform_events();
+void hal_switch_task(native_task_t *task);
 ```
 
 These functions are #define to the real function name, to make easy write kernel tests and mock them.

@@ -1,3 +1,5 @@
+#include <string.h>
+#include <stdlib.h>
 #include <core/logging.h>
 #include <hal/platform.h>
 #include <core/init.h>
@@ -6,6 +8,7 @@
 #include <hal/console.h>
 #include <hal/gdt.h>
 #include <hal/idt.h>
+#include <hal/native_task.h>
 
 void intel_start(uint64_t magic, uintptr_t addr)
 {
@@ -26,4 +29,5 @@ void intel_start(uint64_t magic, uintptr_t addr)
 	}
 
 	bubackos_init(platform);
+
 }

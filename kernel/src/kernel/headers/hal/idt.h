@@ -36,6 +36,7 @@ typedef struct
 
 void idt_install();
 void idt_set_gate(unsigned char num, uintptr_t base, enum_gate_type type);
+int interrupt_handler(uint64_t interrupt, uint64_t param); // called by assembly functions
 
 // assembly functions
 void idt_fill_table();

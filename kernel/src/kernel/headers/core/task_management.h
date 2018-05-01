@@ -1,23 +1,33 @@
+#ifndef _CORE_TASK_MANAGEMENT_H
+#define _CORE_TASK_MANAGEMENT_H
 #include <stdint.h>
+#include <stdbool.h>
 #include <core/memory_allocator.h>
+#include <hal/native_task.h>
 
-typedef uint64_t task_handler_t;
+#define TASK_DEFAULT_STACK_SIZE  1024
+
+typedef unsigned int task_id_t;
+typedef enum { TASK_STATUS_CREATED, TASK_STATUS_READY } task_status_t;
 
 typedef struct {
-  uint32_t task_handler;
-  memory_handler_t memory_handler;
-  bool ready;
-  void* next_address;
+  task_id_t task_id;
+  uintptr_t stack_address; // change to use memory management
+  size_t    stack_size;
+  task_status_t status;
+  native_task_t native_task;
 } task_t;
 
 void task_management_initialize(void);
 
-uint32_t task_create(memory_handler_t memory_handler);
+task_t* task_create();
 
-bool task_start(task_handler_t task_handler, void* start_code_address);
+bool task_start(task_t *task, uintptr_t code);
 
-void task_switch(task_handler_t task_handler);
+// task_t* task_allocate(size_t code_size, size_t data_size, size_t stack_size);
 
-void task_destroy(task_handler_t task_handler);
+// bool task_set_status(task_t* task, task_status_t status);
 
-void _platform_task_switch(void* next_address);
+void task_destroy(task_t* task);
+
+#endif

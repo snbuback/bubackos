@@ -1,7 +1,5 @@
 #ifndef __HAL_GDT_H
 #define __HAL_GDT_H
-#include <stdint.h>
-#include <stdbool.h>
 
 /* Intel manual vol 3A, 3-13 */
 
@@ -51,6 +49,10 @@
 
 #define GDT_SEGMENT(index)             (index*16)
 
+#ifndef ASM_FILE
+#include <stdint.h>
+#include <stdbool.h>
+
 /* Defines a GDT entry.  We say packed, because it prevents the
  * compiler from doing things that it thinks is best, i.e.
  * optimization, etc. */
@@ -78,4 +80,5 @@ void gdt_install();
 void gdt_flush(uintptr_t base, uint16_t limit);
 void tss_flush(uint16_t gdt_entry_number);
 
+#endif // ASM_FILE
 #endif

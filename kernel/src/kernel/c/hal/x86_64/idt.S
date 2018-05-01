@@ -46,6 +46,10 @@ intr_handler:
 	movq	((NUM_SAVED_REGS+1)*REGISTER_SIZE)(%rsp), %rsi
 	call	interrupt_handler
 
+	// verify interrupt_handler returns. 0 means halt
+	orq		%rax, %rax
+	je		2f
+
 	# remove the interruption number and code
 	addq $(REGISTER_SIZE*2), %rsp
 
@@ -70,6 +74,12 @@ intr_handler:
 	popq %rbx;
 	popq %rax;
 	iretq
+
+2:	// in case of no return from the exception, freeze
+	hlt
+	// TODO Improve this!
+	xchg %bx, %bx
+	jmp	2b
 
 /* void idt_flush(uintptr_t base, uint16_t limit); */
 .globl idt_flush
