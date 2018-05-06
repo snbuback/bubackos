@@ -1,4 +1,3 @@
-#define ASM_FILE    1
 #define REG_RESTORE(reg, pos)       movq 8*pos(%rdi), %reg
 #define REG_ENTRY(n)                8*n(%rdi)
 

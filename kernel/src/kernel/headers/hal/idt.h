@@ -1,17 +1,16 @@
 #ifndef __HAL_IDT_H
 #define __HAL_IDT_H
+
+#define IDT_TOTAL_INTERRUPTIONS     256 // TODO there is a bug here. When =50 kernel are generating triple fault
+
+#define TASK_GATE_286           0x5
+#define INTERRUPT_GATE_286      0x6
+#define TRAP_GATE_286           0x7
+#define INTERRUPT_GATE_386      0xE
+#define TRAP_GATE_386           0xF
+
+#ifndef ASM_FILE
 #include <stdint.h>
-
-#define IDT_TOTAL_INTERRUPTIONS     256
-
-typedef enum
-{
-	TASK_GATE_286 = 0x5,
-	INTERRUPT_GATE_286 = 0x6,
-	TRAP_GATE_286 = 0x7,
-	INTERRUPT_GATE_386 = 0xE,
-	TRAP_GATE_386 = 0xF
-} enum_gate_type;
 
 /* Defines an IDT entry */
 typedef struct {
@@ -19,7 +18,7 @@ typedef struct {
     unsigned segment : 16;
     unsigned ist : 3;
     unsigned : 5;
-    enum_gate_type type : 4;
+    unsigned type : 4;
     unsigned : 1;
     unsigned ring : 2;
     unsigned present : 1;
@@ -35,11 +34,12 @@ typedef struct
 } __attribute__((packed)) idt_ptr;
 
 void idt_install();
-void idt_set_gate(unsigned char num, uintptr_t base, enum_gate_type type);
+void idt_set_gate(unsigned num, uintptr_t base, unsigned type);
 int interrupt_handler(uint64_t interrupt, uint64_t param); // called by assembly functions
 
 // assembly functions
 void idt_fill_table();
 void idt_flush(uintptr_t base, uint16_t limit);
 
+#endif // ASM_FILE
 #endif

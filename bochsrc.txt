@@ -1,6 +1,6 @@
 megs: 128
-romimage: file="/usr/share/bochs/BIOS-bochs-latest"
-vgaromimage: file ="/usr/share/bochs/VGABIOS-lgpl-latest"
+romimage: file="/usr/local/share/bochs/BIOS-bochs-latest"
+vgaromimage: file ="/usr/local/share/bochs/VGABIOS-lgpl-latest"
 floppya: 1_44=/dev/loop0, status=inserted
 ata1-master: type=cdrom, path=./build/bubackos.iso, status=inserted
 display_library: x, options="gui_debug"
@@ -8,6 +8,7 @@ boot: cdrom
 log: /tmp/bochsout.txt
 mouse: enabled=0
 clock: sync=realtime
-cpu: model=corei7_ivy_bridge_3770k, reset_on_triple_fault=0
+cpu: model=corei7_sandy_bridge_2600k, reset_on_triple_fault=0
 magic_break: enabled=1
+#debug_symbols: file="./build/symbols-bochs.txt"
 

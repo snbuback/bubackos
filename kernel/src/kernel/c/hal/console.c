@@ -3,9 +3,9 @@
 #include <string.h>
 #include <hal/console.h>
 
-volatile size_t terminal_row;
-volatile size_t terminal_column;
-volatile uint8_t terminal_color;
+static volatile size_t terminal_row;
+static volatile size_t terminal_column;
+static volatile uint8_t terminal_color;
 
 const size_t console__width = 80;
 const size_t console__height = 25;

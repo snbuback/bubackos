@@ -11,7 +11,7 @@ typedef struct {
 } logging_config_t;
 
 // The default values here are utilized by the HAL module during startup
-static logging_config_t L = { .level = LOG_WARN, .quiet = 0 };
+static logging_config_t L = { .level = LOG_INFO, .quiet = 0 };
 
 static const char* level_names[] = {
     "TRACE", "DEBUG", "INFO", "WARN", "ERROR", "FATAL"

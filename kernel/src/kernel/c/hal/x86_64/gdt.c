@@ -8,33 +8,40 @@
 
 #pragma GCC diagnostic ignored "-Wpointer-to-int-cast"
 
-gdt_entry gdt[GDT_MAXIMUM_SIZE];
-tss_entry_t tss_entry;
+gdt_entry gdt[GDT_MAXIMUM_SIZE] __attribute__ ((aligned));
+tss_entry_t tss_entry __attribute__ ((aligned));
 
 /* Setup a descriptor in the Global Descriptor Table */
-static uint16_t gdt_set_gate(uint16_t num, uint64_t base, uint32_t limit, uint8_t type, uint8_t ring)
+uint16_t gdt_set_gate(uint16_t num, uint64_t base, uint32_t limit, uint8_t type, uint8_t ring)
 {
-    // log_debug("Installing GDT %d at %p sizeof %x type %x ring %d", num, base, limit, type, ring);
+    log_trace("Installing GDT %d at %p sizeof %x type %x ring %d", num, base, limit, type, ring);
     // this code only works for 64 bits GDT. Also granulatiry if always 1, that means limit are multiples of 4kb
     limit = limit >> 12;
 
-    gdt[num].base_0_15 = (base & 0xFFFF);
-    gdt[num].base_16_23 = (base >> 16) & 0xFF;
-    gdt[num].base_24_31 = (base >> 24) & 0xFF;
-    gdt[num].base_32_63 = (base >> 32) & 0xFFFFFFFF;
+    gdt_entry new_entry;
+
+    new_entry.base_0_15 = (base & 0xFFFF);
+    new_entry.base_16_23 = (base >> 16) & 0xFF;
+    new_entry.base_24_31 = (base >> 24) & 0xFF;
+    new_entry.base_32_63 = (base >> 32) & 0xFFFFFFFF;
 
     /* Setup the descriptor limits */
-    gdt[num].limit_0_15 = (limit & 0xFFFF);
-    gdt[num].limit_16_19 = (limit >> 16) & 0x0F;
+    new_entry.limit_0_15 = (limit & 0xFFFF);
+    new_entry.limit_16_19 = (limit >> 16) & 0x0F;
 
     /* Finally, set up the granularity and access flags */
-    gdt[num].available = 1;
-    gdt[num].longmode = 1; // 64 bits
-    gdt[num].op_size = 0; // 64 bits (in the manual said should set as 16 bit when in longmode)
-    gdt[num].granularity = 1; // limit is 4kb multiples
-    gdt[num].type = type;
-    gdt[num].ring = ring;
-    gdt[num].present = 1;
+    new_entry.available = 1;
+    new_entry.longmode = 1; // 64 bits
+    new_entry.op_size = 0; // 64 bits (in the manual said should set as 16 bit when in longmode)
+    new_entry.granularity = 1; // limit is 4kb multiples
+    new_entry.type = type;
+    new_entry.ring = ring;
+    new_entry.present = 1;
+
+    // GDT entry is created as local variable and assigned in the end of this function call. This helps
+    // debug process that watches for writing in gdt memory addres.
+    // log_debug("new_entry=%p  %d %p", &new_entry, sizeof(new_entry), &gdt[num]);
+    gdt[num] = new_entry;
     return num;
 }
 
@@ -59,9 +66,9 @@ void gdt_install()
 
     /* Flush our the old GDT / TSS and install the new changes! */
     uint16_t gdt_limit = (sizeof(gdt_entry) * GDT_MAXIMUM_SIZE) - 1;
-	log_info("Flushing GDT table at %p, size of %x", &gdt, gdt_limit);
+    log_debug("Flushing GDT table at %p, size of %x", &gdt, gdt_limit);
     gdt_flush((uintptr_t) &gdt, gdt_limit);
 
-	log_debug("Flushing TSS table using entry %d", GDT_ENTRY_TSS);
+    log_debug("Flushing TSS table using entry %d (%x)", GDT_ENTRY_TSS, GDT_SEGMENT(GDT_ENTRY_TSS));
     tss_flush(GDT_SEGMENT(GDT_ENTRY_TSS));
 }

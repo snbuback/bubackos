@@ -17,6 +17,8 @@ model {
                     args << "-I/Users/snbuback/Projects/bubackos/kernel/src/kernel/headers"
                     // args.remove "-m64"  // this arguments is breaking the linker
                     // args << "-m32"
+                    args << "-DASM_FILE=1"
+                    args << "-g"
                 }
                 cCompiler.executable = 'x86_64-elf-gcc'
                 linker.executable = 'x86_64-elf-ld'
@@ -48,6 +50,6 @@ model {
     binaries {
         all {
             cCompiler.args "-g", "-march=nehalem", "-std=gnu99", "-ffreestanding",  "-Wall", "-Werror", "-mno-red-zone", "-Wextra"
-            linker.args "-nostdlib", "-n", "-T", "src/kernel/c/hal/x86_64/linker.ld", "-L/usr/local/x86_64-elf/lib", "-ljerry-core", "-ljerry-ext", "-ljerry-port-default-minimal", "-lg", "-lm"
+            linker.args "-nostdlib", "-n", "-T", "src/kernel/c/hal/x86_64/linker.ld", "-L/usr/local/x86_64-elf/lib", "-lg", "-lm"
     }   }
 }

@@ -7,22 +7,17 @@
 #include <hal/multiboot2.h>
 
 platform_t platform;
+extern int user_task1;
+extern int user_task2;
 
-void hi() {
-	asm("xchg %bx, %bx");
-	log_info("Hi chamado no modo usuario");
-	for (;;);
-}
-
-void first_task() {
+void user_tasks() {
 	log_info("testing context switching");
 
-	task_t* task = task_create();
+	task_t* task1 = task_create();
+	task_start(task1, (uintptr_t) &user_task1);
 
-	task_start(task, (uintptr_t) &hi);
-
-	asm("xchg %bx, %bx; sti");
-	hal_switch_task(&task->native_task);
+	task_t* task2 = task_create();
+	task_start(task2, (uintptr_t) &user_task2);
 }
 
 void bubackos_init(platform_t platform) {
@@ -48,7 +43,7 @@ void bubackos_init(platform_t platform) {
 
 	task_management_initialize();
 	
-	first_task();
+	user_tasks();
 
     log_info("System ready");
 

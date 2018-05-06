@@ -10,11 +10,11 @@
  * will caused an "Unhandled Interrupt" exception.  Any descriptor
  * for which the 'presence' bit is cleared (0) will generate an
  * "Unhandled Interrupt" exception */
-static idt_entry idt[IDT_TOTAL_INTERRUPTIONS] = {};
+static volatile idt_entry idt[IDT_TOTAL_INTERRUPTIONS] = {};
 
 /* Use this function to set an entry in the IDT.  A lot simpler
  * than twiddling with the GDT ;) */
-void idt_set_gate(unsigned char num, uintptr_t base, enum_gate_type type)
+void idt_set_gate(unsigned num, uintptr_t base, unsigned type)
 {
     log_trace("Set interrupt gate %d (0x%x) at %p type %x", num, num, base, type);
     idt[num].base_0_15 = (base & 0xFFFF);
@@ -56,10 +56,10 @@ int interrupt_handler(uint64_t interrupt, uint64_t param)
         break;
     case 0x9: // keyboard
         key = inb(0x60);
-        log_info("Key pressed: 0x%x", key);
+        log_trace("Key pressed: 0x%x", key);
         break;
     case 0xD: // GP
-        log_info("General protection");
+        log_fatal("General protection");
         return false;
     default:
         log_info("Interruption %d (0x%x) / (%d) 0x%x generated", interrupt, interrupt, param, param);

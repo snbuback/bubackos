@@ -14,7 +14,8 @@
         "node.h": "c",
         "stdbool.h": "c",
         "gdt.h": "c",
-        "idt.h": "c"
+        "idt.h": "c",
+        "tss.h": "c"
     },
     "python.pythonPath": "/usr/local/bin/python3",
     "java.configuration.updateBuildConfiguration": "automatic"

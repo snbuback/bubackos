@@ -18,6 +18,7 @@ task_t* task_create()
   task->status = TASK_STATUS_CREATED;
   task->stack_size = TASK_DEFAULT_STACK_SIZE;
   task->stack_address = (uintptr_t) malloc(TASK_DEFAULT_STACK_SIZE);
+  log_trace("Created task %d at %p", task->task_id, task);
   return task;
 }
 
