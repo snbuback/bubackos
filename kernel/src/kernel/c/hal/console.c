@@ -1,25 +1,26 @@
 // Very basic terminal functions
 #include <stdlib.h>
 #include <string.h>
+#include <stdint.h>
 #include <hal/console.h>
 
-static volatile size_t terminal_row;
-static volatile size_t terminal_column;
-static volatile uint8_t terminal_color;
+static uint16_t* const console_buffer = (uint16_t*) 0xB8000;
+static size_t terminal_row;
+static size_t terminal_column;
+static uint8_t terminal_color;
 
-const size_t console__width = 80;
-const size_t console__height = 25;
-static uint16_t* console_buffer = (uint16_t*) 0xB8000;
-
-static inline uint16_t vga_entry(unsigned char uc, uint8_t color) {
-	return (uint16_t) uc | (uint16_t) color << 8;
-}
+static const size_t console__width = 80;
+static const size_t console__height = 25;
 
 static inline uint8_t vga_entry_color(uint8_t fg, uint8_t bg) {
 	return fg | bg << 4;
 }
 
-static inline int min(int a, int b)
+static inline uint16_t vga_entry(uint16_t uc, uint16_t color) {
+	return uc | color << 8;
+}
+
+static int min(int a, int b)
 {
 	if (a<b) return a;
 	return b;
@@ -66,13 +67,13 @@ static void need_scroll() {
 	}
 }
 
-static inline void newline() {
+static void newline() {
 	terminal_column = 0;
 	++terminal_row;
 	need_scroll();
 }
 
-static inline void terminal_writesequence(const char* buffer_start, size_t length) {
+static void terminal_writesequence(const char* buffer_start, size_t length) {
 	size_t written = 0;
 	do {
 		int chars_to_write = min(console__width - terminal_column, length);

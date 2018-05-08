@@ -15,7 +15,7 @@
 
 
 Stack* Stack_new() {
-    Stack *s = malloc(sizeof(Stack));
+    Stack *s = LIBK_ALLOC(sizeof(Stack));
     s->size = 0;
     s->head = NULL;
     return s;
@@ -23,7 +23,7 @@ Stack* Stack_new() {
 
 void Stack_push(Stack *s, void *el) {
     Node *temp = s->head;
-    Node *new_head = malloc(sizeof(Node));
+    Node *new_head = LIBK_ALLOC(sizeof(Node));
     new_head->val = el;
     new_head->next = temp;
     s->head = new_head;
@@ -41,7 +41,7 @@ void* Stack_pop(Stack *s) {
     void *headval = head->val;
     s->head = head->next;
     s->size--;
-    free(head);
+    LIBK_FREE(head);
     return (headval);
 }
 
@@ -56,8 +56,8 @@ void Stack_delete(Stack *s) {
 
     for (i1 = s->head; i1; i1 = i2) {
         i2 = i1->next;
-        free(i1);
+        LIBK_FREE(i1);
     }
 
-    free(s);
+    LIBK_FREE(s);
 }

@@ -1,9 +1,9 @@
-#include <algorithms/node.h>
 #include <stdlib.h>
+#include <algorithms/node.h>
 
 Node* list_new(void* val)
 {
-    Node* new_node = (Node*)malloc(sizeof(Node));
+    Node* new_node = (Node*)LIBK_ALLOC(sizeof(Node));
     new_node->val = val;
     new_node->next = NULL;
     return new_node;

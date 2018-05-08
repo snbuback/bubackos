@@ -15,6 +15,7 @@ SECTIONS {
 
 		*(.multiboot2)
 		*(.text)
+		*(.rodata)
 		*(.js)
 
 		__ADDR_CODE_END = .;
@@ -27,7 +28,6 @@ SECTIONS {
 	{
 		__ADDR_DATA_START = .;
 		
-		*(.rodata)
 		*(.data)
 		*(COMMON)
 		*(.bss)

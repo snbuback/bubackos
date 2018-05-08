@@ -10,7 +10,6 @@
 hal_create_native_task:
     enter $0, $0
 
-    xchg    %bx, %bx
     movq    $(GDT_SEGMENT(GDT_ENTRY_USER_CS)+3), REG_ENTRY(17)     // user code segment with bottom 2 bits set for ring 3
     movq    $(GDT_SEGMENT(GDT_ENTRY_USER_DS)+3), REG_ENTRY(20)     // user data segment with bottom 2 bits set for ring 3
     movq    %rdx, REG_ENTRY(4)      // rbp
@@ -23,7 +22,6 @@ hal_create_native_task:
 // void hal_switch_task(native_task_t *task)  __attribute__ ((noreturn));
 .globl hal_switch_task
 hal_switch_task:
-
     // first, prepare the stack to iret, so we don't need to worry about the register values
     pushq   REG_ENTRY(20)
     pushq   REG_ENTRY(19)
@@ -32,7 +30,6 @@ hal_switch_task:
     pushq   REG_ENTRY(16)
 
     // change other register segments
-    xchg    %bx, %bx
     movq    $(GDT_SEGMENT(GDT_ENTRY_USER_DS)+3), %rax
     mov     %ax, %ds
     mov     %ax, %es

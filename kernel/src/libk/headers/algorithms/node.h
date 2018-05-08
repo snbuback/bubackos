@@ -6,6 +6,10 @@
  */
 #ifndef ALGORITHM_NODE_H
 #define ALGORITHM_NODE_H
+#include <core/memory_management.h>
+
+#define LIBK_ALLOC(size)        kmem_alloc(size)
+#define LIBK_FREE(ptr)          kmem_free(ptr)
 
 typedef struct Node {
     void *val;

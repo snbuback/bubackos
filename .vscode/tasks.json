@@ -6,7 +6,7 @@
         {
             "label": "Run",
             "type": "shell",
-            "command": "make run",
+            "command": "make iso run",
             "presentation": {
                 "reveal": "always",
                 "panel": "shared"

@@ -1,6 +1,8 @@
 apply plugin: "c"
 apply plugin: "assembler"
 
+def COMPILER_ARGS = ["-g", "-march=nehalem", "-std=gnu99", "-ffreestanding", "-Wall", "-Werror", "-mno-red-zone", "-Wextra", "-DNDEBUG"]
+
 model {
     platforms {
         intel {
@@ -14,13 +16,17 @@ model {
                 assembler.withArguments { args ->
                     args.remove "-x"  // this arguments is breaking the as
                     args.remove "assembler"  // this arguments is breaking the as
-                    args << "-I/Users/snbuback/Projects/bubackos/kernel/src/kernel/headers"
+                    args << "-I$project.projectDir/src/kernel/headers"
+                    args << "-I$project.projectDir/src/libk/headers"
                     // args.remove "-m64"  // this arguments is breaking the linker
                     // args << "-m32"
                     args << "-DASM_FILE=1"
                     args << "-g"
                 }
                 cCompiler.executable = 'x86_64-elf-gcc'
+                cCompiler.withArguments { args ->
+                    args << "-I$project.projectDir/src/libk/headers"
+                }
                 linker.executable = 'x86_64-elf-ld'
                 linker.withArguments { args ->
                     args.remove "-m64"  // this arguments is breaking the linker
@@ -40,7 +46,7 @@ model {
                 }
                 c {
                     source {
-                        srcDirs "src/kernel/c"
+                        srcDirs "src/kernel/c", "src/libk/c"
                         include "**/*.c"
                     }
                 }
@@ -49,7 +55,39 @@ model {
     }
     binaries {
         all {
-            cCompiler.args "-g", "-march=nehalem", "-std=gnu99", "-ffreestanding",  "-Wall", "-Werror", "-mno-red-zone", "-Wextra"
-            linker.args "-nostdlib", "-n", "-T", "src/kernel/c/hal/x86_64/linker.ld", "-L/usr/local/x86_64-elf/lib", "-lg", "-lm"
-    }   }
+            cCompiler.args.addAll COMPILER_ARGS
+            linker.args "-nostdlib", "-n", "-T", "src/kernel/c/hal/x86_64/linker.ld", "-L/usr/local/x86_64-elf/lib"
+        }
+    }
+}
+
+task run_tests(type:Exec) {
+    description 'Run unity tests'
+    FileTree tree = fileTree(dir: 'src/libk/test', include: '**/*.c')
+    inputs.files tree
+
+    String script = """
+    set -e
+    UNITY_ROOT=${project.projectDir}/unity
+    BUILD_DIR=${project.buildDir}/tests
+    mkdir -p \$BUILD_DIR
+    """
+    tree.each { File file ->
+        def sourceFiles = getSourceFiles(file.text, "${project.projectDir}/src/libk/c")
+        script += """
+            ruby \$UNITY_ROOT/auto/generate_test_runner.rb ${file} \$BUILD_DIR/${file.name}
+            gcc ${COMPILER_ARGS.join(' ')} -m64 -I./unity/src unity/src/unity.c ${file} \$BUILD_DIR/${file.name} ${sourceFiles.join(' ')} -o \$BUILD_DIR/${file.name}.run
+            echo "Running ${file.name}"; \$BUILD_DIR/${file.name}.run
+        """
+    }
+    commandLine "bash", "-c", script
+}
+
+def getSourceFiles(String text, String baseDir) {
+    def matcher = text =~ '// source: (.*)'
+    def result = []
+    while (matcher.find()) {
+        result << new File(baseDir, matcher.group(1))
+    }
+    return result
 }

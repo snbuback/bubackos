@@ -78,7 +78,6 @@ intr_handler:
 2:	// in case of no return from the exception, freeze
 	hlt
 	// TODO Improve this!
-	xchg %bx, %bx
 	jmp	2b
 
 /* void idt_flush(uintptr_t base, uint16_t limit); */

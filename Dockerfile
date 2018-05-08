@@ -30,7 +30,9 @@ RUN cd /tools && \
     rm -rf ${BUILD_DIR}
 
 # Improve
-RUN apt-get -qq -y install gawk openjdk-8-jdk
+RUN apt-get -qq update && \
+    apt-get -qq -y upgrade && \
+    apt-get -qq -y install gawk openjdk-8-jdk ruby qemu-system-x86
 
 # Initialize gradew
 ADD settings.gradle gradlew /tools/builder/

@@ -5,13 +5,13 @@ OS_NAME_LOWER=$(shell echo $(OS_NAME) | tr '[:upper:]' '[:lower:]')
 BUILD_DIR=$(BASE_DIR)/build
 TARGET=$(OS_ARCH)-elf
 SYSROOT=$(BASE_DIR)/sysroot
-
 UNAME_S := $(shell uname -s)
 ifeq ($(UNAME_S),Darwin)
-    CONTAINER=docker run --rm -it -v $(BASE_DIR):$(BASE_DIR) -w $(BASE_DIR) bubackos
+    CONTAINER=docker run --rm -it --privileged -v $(BASE_DIR):$(BASE_DIR) -w $(BASE_DIR) bubackos
 else
     CONTAINER=
 endif
+QEMU_ARGS=-m 128 -cpu Nehalem -cdrom $(BUILD_DIR)/bubackos.iso -no-reboot -no-shutdown -usb -device usb-tablet -show-cursor
 
 
 .PHONY: all build run run-debug shell gdb docker-build
@@ -38,10 +38,10 @@ iso:
 	@$(CONTAINER) ./gradlew iso
 
 run:
-	@qemu-system-x86_64 -m 128 -cpu Nehalem -cdrom $(BUILD_DIR)/bubackos.iso -no-reboot -no-shutdown -monitor stdio -d cpu_reset,guest_errors,unimp,page
+	@qemu-system-x86_64 $(QEMU_ARGS) -d guest_errors,unimp,page -monitor stdio
 
 run-debug:
-	@qemu-system-x86_64 -m 128 -cpu Nehalem -cdrom $(BUILD_DIR)/bubackos.iso -no-reboot -no-shutdown -monitor stdio -S -s -d cpu_reset,guest_errors,unimp,int,page,in_asm
+	@qemu-system-x86_64 $(QEMU_ARGS) -S -s -d guest_errors,unimp,page,in_asm
 
 shell:
 	@$(CONTAINER) bash

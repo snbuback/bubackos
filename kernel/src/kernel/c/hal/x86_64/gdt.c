@@ -2,6 +2,7 @@
 #include <string.h>
 #include <stdlib.h>
 #include <core/configuration.h>
+#include <core/memory_management.h>
 #include <core/logging.h>
 #include <hal/gdt.h>
 #include <hal/tss.h>
@@ -47,9 +48,9 @@ uint16_t gdt_set_gate(uint16_t num, uint64_t base, uint32_t limit, uint8_t type,
 
 static void tss_set(tss_entry_t *tss) {
     log_trace("TSS installed at %p size 0x%x", &tss, sizeof *tss);
-    tss->rsp0 = (uint64_t) malloc(SYSTEM_STACKSIZE);
-    tss->rsp1 = (uint64_t) malloc(SYSTEM_STACKSIZE);
-    tss->rsp2 = (uint64_t) malloc(SYSTEM_STACKSIZE);
+    tss->rsp0 = (uint64_t) (kmem_alloc(SYSTEM_STACKSIZE) + SYSTEM_STACKSIZE);
+    tss->rsp1 = (uint64_t) (kmem_alloc(SYSTEM_STACKSIZE) + SYSTEM_STACKSIZE);
+    tss->rsp2 = (uint64_t) (kmem_alloc(SYSTEM_STACKSIZE) + SYSTEM_STACKSIZE);
 }
 
 void gdt_install()

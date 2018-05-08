@@ -81,7 +81,7 @@ bool insert_node(BTNode *n, BTNode *x) {
  * Create and return a new BTNode structure
  */
 BTNode* BTNode_new(int val, void* data) {
-    BTNode* node = malloc(sizeof(BTNode));
+    BTNode* node = LIBK_ALLOC(sizeof(BTNode));
     node->val = val;
     node->data = data;
     node->parent = NULL;
@@ -94,7 +94,7 @@ BTNode* BTNode_new(int val, void* data) {
  * Create and return a new empty BST 
  */
 BST* BST_new() {
-    BST *t = malloc(sizeof(BST));
+    BST *t = LIBK_ALLOC(sizeof(BST));
     t->head = NULL;
     return t;
 }

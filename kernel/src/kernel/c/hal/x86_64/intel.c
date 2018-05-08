@@ -30,4 +30,5 @@ void intel_start(uint64_t magic, uintptr_t addr)
 
 	bubackos_init(platform);
 
+    log_info("Intel System ready");
 }

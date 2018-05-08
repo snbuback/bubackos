@@ -5,8 +5,9 @@
             "includePath": [
                 "${workspaceFolder}/sysroot/gcc/include",
                 "${workspaceFolder}/sysroot/platform/include",
-                "${workspaceFolder}/src/kernel/headers",
-                "${workspaceFolder}/kernel/src/kernel/headers"
+                "${workspaceFolder}/kernel/src/kernel/headers",
+                "${workspaceFolder}/kernel/src/libk/headers",
+                "${workspaceFolder}/kernel/unity/src"
             ],
             "defines": [],
             "intelliSenseMode": "clang-x64",
@@ -22,5 +23,5 @@
             "cppStandard": "c++17"
         }
     ],
-    "version": 3
+    "version": 4
 }

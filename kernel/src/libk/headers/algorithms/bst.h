@@ -8,10 +8,10 @@
  **
  ****************************************************************************/
 
-#include <stdbool.h>
-
 #ifndef ALGORITHM_BST_H
 #define ALGORITHM_BST_H
+#include <stdbool.h>
+#include <algorithms/node.h>
 
 // Binary Tree Node Definition
 typedef struct BTNode {

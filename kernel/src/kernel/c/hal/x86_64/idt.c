@@ -52,7 +52,7 @@ int interrupt_handler(uint64_t interrupt, uint64_t param)
     uint8_t key;
     switch (interrupt) {
     case 0x8: // timer
-        // log_debug("timer");
+        log_debug("timer");
         break;
     case 0x9: // keyboard
         key = inb(0x60);

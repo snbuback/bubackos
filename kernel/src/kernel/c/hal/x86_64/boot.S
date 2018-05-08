@@ -1,13 +1,13 @@
-.globl boot_hal
+#include <core/configuration.h>
 
-#define DEBUGGER      xchgw %bx, %bx
+.globl boot_hal
 
 .text
 boot_hal:
 .code32
   /* save grub parameters in the data section */
-  mov     $stack_end, %ebp
-  mov     $stack_end, %esp
+  mov     $stack_begin + SYSTEM_STACKSIZE, %ebp
+  mov     %ebp, %esp
   pushl   $0
   pushl   %eax
   pushl   $0
@@ -147,9 +147,9 @@ k_64bits:
   call  intel_start
   sti
 
-2:
+.keep:
   hlt
-  jmp   2b
+  jmp   .keep
 
 
 .data
@@ -184,7 +184,6 @@ gdt:
 gdt_end:
 
 .bss
-.lcomm stack_begin, 16*1024
-stack_end:
+.lcomm stack_begin, SYSTEM_STACKSIZE
 
 

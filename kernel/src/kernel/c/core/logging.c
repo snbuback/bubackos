@@ -5,6 +5,11 @@
 #include <stdlib.h>
 #include <string.h>
 
+#define MIN(a,b) \
+   ({ __typeof__ (a) _a = (a); \
+       __typeof__ (b) _b = (b); \
+     _a < _b ? _a : _b; })
+
 typedef struct {
     int level;
     int quiet;
@@ -27,6 +32,21 @@ void log_set_quiet(int enable)
     L.quiet = enable ? 1 : 0;
 }
 
+int logging_format(char* buf, int level, const char *tag, const char *format, va_list args) {
+        // print logging line header
+        snprintf(buf, LOGGING_MAX_LINE + 1, "%s %s: ", level_names[level], tag);
+
+        // print the logging itself
+        int size = strlen(buf);
+        size += vsnprintf(buf + size, LOGGING_MAX_LINE + 1 - size, format, args);
+        return MIN(size, LOGGING_MAX_LINE);
+}
+
+static void logging_output(char *log_line, size_t size) {
+    console_write(log_line, size);
+    console_write("\n", 1);
+}
+
 void logging(int level, const char* tag, const char* fmt, ...)
 {
     if (level < L.level) {
@@ -34,27 +54,13 @@ void logging(int level, const char* tag, const char* fmt, ...)
     }
 
     if (!L.quiet) {
-        char buf[LOGGING_MAX_LINE + 2];
-
-        // print logging line header
-        snprintf(buf, LOGGING_MAX_LINE, "%-5s %s: ", level_names[level], tag);
-
-        // print the logging itself
-        int size = strlen(buf);
+        char buf[LOGGING_MAX_LINE + 1];  // + \0
         va_list args;
         va_start(args, fmt);
-        size += vsnprintf(buf + size, LOGGING_MAX_LINE - size, fmt, args);
+        int size = logging_format(buf, level, tag, fmt, args);
         va_end(args);
 
-        int final_size = strlen(buf);
-        if (final_size < size) {
-            // register in the log there was a truncate
-            buf[final_size-1] = '#';
-        }
-        buf[final_size] = '\n';
-        buf[final_size + 1] = 0;
-
-        console_print(buf);
+        logging_output(buf, size);
     }
 }
 
@@ -62,3 +68,4 @@ void logging_init() {
     log_set_level(LOG_DEBUG);
     log_set_quiet(0);
 }
+

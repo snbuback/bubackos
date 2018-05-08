@@ -14,7 +14,7 @@
 
 
 Queue* Queue_new() {
-    Queue *q = malloc(sizeof(Queue));
+    Queue *q = LIBK_ALLOC(sizeof(Queue));
     q->size = 0;
     q->head = NULL;
     q->tail = NULL;
@@ -23,7 +23,7 @@ Queue* Queue_new() {
 
 void Queue_add(Queue *q, void *el) {
     // Node *temp = q->head;
-    Node *new_tail = malloc(sizeof(Node));
+    Node *new_tail = LIBK_ALLOC(sizeof(Node));
     new_tail->val = el;
     new_tail->next = NULL;
 
@@ -53,7 +53,7 @@ void* Queue_remove(Queue *q) {
     }
 
     q->size--;
-    free(head);
+    LIBK_FREE(head);
     return (headval);
 }
 
@@ -68,8 +68,8 @@ void Queue_delete(Queue *q) {
 
     for (i1 = q->head; i1; i1 = i2) {
         i2 = i1->next;
-        free(i1);
+        LIBK_FREE(i1);
     }
 
-    free(q);
+    LIBK_FREE(q);
 }
