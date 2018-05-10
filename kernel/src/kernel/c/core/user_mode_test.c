@@ -1,22 +1,19 @@
+#include <stdio.h>
 #include <stdint.h>
 #include <core/logging.h>
+#include <hal/console.h>
+#include <core/task_management.h>
 
-#define INTERACTIONS 50000000
+#define INTERACTIONS 3000000
+#define BUFFER_SIZE		100
 
 void user_task1() {
-	asm("xchg %bx, %bx");
-	log_info("User: Hi chamado no modo usuario");
-
-	unsigned cs, ds, ss;
-	asm ("mov %%cs, %0; mov %%ds, %1; mov %%ss, %2"
-		: "=r" (cs), "=r" (ds), "=r" (ss)
-		);
-	log_info("User: Segment registers: cs=0x%x ds=0x%x ss=0x%x", cs, ds, ss);
-
-	for (register uint64_t i=0;; i++) {
+	char buffer[BUFFER_SIZE];
+	for (register int i=10*INTERACTIONS;; i++) {
+		asm volatile ("movq $0x1111, %r11; movq $0x1115, %r15");
 		if (i%INTERACTIONS == 0) {
-			log_debug("i=%d", i/INTERACTIONS);
-			// asm("int $49");
+			size_t sz = snprintf(buffer, BUFFER_SIZE, "task 1=%d", i/INTERACTIONS);
+			console_raw_write(buffer, sz, 10, 24, 50);
 		}
         double cos = 2;
         double sin = 3;
@@ -26,18 +23,12 @@ void user_task1() {
 }
 
 void user_task2() {
-	asm("xchg %bx, %bx");
-	log_info("User: Hi chamado no modo usuario second task");
-
-	unsigned cs, ds, ss;
-	asm ("mov %%cs, %0; mov %%ds, %1; mov %%ss, %2"
-		: "=r" (cs), "=r" (ds), "=r" (ss)
-		);
-	log_info("User: Segment registers second task: cs=0x%x ds=0x%x ss=0x%x", cs, ds, ss);
-
-	for (register uint64_t i=0;; i++) {
+	char buffer[BUFFER_SIZE];
+	for (register int i=0;; i++) {
+		asm volatile ("movq $0x2222, %r11; movq $0x2226, %r15");
 		if (i%INTERACTIONS == 0) {
-			log_debug("i second task=%d", i/INTERACTIONS);
+			size_t sz = snprintf(buffer, BUFFER_SIZE, "task 2=%d", i/INTERACTIONS);
+			console_raw_write(buffer, sz, 11, 24, 65);
 		}
         double cos = 2;
         double sin = 3;
@@ -46,4 +37,24 @@ void user_task2() {
 	}
 }
 
-
+void user_task3() {
+	bool destroyed = false;
+	char buffer[BUFFER_SIZE];
+	for (register int i=0;; i++) {
+		asm volatile ("movq $0x3333, %r11; movq $0x3337, %r15");
+		if (i%INTERACTIONS == 0) {
+			size_t sz = snprintf(buffer, BUFFER_SIZE, "task 3=%d", i/INTERACTIONS);
+			console_raw_write(buffer, sz, 11, 24, 35);
+		}
+		if (i/INTERACTIONS == 10 && !destroyed) {
+			log_info("Killing");
+			asm("int $0x50");
+			log_info("This should not happened");
+			break;
+		}
+        double cos = 2;
+        double sin = 3;
+        double inp = 3;
+        asm volatile ("fsincos" : "=t" (cos), "=u" (sin) : "0" (inp));
+	}
+}

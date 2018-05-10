@@ -1,7 +1,7 @@
 #ifndef __HAL_IDT_H
 #define __HAL_IDT_H
 
-#define IDT_TOTAL_INTERRUPTIONS     50
+#define IDT_TOTAL_INTERRUPTIONS     51
 
 #define TASK_GATE_286           0x5
 #define INTERRUPT_GATE_286      0x6
@@ -9,8 +9,13 @@
 #define INTERRUPT_GATE_386      0xE
 #define TRAP_GATE_386           0xF
 
+#define RETURN_KEEP_CURRENT_TASK            0       // just return to the same task
+#define RETURN_TASK_SWITH_NO_SAVING         1       // the task was destroy. Do the context switch, but don't worry about saving state
+#define RETURN_TASK_SWITH_WITH_SAVING       2       // save the current task state and do the context switch
+
 #ifndef ASM_FILE
 #include <stdint.h>
+#include <hal/native_task.h>
 
 /* Defines an IDT entry */
 typedef struct {
@@ -35,7 +40,7 @@ typedef struct
 
 void idt_install();
 void idt_set_gate(unsigned num, uintptr_t base, unsigned type, unsigned ring);
-void interrupt_handler(uint64_t interrupt, uint64_t param); // called by assembly functions
+void interrupt_handler(native_task_t *native_task, int interrupt) __attribute__ ((noreturn)); // called by assembly functions
 
 // assembly functions
 void idt_fill_table();

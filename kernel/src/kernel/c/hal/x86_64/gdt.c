@@ -48,7 +48,7 @@ uint16_t gdt_set_gate(uint16_t num, uint64_t base, uint32_t limit, uint8_t type,
 
 static void tss_set(tss_entry_t *tss) {
     tss->rsp0 = (uint64_t) (kmem_alloc(SYSTEM_STACKSIZE) + SYSTEM_STACKSIZE);
-    log_trace("TSS installed at %p size 0x%x (stack at %p)", &tss, sizeof *tss, tss->rsp0);
+    log_warn("TSS installed at %p size 0x%x (stack at %p)", &tss, sizeof *tss, tss->rsp0);
     // tss->rsp1 = (uint64_t) (kmem_alloc(SYSTEM_STACKSIZE) + SYSTEM_STACKSIZE);
     // tss->rsp2 = (uint64_t) (kmem_alloc(SYSTEM_STACKSIZE) + SYSTEM_STACKSIZE);
 }

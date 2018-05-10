@@ -1,5 +1,6 @@
 #include <hal/idt.h>
 #include <hal/gdt.h>
+#include <hal/native_task.h>
 
 .extern idt_set_gate
 .extern intr_handler
@@ -11,10 +12,13 @@
 .global intr\num
 intr\num\():
 .if \errorcode
-	pushq $0
+	pushq 	$0
 .endif
-	pushq $\num
-	jmp intr_handler
+	xchg 	%bx, %bx
+	hal_save_task_state()
+	movq	%rsp, %rdi	// rdi have a pointer to native_task_t
+	movq	$\num, %rsi	// rsi instruction number
+	jmp 	intr_handler
 .endm
 
 	interrupt 0

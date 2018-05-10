@@ -31,11 +31,15 @@ task_id_t task_create();
 
 bool task_start(task_id_t task_id, uintptr_t code);
 
+void task_update_current_state(native_task_t *native_task);
+
 // task_t* task_allocate(size_t code_size, size_t data_size, size_t stack_size);
 
 // bool task_set_status(task_t* task, task_status_t status);
 
 bool task_destroy(task_id_t task_id);
+
+bool task_destroy_current_task();
 
 void do_task_switch();
 

@@ -47,6 +47,23 @@
 // from linux: https://github.com/torvalds/linux/blob/ead751507de86d90fa250431e9990a8b881f713c/arch/x86/include/asm/sighandling.h
 #define INITIAL_EFLAGS	(X86_EFLAGS_IOPL | X86_EFLAGS_FIXED | X86_EFLAGS_IF | X86_EFLAGS_ID)
 
+// register save by the hardware context switch: SS, rsp, rip (pointer), rflags
+#define hal_save_task_state() \
+    pushq %rdi; \
+    pushq %rsi; \
+    pushq %rdx; \
+    pushq %rcx; \
+    pushq %rax; \
+    pushq %r8;  \
+    pushq %r9;  \
+    pushq %r10; \
+    pushq %r11; \
+    pushq %rbx; \
+    pushq %rbp; \
+    pushq %r12; \
+    pushq %r13; \
+    pushq %r14; \
+    pushq %r15;
 
 
 #ifndef ASM_FILE
@@ -97,7 +114,7 @@ typedef struct {
 void hal_create_native_task(native_task_t *task, uintptr_t code, uintptr_t stack);
 
 // assembly
-void hal_switch_task(native_task_t *task)  __attribute__ ((noreturn));
+void hal_switch_task(native_task_t *task) __attribute__ ((noreturn));
 void hal_sleep(void) __attribute__ ((noreturn));
 
 #endif // ASM_FILE

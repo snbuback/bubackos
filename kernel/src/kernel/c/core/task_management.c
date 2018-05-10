@@ -79,6 +79,23 @@ bool task_destroy(task_id_t task_id)
     return true;
 }
 
+bool task_destroy_current_task()
+{
+    return task_destroy(get_current_task());
+}
+
+void task_update_current_state(native_task_t *native_task)
+{
+    task_t* task = get_task(get_current_task());
+    if (task == NULL) {
+        // no status to update
+        return;
+    }
+
+    // copy content from native_task
+    task->native_task = *native_task;
+}
+
 /**
  * Get the next task to execute. The current implementation tries to avoid select the same task
  */
@@ -109,6 +126,7 @@ void do_task_switch()
     task_t* task = get_next_task();
     if (task != NULL) {
         ++task->priority;
+        current_task_id = task->task_id;
         hal_switch_task(&task->native_task);
     } else {
         // halt until a new event

@@ -9,6 +9,7 @@
 platform_t platform;
 extern int user_task1;
 extern int user_task2;
+extern int user_task3;
 
 void user_tasks() {
     log_info("testing context switching");
@@ -18,6 +19,9 @@ void user_tasks() {
 
     task_id_t task2 = task_create();
     task_start(task2, (uintptr_t) &user_task2);
+
+    task_id_t task3 = task_create();
+    task_start(task3, (uintptr_t) &user_task3);
 }
 
 void bubackos_init(platform_t platform) {

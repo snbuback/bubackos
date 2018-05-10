@@ -48,17 +48,19 @@ static inline void outb(uint16_t port, uint8_t val)
      * %1 expands to %dx because  port  is a uint16_t.  %w1 could be used if we had the port number a wider C type */
 }
 
-void interrupt_handler(uint64_t interrupt, uint64_t param)
+void interrupt_handler(native_task_t *native_task, int interrupt)
 {
+    // log_debug("Interruption %d with %x", interrupt, native_task->r11);
     uint8_t key;
     task_id_t task_id;
+    int result = RETURN_KEEP_CURRENT_TASK;  // default behavior
 
     switch (interrupt) {
     case 0x8: // timer
         // log_debug("timer");
         // ack int (PIC_MASTER_CMD, PIC_CMD_EOI)
         outb(0x20, 0x20);
-        do_task_switch();
+        result = RETURN_TASK_SWITH_WITH_SAVING;
         break;
     case 0x9: // keyboard
         key = inb(0x60);
@@ -72,13 +74,23 @@ void interrupt_handler(uint64_t interrupt, uint64_t param)
         } else {
             log_fatal("General protection caused by kernel :,(");
         }
-        do_task_switch();
+        result = RETURN_TASK_SWITH_NO_SAVING;
         break;
     default:
-        log_info("Interruption %d (0x%x) / (%d) 0x%x generated", interrupt, interrupt, param, param);
+        log_info("Interruption %d (0x%x) with param %d", interrupt, interrupt, native_task->orig_rax);
         break;
     }
-    return;
+    log_trace("Interruption %d (0x%x) return %d", interrupt, interrupt, result);
+
+
+    if (result == RETURN_KEEP_CURRENT_TASK) {
+        hal_switch_task(native_task);  // fast context switching to the same task
+    } else if (result == RETURN_TASK_SWITH_WITH_SAVING) {
+        task_update_current_state(native_task);
+    }
+    do_task_switch();
+    // fix... no return here
+    return 0;
 }
 
 /* Installs the IDT */

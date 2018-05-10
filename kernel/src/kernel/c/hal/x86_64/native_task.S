@@ -21,11 +21,13 @@ hal_create_native_task:
     leave
     ret
 
+
+// hal_save_task_state: implementation in native_task.h
+
+
 // void hal_switch_task(native_task_t *task)  __attribute__ ((noreturn));
 .globl hal_switch_task
 hal_switch_task:
-	xchg %bx, %bx
-    
     // first, prepare the stack to iret, so we don't need to worry about the register values
     pushq   REG_ENTRY(20)
     pushq   REG_ENTRY(19)
@@ -41,6 +43,7 @@ hal_switch_task:
     mov     %ax, %gs
     //we don't need to worry about SS. it's handled by iret
 
+    //  TODO Improvement: controls the stack and change the instructions to use pop instead of mov (faster)
     // now, register all register, but SS, rsp, rip (pointer), rflags
     REG_RESTORE(r15, 0)
     REG_RESTORE(r14, 1)
