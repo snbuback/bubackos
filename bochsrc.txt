@@ -5,7 +5,7 @@ floppya: 1_44=/dev/loop0, status=inserted
 ata1-master: type=cdrom, path=./build/bubackos.iso, status=inserted
 display_library: x, options="gui_debug"
 boot: cdrom
-log: /tmp/bochsout.txt
+log: /dev/null
 mouse: enabled=0
 clock: sync=realtime
 cpu: model=corei7_sandy_bridge_2600k, reset_on_triple_fault=0

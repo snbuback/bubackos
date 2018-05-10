@@ -46,16 +46,8 @@ intr_handler:
 	movq	((NUM_SAVED_REGS+1)*REGISTER_SIZE)(%rsp), %rsi
 	call	interrupt_handler
 
-	// verify interrupt_handler returns. 0 means halt
-	orq		%rax, %rax
-	je		2f
-
 	# remove the interruption number and code
 	addq $(REGISTER_SIZE*2), %rsp
-
-	// ack int (PIC_MASTER_CMD, PIC_CMD_EOI)
-	movb $0x20, %al
-	outb %al, $0x20
 
 	// restore and return
 	popq %rdi;
@@ -75,10 +67,6 @@ intr_handler:
 	popq %rax;
 	iretq
 
-2:	// in case of no return from the exception, freeze
-	hlt
-	// TODO Improve this!
-	jmp	2b
 
 /* void idt_flush(uintptr_t base, uint16_t limit); */
 .globl idt_flush

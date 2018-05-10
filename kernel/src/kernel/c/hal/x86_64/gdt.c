@@ -47,16 +47,17 @@ uint16_t gdt_set_gate(uint16_t num, uint64_t base, uint32_t limit, uint8_t type,
 }
 
 static void tss_set(tss_entry_t *tss) {
-    log_trace("TSS installed at %p size 0x%x", &tss, sizeof *tss);
     tss->rsp0 = (uint64_t) (kmem_alloc(SYSTEM_STACKSIZE) + SYSTEM_STACKSIZE);
-    tss->rsp1 = (uint64_t) (kmem_alloc(SYSTEM_STACKSIZE) + SYSTEM_STACKSIZE);
-    tss->rsp2 = (uint64_t) (kmem_alloc(SYSTEM_STACKSIZE) + SYSTEM_STACKSIZE);
+    log_trace("TSS installed at %p size 0x%x (stack at %p)", &tss, sizeof *tss, tss->rsp0);
+    // tss->rsp1 = (uint64_t) (kmem_alloc(SYSTEM_STACKSIZE) + SYSTEM_STACKSIZE);
+    // tss->rsp2 = (uint64_t) (kmem_alloc(SYSTEM_STACKSIZE) + SYSTEM_STACKSIZE);
 }
 
 void gdt_install()
 {
     /* Clear GDT table. Also insert the NULL GDT */
     memset(gdt, 0, sizeof(gdt));
+    memset(&tss_entry, 0, sizeof(tss_entry));
 
     gdt_set_gate(GDT_ENTRY_KERNEL_CS, 0x0, GDT_MAXIMUM_MEMORY, GDT_TYPE_SEG_CODE_EXRD, GDT_RING_SYSTEM);
     gdt_set_gate(GDT_ENTRY_KERNEL_DS, 0x0, GDT_MAXIMUM_MEMORY, GDT_TYPE_SEG_DATA_RDWR, GDT_RING_SYSTEM);

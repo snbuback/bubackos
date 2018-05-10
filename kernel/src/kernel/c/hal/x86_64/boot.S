@@ -145,11 +145,11 @@ k_64bits:
 
   call  enable_sse
   call  intel_start
-  sti
+  
+  call  do_task_switch
 
-.keep:
-  hlt
-  jmp   .keep
+  // do_task_switch should never returns... but just to ensure...
+  call hal_sleep
 
 
 .data
@@ -184,6 +184,5 @@ gdt:
 gdt_end:
 
 .bss
-.lcomm stack_begin, SYSTEM_STACKSIZE
-
+.lcomm stack_begin, SYSTEM_STACKSIZE + 128 // 128 bytes belongs to the redzone
 

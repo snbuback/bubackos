@@ -1,7 +1,8 @@
+#include <hal/gdt.h>
+#include <hal/native_task.h>
 #define REG_RESTORE(reg, pos)       movq 8*pos(%rdi), %reg
 #define REG_ENTRY(n)                8*n(%rdi)
 
-#include <hal/gdt.h>
 .section .text
 .code64
 
@@ -10,11 +11,12 @@
 hal_create_native_task:
     enter $0, $0
 
-    movq    $(GDT_SEGMENT(GDT_ENTRY_USER_CS)+3), REG_ENTRY(17)     // user code segment with bottom 2 bits set for ring 3
-    movq    $(GDT_SEGMENT(GDT_ENTRY_USER_DS)+3), REG_ENTRY(20)     // user data segment with bottom 2 bits set for ring 3
+    movq    $(GDT_SEGMENT(GDT_ENTRY_USER_CS)+GDT_RING_USER), REG_ENTRY(17)     // user code segment with bottom 2 bits set for ring 3
+    movq    $(GDT_SEGMENT(GDT_ENTRY_USER_DS)+GDT_RING_USER), REG_ENTRY(20)     // user data segment with bottom 2 bits set for ring 3
     movq    %rdx, REG_ENTRY(4)      // rbp
     movq    %rdx, REG_ENTRY(19)     // rsp
     movq    %rsi, REG_ENTRY(16)     // code
+    movq    $INITIAL_EFLAGS, REG_ENTRY(18)  // eflags
 
     leave
     ret
@@ -22,6 +24,8 @@ hal_create_native_task:
 // void hal_switch_task(native_task_t *task)  __attribute__ ((noreturn));
 .globl hal_switch_task
 hal_switch_task:
+	xchg %bx, %bx
+    
     // first, prepare the stack to iret, so we don't need to worry about the register values
     pushq   REG_ENTRY(20)
     pushq   REG_ENTRY(19)
@@ -30,7 +34,7 @@ hal_switch_task:
     pushq   REG_ENTRY(16)
 
     // change other register segments
-    movq    $(GDT_SEGMENT(GDT_ENTRY_USER_DS)+3), %rax
+    movq    $(GDT_SEGMENT(GDT_ENTRY_USER_DS)+GDT_RING_USER), %rax
     mov     %ax, %ds
     mov     %ax, %es
     mov     %ax, %fs
@@ -54,3 +58,9 @@ hal_switch_task:
     REG_RESTORE(rsi, 13)
     REG_RESTORE(rdi, 14) // last to restore because pointer to all information
     iretq
+
+.globl hal_sleep
+hal_sleep:
+    sti
+    hlt
+    jmp hal_sleep

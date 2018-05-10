@@ -36,7 +36,7 @@ These functions are #define to the real function name, to make easy write kernel
 
 ```c
 void bubackos_init(platform_t platform);
-task_t* get_available_tasks(): list of Task (first version always returning 1 task)
+task_t* get_next_task(): list of Task (first version always returning 1 task)
 publish_hardware_event(...???)
 ```
 

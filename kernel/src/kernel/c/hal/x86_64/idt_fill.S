@@ -1,4 +1,5 @@
 #include <hal/idt.h>
+#include <hal/gdt.h>
 
 .extern idt_set_gate
 .extern intr_handler
@@ -66,15 +67,18 @@ intr\num\():
 	interrupt 47
 	interrupt 48
 	interrupt 49
+	interrupt 50
 
 /* void idt_fill_table(int num_int); */
 .globl idt_fill_table
 idt_fill_table:
 	enter $0, $0
 
-    
+// System interruption (ring 0)
+#define REGISTER_INTR(n)        movq $GDT_RING_SYSTEM, %rcx; movq $INTERRUPT_GATE_386, %rdx; movq $n, %rdi; movq $intr ## n, %rsi ; call idt_set_gate
 
-#define REGISTER_INTR(n)    movq $INTERRUPT_GATE_386, %rdx; movq $n, %rdi; movq $intr ## n, %rsi ; call idt_set_gate
+// User interruptions (ring 3)
+#define REGISTER_USR_INTR(n)     movq $GDT_RING_USER, %rcx; movq $INTERRUPT_GATE_386, %rdx; movq $n, %rdi; movq $intr ## n, %rsi ; call idt_set_gate
 
     REGISTER_INTR(0)
     REGISTER_INTR(1)
@@ -126,6 +130,7 @@ idt_fill_table:
 	REGISTER_INTR(47)
 	REGISTER_INTR(48)
 	REGISTER_INTR(49)
+	REGISTER_USR_INTR(50)
 
 	leave
 	ret

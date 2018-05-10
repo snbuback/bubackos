@@ -16,6 +16,7 @@ void user_task1() {
 	for (register uint64_t i=0;; i++) {
 		if (i%INTERACTIONS == 0) {
 			log_debug("i=%d", i/INTERACTIONS);
+			// asm("int $49");
 		}
         double cos = 2;
         double sin = 3;
@@ -36,7 +37,7 @@ void user_task2() {
 
 	for (register uint64_t i=0;; i++) {
 		if (i%INTERACTIONS == 0) {
-			log_debug("i second task=%ld", i/INTERACTIONS);
+			log_debug("i second task=%d", i/INTERACTIONS);
 		}
         double cos = 2;
         double sin = 3;

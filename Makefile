@@ -41,7 +41,7 @@ run:
 	@qemu-system-x86_64 $(QEMU_ARGS) -d guest_errors,unimp,page -monitor stdio
 
 run-debug:
-	@qemu-system-x86_64 $(QEMU_ARGS) -S -s -d guest_errors,unimp,page,in_asm
+	@qemu-system-x86_64 $(QEMU_ARGS) -S -s -monitor stdio -d guest_errors,unimp,page,int,in_asm
 
 shell:
 	@$(CONTAINER) bash

@@ -13,10 +13,10 @@ extern int user_task2;
 void user_tasks() {
     log_info("testing context switching");
 
-    task_t* task1 = task_create();
+    task_id_t task1 = task_create();
     task_start(task1, (uintptr_t) &user_task1);
 
-    task_t* task2 = task_create();
+    task_id_t task2 = task_create();
     task_start(task2, (uintptr_t) &user_task2);
 }
 

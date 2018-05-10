@@ -1,7 +1,7 @@
 #ifndef __HAL_IDT_H
 #define __HAL_IDT_H
 
-#define IDT_TOTAL_INTERRUPTIONS     256 // TODO there is a bug here. When =50 kernel are generating triple fault
+#define IDT_TOTAL_INTERRUPTIONS     50
 
 #define TASK_GATE_286           0x5
 #define INTERRUPT_GATE_286      0x6
@@ -34,8 +34,8 @@ typedef struct
 } __attribute__((packed)) idt_ptr;
 
 void idt_install();
-void idt_set_gate(unsigned num, uintptr_t base, unsigned type);
-int interrupt_handler(uint64_t interrupt, uint64_t param); // called by assembly functions
+void idt_set_gate(unsigned num, uintptr_t base, unsigned type, unsigned ring);
+void interrupt_handler(uint64_t interrupt, uint64_t param); // called by assembly functions
 
 // assembly functions
 void idt_fill_table();
