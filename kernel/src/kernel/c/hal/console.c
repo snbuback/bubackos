@@ -10,7 +10,7 @@ static size_t terminal_column;
 static uint8_t terminal_color;
 
 static const size_t console__width = 80;
-static const size_t console__height = 25;
+static const size_t console__height = 24;  // removed status bar
 
 static inline uint8_t vga_entry_color(uint8_t fg, uint8_t bg) {
 	return fg | bg << 4;
@@ -56,12 +56,13 @@ void console_initialize(void) {
 // Terminal functions
 
 void console_scroll_up(size_t rows) {
-	memcpy(console_buffer, &console_buffer[rows * console__width * sizeof(uint16_t)], (console__height-rows) * console__width * sizeof(uint16_t));
+	int number_of_lines = console__height-rows;
+	memcpy(console_buffer, &console_buffer[rows * console__width], number_of_lines * console__width * sizeof(uint16_t));
 	__console_clear(console__height-rows, 0, console__height, console__width);
 }
 
 static void need_scroll() {
-	if (terminal_row > console__height) {
+	if (terminal_row >= console__height) {
 		console_scroll_up(1);
 		terminal_row = console__height-1;
 	}

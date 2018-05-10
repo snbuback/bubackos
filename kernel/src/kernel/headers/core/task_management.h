@@ -39,8 +39,6 @@ void task_update_current_state(native_task_t *native_task);
 
 bool task_destroy(task_id_t task_id);
 
-bool task_destroy_current_task();
-
-void do_task_switch();
+void do_task_switch() __attribute__ ((noreturn));
 
 #endif

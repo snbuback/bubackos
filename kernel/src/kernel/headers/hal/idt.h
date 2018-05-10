@@ -9,10 +9,6 @@
 #define INTERRUPT_GATE_386      0xE
 #define TRAP_GATE_386           0xF
 
-#define RETURN_KEEP_CURRENT_TASK            0       // just return to the same task
-#define RETURN_TASK_SWITH_NO_SAVING         1       // the task was destroy. Do the context switch, but don't worry about saving state
-#define RETURN_TASK_SWITH_WITH_SAVING       2       // save the current task state and do the context switch
-
 #ifndef ASM_FILE
 #include <stdint.h>
 #include <hal/native_task.h>

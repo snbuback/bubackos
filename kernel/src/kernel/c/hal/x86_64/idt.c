@@ -48,49 +48,64 @@ static inline void outb(uint16_t port, uint8_t val)
      * %1 expands to %dx because  port  is a uint16_t.  %w1 could be used if we had the port number a wider C type */
 }
 
+void handle_keyboard() {
+    outb(0x20, 0x20);
+    // uint8_t key = inb(0x60);
+    // log_trace("Key pressed: 0x%x", (unsigned int) key);
+}
+
+void handle_syscall(unsigned int operation)
+{
+    log_info("syscall with operation %d", operation);
+    if (operation == 1) {
+        task_destroy(get_current_task());
+    }
+}
+
+void handle_general_protection()
+{
+    task_id_t task_id = get_current_task();
+    if (task_id != NULL_TASK) {
+        log_fatal("General protection caused by task %d. Killing task.", task_id);
+        task_destroy(task_id);
+    } else {
+        log_fatal("General protection caused by kernel :,(");
+    }
+    do_task_switch();
+}
+
 void interrupt_handler(native_task_t *native_task, int interrupt)
 {
-    // log_debug("Interruption %d with %x", interrupt, native_task->r11);
-    uint8_t key;
-    task_id_t task_id;
-    int result = RETURN_KEEP_CURRENT_TASK;  // default behavior
-
     switch (interrupt) {
     case 0x8: // timer
         // log_debug("timer");
         // ack int (PIC_MASTER_CMD, PIC_CMD_EOI)
         outb(0x20, 0x20);
-        result = RETURN_TASK_SWITH_WITH_SAVING;
-        break;
-    case 0x9: // keyboard
-        key = inb(0x60);
-        log_trace("Key pressed: 0x%x", key);
-        break;
-    case 0xD: // GP
-        task_id = get_current_task();
-        if (task_id != NULL_TASK) {
-            log_fatal("General protection caused by task %d. Killing task.", task_id);
-            task_destroy(task_id);
-        } else {
-            log_fatal("General protection caused by kernel :,(");
-        }
-        result = RETURN_TASK_SWITH_NO_SAVING;
-        break;
-    default:
-        log_info("Interruption %d (0x%x) with param %d", interrupt, interrupt, native_task->orig_rax);
-        break;
-    }
-    log_trace("Interruption %d (0x%x) return %d", interrupt, interrupt, result);
-
-
-    if (result == RETURN_KEEP_CURRENT_TASK) {
-        hal_switch_task(native_task);  // fast context switching to the same task
-    } else if (result == RETURN_TASK_SWITH_WITH_SAVING) {
         task_update_current_state(native_task);
+        do_task_switch();
+
+    case 0x9: // keyboard
+        handle_keyboard();
+        break;
+
+    case 0xD: // GP
+        handle_general_protection();
+        break;
+
+    case 0x32:
+        task_update_current_state(native_task);
+        handle_syscall(native_task->rdi);
+        break;
+
+    default:
+        task_update_current_state(native_task);
+        log_info("Unmapped interruption %d (0x%x) with param %d called", interrupt, interrupt, native_task->orig_rax);
+        break;
     }
+
     do_task_switch();
-    // fix... no return here
-    return 0;
+    // TODO check if current task is still valid
+    // hal_switch_task(native_task);  // fast context switching to the same task
 }
 
 /* Installs the IDT */

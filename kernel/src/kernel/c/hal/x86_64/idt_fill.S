@@ -14,7 +14,6 @@ intr\num\():
 .if \errorcode
 	pushq 	$0
 .endif
-	xchg 	%bx, %bx
 	hal_save_task_state()
 	movq	%rsp, %rdi	// rdi have a pointer to native_task_t
 	movq	$\num, %rsi	// rsi instruction number

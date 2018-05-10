@@ -22,8 +22,11 @@ void* kmem_alloc(size_t size)
  */
 void kmem_free(void *addr)
 {
-    log_info("Releasing memory at %p (dummy). Used %d MB", addr, total_allocated/1024/1024);
-    // not implemented yet
+    if (addr != NULL) {
+        // release
+    }
+    // log_info("Releasing memory at %p (dummy). Used %d MB", addr, total_allocated/1024/1024);
+    // TODO not implemented yet
 }
 
 

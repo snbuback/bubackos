@@ -38,10 +38,10 @@ iso:
 	@$(CONTAINER) ./gradlew iso
 
 run:
-	@qemu-system-x86_64 $(QEMU_ARGS) -d guest_errors,unimp,page -monitor stdio
+	@qemu-system-x86_64 $(QEMU_ARGS) -monitor stdio -d guest_errors,unimp,page
 
 run-debug:
-	@qemu-system-x86_64 $(QEMU_ARGS) -S -s -monitor stdio -d guest_errors,unimp,page,int,in_asm
+	@qemu-system-x86_64 $(QEMU_ARGS) -monitor stdio -d guest_errors,unimp,page  -S -s
 
 shell:
 	@$(CONTAINER) bash

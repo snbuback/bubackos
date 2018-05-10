@@ -65,7 +65,7 @@ void logging(int level, const char* tag, const char* fmt, ...)
 }
 
 void logging_init() {
-    log_set_level(LOG_DEBUG);
+    log_set_level(LOG_TRACE);
     log_set_quiet(0);
 }
 

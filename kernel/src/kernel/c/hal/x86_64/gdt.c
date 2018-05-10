@@ -7,10 +7,8 @@
 #include <hal/gdt.h>
 #include <hal/tss.h>
 
-#pragma GCC diagnostic ignored "-Wpointer-to-int-cast"
-
-gdt_entry gdt[GDT_MAXIMUM_SIZE] __attribute__ ((aligned));
-tss_entry_t tss_entry __attribute__ ((aligned));
+static gdt_entry gdt[GDT_MAXIMUM_SIZE] __attribute__ ((aligned));
+static tss_entry_t tss_entry __attribute__ ((aligned));
 
 /* Setup a descriptor in the Global Descriptor Table */
 uint16_t gdt_set_gate(uint16_t num, uint64_t base, uint32_t limit, uint8_t type, uint8_t ring)
@@ -41,14 +39,13 @@ uint16_t gdt_set_gate(uint16_t num, uint64_t base, uint32_t limit, uint8_t type,
 
     // GDT entry is created as local variable and assigned in the end of this function call. This helps
     // debug process that watches for writing in gdt memory addres.
-    // log_debug("new_entry=%p  %d %p", &new_entry, sizeof(new_entry), &gdt[num]);
     gdt[num] = new_entry;
     return num;
 }
 
 static void tss_set(tss_entry_t *tss) {
     tss->rsp0 = (uint64_t) (kmem_alloc(SYSTEM_STACKSIZE) + SYSTEM_STACKSIZE);
-    log_warn("TSS installed at %p size 0x%x (stack at %p)", &tss, sizeof *tss, tss->rsp0);
+    log_trace("TSS installed at %p size 0x%x (stack at %p)", &tss, sizeof *tss, tss->rsp0);
     // tss->rsp1 = (uint64_t) (kmem_alloc(SYSTEM_STACKSIZE) + SYSTEM_STACKSIZE);
     // tss->rsp2 = (uint64_t) (kmem_alloc(SYSTEM_STACKSIZE) + SYSTEM_STACKSIZE);
 }
@@ -68,9 +65,9 @@ void gdt_install()
 
     /* Flush our the old GDT / TSS and install the new changes! */
     uint16_t gdt_limit = (sizeof(gdt_entry) * GDT_MAXIMUM_SIZE) - 1;
-    log_debug("Flushing GDT table at %p, size of %x", &gdt, gdt_limit);
+    log_trace("Flushing GDT table at %p, size of %x", &gdt, gdt_limit);
     gdt_flush((uintptr_t) &gdt, gdt_limit);
 
-    log_debug("Flushing TSS table using entry %d (%x)", GDT_ENTRY_TSS, GDT_SEGMENT(GDT_ENTRY_TSS));
+    log_trace("Flushing TSS table using entry %d (%x)", GDT_ENTRY_TSS, GDT_SEGMENT(GDT_ENTRY_TSS));
     tss_flush(GDT_SEGMENT(GDT_ENTRY_TSS));
 }

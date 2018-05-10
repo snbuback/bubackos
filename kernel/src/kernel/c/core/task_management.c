@@ -79,11 +79,6 @@ bool task_destroy(task_id_t task_id)
     return true;
 }
 
-bool task_destroy_current_task()
-{
-    return task_destroy(get_current_task());
-}
-
 void task_update_current_state(native_task_t *native_task)
 {
     task_t* task = get_task(get_current_task());
@@ -130,6 +125,7 @@ void do_task_switch()
         hal_switch_task(&task->native_task);
     } else {
         // halt until a new event
+        current_task_id = 0;
         hal_sleep();
     }
 }

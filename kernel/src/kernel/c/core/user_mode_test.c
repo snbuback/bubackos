@@ -4,8 +4,13 @@
 #include <hal/console.h>
 #include <core/task_management.h>
 
-#define INTERACTIONS 3000000
+#define INTERACTIONS 	3000000
 #define BUFFER_SIZE		100
+
+void syscall()
+{
+	asm volatile("xchg %bx, %bx; mov $1, %rdi; int $50");
+}
 
 void user_task1() {
 	char buffer[BUFFER_SIZE];
@@ -46,11 +51,10 @@ void user_task3() {
 			size_t sz = snprintf(buffer, BUFFER_SIZE, "task 3=%d", i/INTERACTIONS);
 			console_raw_write(buffer, sz, 11, 24, 35);
 		}
-		if (i/INTERACTIONS == 10 && !destroyed) {
-			log_info("Killing");
-			asm("int $0x50");
-			log_info("This should not happened");
-			break;
+		if (i/INTERACTIONS == 1 && !destroyed) {
+			log_info("syscall");
+			syscall();
+			log_info("Return from syscall");
 		}
         double cos = 2;
         double sin = 3;
