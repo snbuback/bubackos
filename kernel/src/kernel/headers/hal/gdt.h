@@ -74,6 +74,8 @@ typedef struct {
     unsigned : 32;
 } __attribute__((packed)) gdt_entry;
 
+extern uintptr_t kernel_stack;
+
 void gdt_install();
 
 // assembly functions

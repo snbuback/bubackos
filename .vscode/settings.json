@@ -19,7 +19,12 @@
         "memory_management.h": "c",
         "task_management.h": "c",
         "configuration.h": "c",
-        "algorithm": "cpp"
+        "algorithm": "cpp",
+        "deque": "c",
+        "vector": "c",
+        "functional": "c",
+        "iterator": "c",
+        "memory": "c"
     },
     "python.pythonPath": "/usr/local/bin/python3",
     "java.configuration.updateBuildConfiguration": "automatic",

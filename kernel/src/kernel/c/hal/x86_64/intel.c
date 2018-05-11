@@ -20,7 +20,7 @@ void intel_start(uint64_t magic, uintptr_t addr)
 	platform.console.height = 25;
 
 	gdt_install();
-	idt_install();
+	idt_initialize();
 
 	// multiboot_parser fills memory information
 	if (multiboot_parser(magic, addr, &platform) == -1) {
@@ -29,6 +29,8 @@ void intel_start(uint64_t magic, uintptr_t addr)
 	}
 
 	bubackos_init(platform);
+
+	idt_install();
 
     log_info("Intel System ready");
 }

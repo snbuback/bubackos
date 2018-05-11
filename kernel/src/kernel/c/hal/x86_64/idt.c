@@ -4,6 +4,7 @@
 #include <hal/idt.h>
 #include <core/logging.h>
 #include <core/task_management.h>
+#include <core/syscall.h>
 
 /** Declare an IDT of 256 entries.  Although we will only use the
  * first 32 entries in this tutorial, the rest exists as a bit
@@ -12,6 +13,9 @@
  * for which the 'presence' bit is cleared (0) will generate an
  * "Unhandled Interrupt" exception */
 static volatile idt_entry idt[IDT_TOTAL_INTERRUPTIONS] = {};
+
+// pointer to the syscall function
+syscall_handler_t syscall_handler;
 
 /* Use this function to set an entry in the IDT.  A lot simpler
  * than twiddling with the GDT ;) */
@@ -54,14 +58,6 @@ void handle_keyboard() {
     // log_trace("Key pressed: 0x%x", (unsigned int) key);
 }
 
-void handle_syscall(unsigned int operation)
-{
-    log_info("syscall with operation %d", operation);
-    if (operation == 1) {
-        task_destroy(get_current_task());
-    }
-}
-
 void handle_general_protection()
 {
     task_id_t task_id = get_current_task();
@@ -92,9 +88,9 @@ void interrupt_handler(native_task_t *native_task, int interrupt)
         handle_general_protection();
         break;
 
-    case 0x32:
+    case INT_SYSTEM_CALL:
+        native_task->rax = syscall_handler(native_task->rdi);
         task_update_current_state(native_task);
-        handle_syscall(native_task->rdi);
         break;
 
     default:
@@ -108,12 +104,21 @@ void interrupt_handler(native_task_t *native_task, int interrupt)
     // hal_switch_task(native_task);  // fast context switching to the same task
 }
 
+void idt_initialize()
+{
+    idt_fill_table();
+}
+
 /* Installs the IDT */
 void idt_install()
 {
     log_debug("IDT Table at %p of size %d bytes", &idt, sizeof(idt));
-
-    idt_fill_table();
-
     idt_flush((uintptr_t) &idt, sizeof(idt) - 1);
+    syscall_install(kernel_stack);
+}
+
+void hal_register_syscall_handler(syscall_handler_t _new_handler)
+{
+    syscall_handler = _new_handler;
+
 }

@@ -92,8 +92,8 @@ enable_paging:
 
   /* Page 2749
   ; Set master (PML4) page table in CR3. */
-  movl   $PML4E_ADDR, %eax
-  movl  %eax, %cr3
+  movl    $PML4E_ADDR, %eax
+  movl    %eax, %cr3
 
   /* Page 4382
   ; Set IA-32e Mode Enable (read: 64-bit mode enable) in the "model-specific
