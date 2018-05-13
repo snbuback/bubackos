@@ -10,14 +10,12 @@
 #include <hal/idt.h>
 #include <hal/native_task.h>
 
+static platform_t platform;
+
 void intel_start(uint64_t magic, uintptr_t addr)
 {
-	platform_t platform;
-
 	// is necessary to initialize the terminal soon as possible to enable basic logging function
 	console_initialize();
-	platform.console.width = 80;
-	platform.console.height = 25;
 
 	gdt_install();
 	idt_initialize();

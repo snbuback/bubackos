@@ -87,7 +87,7 @@
 #define MULTIBOOT_CONSOLE_FLAGS_CONSOLE_REQUIRED 1
 #define MULTIBOOT_CONSOLE_FLAGS_EGA_TEXT_SUPPORTED 2
 
-#ifndef ASM_FILE
+#ifndef __ASSEMBLER__
 #include <stdint.h>
 #include <hal/platform.h>
 
@@ -416,6 +416,6 @@ struct multiboot_tag_load_base_addr
 
 int multiboot_parser(uint64_t magic, uintptr_t addr, platform_t *platform);
 
-#endif /*  ! ASM_FILE */
+#endif /*  ! __ASSEMBLER__ */
 
 #endif /*  ! MULTIBOOT_HEADER */

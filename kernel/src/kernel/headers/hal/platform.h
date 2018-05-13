@@ -11,8 +11,8 @@ typedef uint8_t text_color_t;
 typedef struct {
     console_pos_t width;
     console_pos_t height;
-    void (*write_func)(const char* text, size_t size, text_color_t color, console_pos_t row, console_pos_t col);
-    // missing read
+    console_pos_t pos_row;
+    console_pos_t pos_col;
 } text_console_t;
 
 typedef struct {

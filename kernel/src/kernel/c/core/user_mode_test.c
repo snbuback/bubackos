@@ -9,7 +9,7 @@
 
 void syscall()
 {
-    asm volatile("xchg %bx, %bx; mov $1, %rdi; syscall");
+    asm volatile("mov $1, %rdi; int $50");
 }
 
 void something_slow()
@@ -46,18 +46,5 @@ void user_task3() {
     log_info("syscall");
     syscall();
     log_info("Return from syscall");
-
-    char buffer[BUFFER_SIZE];
-    for (register int i=0;; i++) {
-        asm volatile ("movq $0x3333, %r11; movq $0x3337, %r15");
-        if (i%INTERACTIONS == 0) {
-            size_t sz = snprintf(buffer, BUFFER_SIZE, "task 3=%d", i/INTERACTIONS);
-            console_raw_write(buffer, sz, 11, 24, 35);
-        }
-/*		if (i/INTERACTIONS == 1 && !destroyed) {
-            log_info("syscall");
-            syscall();
-            log_info("Return from syscall");
-        }*/
-    }
+    for(;;);
 }

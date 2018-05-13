@@ -6,7 +6,7 @@
 boot_hal:
 .code32
   /* save grub parameters in the data section */
-  mov     $stack_begin + SYSTEM_STACKSIZE, %ebp
+  mov     $cpu0_kernel_stack + SYSTEM_STACKSIZE, %ebp
   mov     %ebp, %esp
   pushl   $0
   pushl   %eax
@@ -146,10 +146,8 @@ k_64bits:
   call  enable_sse
   call  intel_start
   
-  call  do_task_switch
-
-  // do_task_switch should never returns... but just to ensure...
-  call hal_sleep
+  // do_task_switch should never returns... but just to ensure the return address is 1234
+  jmp   do_task_switch
 
 
 .data
@@ -184,5 +182,6 @@ gdt:
 gdt_end:
 
 .bss
-.lcomm stack_begin, SYSTEM_STACKSIZE + 128 // 128 bytes belongs to the redzone
+.globl cpu0_kernel_stack
+.lcomm cpu0_kernel_stack, SYSTEM_STACKSIZE
 

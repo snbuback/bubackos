@@ -9,7 +9,7 @@
 
 static gdt_entry gdt[GDT_MAXIMUM_SIZE] __attribute__ ((aligned));
 static tss_entry_t tss_entry __attribute__ ((aligned));
-uintptr_t kernel_stack;
+static uintptr_t* kernel_stacks __attribute__ ((aligned)); // per cpu
 
 /* Setup a descriptor in the Global Descriptor Table */
 uint16_t gdt_set_gate(uint16_t num, uint64_t base, uint32_t limit, uint8_t type, uint8_t ring)
@@ -45,10 +45,17 @@ uint16_t gdt_set_gate(uint16_t num, uint64_t base, uint32_t limit, uint8_t type,
 }
 
 static void tss_set(tss_entry_t *tss) {
-    tss->rsp0 = kernel_stack;
-    log_trace("TSS installed at %p size 0x%x (stack at %p)", &tss, sizeof *tss, tss->rsp0);
+    uintptr_t kernel_stack_address = *get_kernel_stack();
+    tss->rsp0_0_31 = kernel_stack_address & 0xFFFFFFFF;
+    tss->rsp0_32_63 = kernel_stack_address >> 32;
+    log_trace("TSS installed at %p size 0x%x (stack at %p)", &tss, sizeof *tss, kernel_stack_address);
     // tss->rsp1 = (uint64_t) (kmem_alloc(SYSTEM_STACKSIZE) + SYSTEM_STACKSIZE);
     // tss->rsp2 = (uint64_t) (kmem_alloc(SYSTEM_STACKSIZE) + SYSTEM_STACKSIZE);
+}
+
+uintptr_t* get_kernel_stack() {
+    // as today there is support for 1 cpu
+    return kernel_stacks;
 }
 
 void gdt_install()
@@ -57,7 +64,11 @@ void gdt_install()
     memset(gdt, 0, sizeof(gdt));
     memset(&tss_entry, 0, sizeof(tss_entry));
 
-    kernel_stack = (uint64_t) (kmem_alloc(SYSTEM_STACKSIZE) + SYSTEM_STACKSIZE);
+    // initialize kernel stack per cpu (currently 1)
+    kernel_stacks = (uintptr_t*) kmem_alloc(1 * sizeof(uintptr_t));
+    kernel_stacks[0] = (uintptr_t) (kmem_alloc(SYSTEM_STACKSIZE) + SYSTEM_STACKSIZE);
+    log_trace("Kernel stack at %p (pointer to pointer at %p)", kernel_stacks[0], kernel_stacks);
+    log_trace("*get_kernel_stack() = %p", *get_kernel_stack());
 
     gdt_set_gate(GDT_ENTRY_KERNEL_CS, 0x0, GDT_MAXIMUM_MEMORY, GDT_TYPE_SEG_CODE_EXRD, GDT_RING_SYSTEM);
     gdt_set_gate(GDT_ENTRY_KERNEL_DS, 0x0, GDT_MAXIMUM_MEMORY, GDT_TYPE_SEG_DATA_RDWR, GDT_RING_SYSTEM);

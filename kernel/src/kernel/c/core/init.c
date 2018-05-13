@@ -12,7 +12,7 @@ extern int user_task2;
 extern int user_task3;
 
 void user_tasks() {
-    log_info("testing context switching");
+    log_info("creating dummy tasks");
 
     task_id_t task1 = task_create();
     task_start(task1, (uintptr_t) &user_task1);

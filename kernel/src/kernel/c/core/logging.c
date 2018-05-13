@@ -16,7 +16,7 @@ typedef struct {
 } logging_config_t;
 
 // The default values here are utilized by the HAL module during startup
-static logging_config_t L = { .level = LOG_INFO, .quiet = 0 };
+static logging_config_t L = { .level = LOG_TRACE, .quiet = 0 };
 
 static const char* level_names[] = {
     "TRACE", "DEBUG", "INFO", "WARN", "ERROR", "FATAL"
@@ -42,7 +42,8 @@ int logging_format(char* buf, int level, const char *tag, const char *format, va
         return MIN(size, LOGGING_MAX_LINE);
 }
 
-static void logging_output(char *log_line, size_t size) {
+void logging_output(char *log_line, size_t size)
+{
     console_write(log_line, size);
     console_write("\n", 1);
 }

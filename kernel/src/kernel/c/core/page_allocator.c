@@ -33,7 +33,6 @@ void page_allocator_initialize(size_t t)
 {
     total_memory = t;
     total_of_pages = total_memory / SYSTEM_PAGE_SIZE;
-    log_trace("kmem_alloc=%d", sizeof(page_type) * total_of_pages);
     pages = (page_type*) kmem_alloc(sizeof(page_type) * total_of_pages);
 
     log_trace("Page allocator data: start=%p end=%p total_of_pages=%d page size=%d", (void*)pages, (void*)pages + (total_of_pages + 1), total_of_pages, SYSTEM_PAGE_SIZE);

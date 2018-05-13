@@ -24,10 +24,24 @@
         "vector": "c",
         "functional": "c",
         "iterator": "c",
-        "memory": "c"
+        "memory": "c",
+        "exception": "c",
+        "__split_buffer": "c",
+        "initializer_list": "c",
+        "queue": "c",
+        "utility": "c",
+        "__functional_base": "c",
+        "__functional_base_03": "c",
+        "__tuple": "c",
+        "limits": "c",
+        "tuple": "c",
+        "type_traits": "c",
+        "__bit_reference": "c",
+        "stdint.h": "c"
     },
     "python.pythonPath": "/usr/local/bin/python3",
     "java.configuration.updateBuildConfiguration": "automatic",
     "editor.tabSize": 4,
-    "editor.useTabStops": false
+    "editor.useTabStops": false,
+    "C_Cpp.dimInactiveRegions": false
 }

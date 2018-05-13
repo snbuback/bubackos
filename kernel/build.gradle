@@ -1,7 +1,7 @@
 apply plugin: "c"
 apply plugin: "assembler"
 
-def COMPILER_ARGS = ["-g", "-march=nehalem", "-std=gnu99", "-ffreestanding", "-Wall", "-Werror", "-mno-red-zone", "-Wextra", "-DNDEBUG"]
+def COMPILER_ARGS = ["-g", "-march=nehalem", "-std=gnu99", "-ffreestanding", "-Wall", "-Werror", "-mno-red-zone", "-Wextra", "-DNDEBUG", "-include", "hal/debugger.h"]
 
 model {
     platforms {
@@ -16,12 +16,9 @@ model {
                 assembler.withArguments { args ->
                     args.remove "-x"  // this arguments is breaking the as
                     args.remove "assembler"  // this arguments is breaking the as
+                    args.addAll COMPILER_ARGS
                     args << "-I$project.projectDir/src/kernel/headers"
                     args << "-I$project.projectDir/src/libk/headers"
-                    // args.remove "-m64"  // this arguments is breaking the linker
-                    // args << "-m32"
-                    args << "-DASM_FILE=1"
-                    args << "-g"
                 }
                 cCompiler.executable = 'x86_64-elf-gcc'
                 cCompiler.withArguments { args ->
@@ -30,6 +27,7 @@ model {
                 linker.executable = 'x86_64-elf-ld'
                 linker.withArguments { args ->
                     args.remove "-m64"  // this arguments is breaking the linker
+                    args << "--discard-none"  // avoid remote debug symbols
                 }
             }
         }
@@ -63,8 +61,18 @@ model {
 
 task run_tests(type:Exec) {
     description 'Run unity tests'
-    FileTree tree = fileTree(dir: 'src/libk/test', include: '**/*.c')
+    FileTree tree = fileTree(dir: 'src', include: '**/test/**/*.c')
     inputs.files tree
+
+    def test_compiler_args = []
+    test_compiler_args.addAll COMPILER_ARGS
+    test_compiler_args.remove "-Werror"
+    test_compiler_args << "-Wno-unused-variable"
+    test_compiler_args << "-Wno-unused-parameter"
+    test_compiler_args << "-Wl,--warn-unresolved-symbols"
+    test_compiler_args << "-I./unity/src unity/src/unity.c"
+    test_compiler_args << "-I${project.projectDir}/src/kernel/headers"
+    test_compiler_args << "-I${project.projectDir}/src/libk/headers"
 
     String script = """
     set -e
@@ -73,10 +81,10 @@ task run_tests(type:Exec) {
     mkdir -p \$BUILD_DIR
     """
     tree.each { File file ->
-        def sourceFiles = getSourceFiles(file.text, "${project.projectDir}/src/libk/c")
+        def sourceFiles = getSourceFiles(file.text, "${project.projectDir}/src")
         script += """
             ruby \$UNITY_ROOT/auto/generate_test_runner.rb ${file} \$BUILD_DIR/${file.name}
-            gcc ${COMPILER_ARGS.join(' ')} -m64 -I./unity/src unity/src/unity.c ${file} \$BUILD_DIR/${file.name} ${sourceFiles.join(' ')} -o \$BUILD_DIR/${file.name}.run
+            gcc ${test_compiler_args.join(' ')}  ${file} \$BUILD_DIR/${file.name} ${sourceFiles.join(' ')} -o \$BUILD_DIR/${file.name}.run
             echo "Running ${file.name}"; \$BUILD_DIR/${file.name}.run
         """
     }

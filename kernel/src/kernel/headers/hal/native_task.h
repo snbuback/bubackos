@@ -66,7 +66,7 @@
     pushq %r15;
 
 
-#ifndef ASM_FILE
+#ifndef __ASSEMBLER__
 #include <stdint.h>
 // native_task_t is hardware dependent
 // IMPORTANT: Never changes the layout of native_task_t without change it in native_task.S
@@ -117,6 +117,6 @@ void hal_create_native_task(native_task_t *task, uintptr_t code, uintptr_t stack
 void hal_switch_task(native_task_t *task) __attribute__ ((noreturn));
 void hal_sleep(void) __attribute__ ((noreturn));
 
-#endif // ASM_FILE
+#endif // __ASSEMBLER__
 
 #endif

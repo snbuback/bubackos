@@ -20,6 +20,9 @@ func:
 #define REGISTER_SIZE 	8
 
 .extern interrupt_handler
+.extern do_syscall
+.extern do_task_switch
+.extern task_update_current_state
 .text
 .code64
 
@@ -30,7 +33,6 @@ func:
 .globl intr_handler
 intr_handler:
     jmp		interrupt_handler
-
 
 
 /* void idt_flush(uintptr_t base, uint16_t limit); */
@@ -49,7 +51,6 @@ idt_flush:
  */
 .globl syscall_install
 syscall_install:
-    xchg    %bx, %bx
     // rdi pointer to the stack address
     pushq   %rbp
     movq    %rsp, %rbp
@@ -97,15 +98,17 @@ syscall_install:
     
 
 .syscall_jumper:
-    xchg    %bx, %bx
     cli
     swapgs
+    /* save user stack pointer. Since rax is the return of syscall there is no problem in change it's value */
+    movq    %rsp, %rax
+    movq    %gs:0, %rsp
 
     pushq   $(GDT_SEGMENT(GDT_ENTRY_USER_DS)+GDT_RING_USER) // ss
-    pushq   %rsp // rsp
-    pushq   %r11 // r11 (contains rflags after sysenter)
+    pushq   %rax    // user's rsp
+    pushq   %r11    // r11 (contains rflags after sysenter)
     pushq   $(GDT_SEGMENT(GDT_ENTRY_USER_CS)+GDT_RING_USER) // cs
-    pushq   %rcx
+    pushq   %rcx    // user's next instruction
     pushq   $0
 
     hal_save_task_state()
@@ -114,7 +117,6 @@ syscall_install:
     movq    %rsp, %rdi
     call    task_update_current_state
 
-.extern syscall_handler
     movq    14*8(%rdi), %rsi
     call    do_syscall
     call    do_task_switch

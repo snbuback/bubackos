@@ -49,7 +49,7 @@
 
 #define GDT_SEGMENT(index)             (index*16)
 
-#ifndef ASM_FILE
+#ifndef __ASSEMBLER__
 #include <stdint.h>
 #include <stdbool.h>
 
@@ -74,7 +74,7 @@ typedef struct {
     unsigned : 32;
 } __attribute__((packed)) gdt_entry;
 
-extern uintptr_t kernel_stack;
+uintptr_t* get_kernel_stack();
 
 void gdt_install();
 
@@ -82,5 +82,5 @@ void gdt_install();
 void gdt_flush(uintptr_t base, uint16_t limit);
 void tss_flush(uint16_t gdt_entry_number);
 
-#endif // ASM_FILE
+#endif // __ASSEMBLER__
 #endif

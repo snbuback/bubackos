@@ -11,7 +11,7 @@ ifeq ($(UNAME_S),Darwin)
 else
     CONTAINER=
 endif
-QEMU_ARGS=-m 128 -cpu Nehalem -cdrom $(BUILD_DIR)/bubackos.iso -no-reboot -no-shutdown -usb -device usb-tablet -show-cursor
+QEMU_ARGS=-m 128 -cpu Nehalem -boot order=d -cdrom $(BUILD_DIR)/bubackos.iso -no-reboot -no-shutdown -usb -device usb-tablet -show-cursor -d guest_errors,unimp,page,int
 
 
 .PHONY: all build run run-debug shell gdb docker-build
@@ -37,17 +37,32 @@ build:
 iso:
 	@$(CONTAINER) ./gradlew iso
 
+test:
+	@$(CONTAINER) ./gradlew kernel:run_tests
+
 run:
-	@qemu-system-x86_64 $(QEMU_ARGS) -monitor stdio -d guest_errors,unimp,page
+	@qemu-system-x86_64 $(QEMU_ARGS) -monitor stdio
 
 run-debug:
-	@qemu-system-x86_64 $(QEMU_ARGS) -monitor stdio -d guest_errors,unimp,page  -S -s
-
-shell:
-	@$(CONTAINER) bash
+	@qemu-system-x86_64 $(QEMU_ARGS) -monitor stdio -S -s
 
 gdb:
-	@$(CONTAINER) gdb -iex 'file build/bootloader/boot/bubackos.elf' -iex 'target remote docker.for.mac.localhost:1234' -iex 'break intel_start'  -iex 'continue'
+	@$(CONTAINER) gdb -iex 'file $(BUILD_DIR)/bootloader/boot/bubackos.elf' -iex 'target remote docker.for.mac.localhost:1234' -iex 'break intel_start'  -iex 'continue'
+
+debug:
+	@$(CONTAINER) tmux \
+		new-session -d \
+			qemu-system-x86_64 $(QEMU_ARGS) -S -s -display curses -monitor /dev/pts/3 -d guest_errors,unimp,page,in_asm,int -D /dev/pts/3 \; \
+		split-window -d \
+			./tools/gdb-startup.sh localhost:1234 \; \
+		split-window -h -d \
+			bash -c 'sleep 1; tail --pid=`pgrep qemu-system` -f /dev/null' \; \
+		attach
+
+symbol-dump:
+	@$(CONTAINER) objdump -t $(BUILD_DIR)/bootloader/boot/bubackos.elf  | sort -n
+shell:
+	@$(CONTAINER) bash
 
 docker-build:
 	docker build --build-arg SYSROOT=$(SYSROOT) \

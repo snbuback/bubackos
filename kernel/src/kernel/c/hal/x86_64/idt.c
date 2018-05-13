@@ -21,7 +21,7 @@ syscall_handler_t syscall_handler;
  * than twiddling with the GDT ;) */
 void idt_set_gate(unsigned num, uintptr_t base, unsigned type, unsigned ring)
 {
-    log_trace("Set interrupt gate %d (0x%x) at %p type %x", num, num, base, type);
+    // log_trace("Set interrupt gate %d (0x%x) at %p type %x", num, num, base, type);
     idt[num].base_0_15 = (base & 0xFFFF);
     idt[num].base_16_31 = (base >> 16) & 0xFFFF;
     idt[num].base_32_63 = (base >> 32) & 0xFFFFFFFF;
@@ -114,7 +114,7 @@ void idt_install()
 {
     log_debug("IDT Table at %p of size %d bytes", &idt, sizeof(idt));
     idt_flush((uintptr_t) &idt, sizeof(idt) - 1);
-    syscall_install(kernel_stack);
+    syscall_install(get_kernel_stack());
 }
 
 void hal_register_syscall_handler(syscall_handler_t _new_handler)

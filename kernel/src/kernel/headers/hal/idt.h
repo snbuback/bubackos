@@ -11,7 +11,7 @@
 
 #define INT_SYSTEM_CALL   50      // 0x32
 
-#ifndef ASM_FILE
+#ifndef __ASSEMBLER__
 #include <stdint.h>
 #include <hal/native_task.h>
 
@@ -39,7 +39,7 @@ typedef struct
 
 void idt_initialize();
 void idt_install();
-void syscall_install(uintptr_t stack);
+void syscall_install(uintptr_t* stack);
 void idt_set_gate(unsigned num, uintptr_t base, unsigned type, unsigned ring);
 void interrupt_handler(native_task_t *native_task, int interrupt) __attribute__ ((noreturn)); // called by assembly functions
 
@@ -47,5 +47,5 @@ void interrupt_handler(native_task_t *native_task, int interrupt) __attribute__ 
 void idt_fill_table();
 void idt_flush(uintptr_t base, uint16_t limit);
 
-#endif // ASM_FILE
+#endif // __ASSEMBLER__
 #endif

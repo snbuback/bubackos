@@ -2,6 +2,7 @@
 #define LOG_H
 
 #include <stdarg.h>
+#include <stdlib.h>
 
 enum { LOG_TRACE, LOG_DEBUG, LOG_INFO, LOG_WARN, LOG_ERROR, LOG_FATAL };
 
@@ -18,5 +19,6 @@ void log_set_quiet(int enable);
 
 void logging_init();
 void logging(int level, const char *tag, const char *fmt, ...);
+void logging_output(char *log_line, size_t size) __attribute__ ((weak));
 
 #endif

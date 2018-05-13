@@ -61,7 +61,7 @@ bool task_start(task_id_t task_id, uintptr_t code)
         return false;
     }
 
-    hal_create_native_task(&task->native_task, code, task->stack_address + task->stack_size - sizeof(long));
+    hal_create_native_task(&task->native_task, code, task->stack_address + task->stack_size);
     task->status = TASK_STATUS_READY;
     return true;
 }
@@ -73,6 +73,7 @@ bool task_destroy(task_id_t task_id)
         log_warn("Invalid task to destroy: %d", task_id);
         return false;
     }
+    log_debug("Destroying task %d", task_id);
     // TODO clean up task data
     kmem_free(task);
     task_list[task_id] = NULL;
