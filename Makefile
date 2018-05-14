@@ -11,7 +11,7 @@ ifeq ($(UNAME_S),Darwin)
 else
     CONTAINER=
 endif
-QEMU_ARGS=-m 128 -cpu Nehalem -boot order=d -cdrom $(BUILD_DIR)/bubackos.iso -no-reboot -no-shutdown -usb -device usb-tablet -show-cursor -d guest_errors,unimp,page,int
+QEMU_ARGS=-m 128 -cpu Nehalem -boot order=d -cdrom $(BUILD_DIR)/bubackos.iso -no-reboot -no-shutdown -usb -device usb-tablet -show-cursor -d guest_errors,unimp,page
 
 
 .PHONY: all build run run-debug shell gdb docker-build
@@ -59,8 +59,13 @@ debug:
 			bash -c 'sleep 1; tail --pid=`pgrep qemu-system` -f /dev/null' \; \
 		attach
 
-symbol-dump:
+dump-symbols:
 	@$(CONTAINER) objdump -t $(BUILD_DIR)/bootloader/boot/bubackos.elf  | sort -n
+
+dump-asm:
+	@$(CONTAINER) objdump -xd $(BUILD_DIR)/bootloader/boot/bubackos.elf 
+
+
 shell:
 	@$(CONTAINER) bash
 

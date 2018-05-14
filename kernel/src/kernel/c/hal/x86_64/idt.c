@@ -14,9 +14,6 @@
  * "Unhandled Interrupt" exception */
 static volatile idt_entry idt[IDT_TOTAL_INTERRUPTIONS] = {};
 
-// pointer to the syscall function
-syscall_handler_t syscall_handler;
-
 /* Use this function to set an entry in the IDT.  A lot simpler
  * than twiddling with the GDT ;) */
 void idt_set_gate(unsigned num, uintptr_t base, unsigned type, unsigned ring)
@@ -88,8 +85,14 @@ void interrupt_handler(native_task_t *native_task, int interrupt)
         handle_general_protection();
         break;
 
+    case 0x6: // Invalid OPCODE
+        DEBUGGER();
+        handle_general_protection();
+        break;
+
     case INT_SYSTEM_CALL:
-        native_task->rax = syscall_handler(native_task->rdi);
+        native_task->rax = do_syscall(native_task, native_task->rdi);
+        // TODO There is two calls to 'task_update_current_state' during the syscall
         task_update_current_state(native_task);
         break;
 
@@ -115,10 +118,4 @@ void idt_install()
     log_debug("IDT Table at %p of size %d bytes", &idt, sizeof(idt));
     idt_flush((uintptr_t) &idt, sizeof(idt) - 1);
     syscall_install(get_kernel_stack());
-}
-
-void hal_register_syscall_handler(syscall_handler_t _new_handler)
-{
-    syscall_handler = _new_handler;
-
 }

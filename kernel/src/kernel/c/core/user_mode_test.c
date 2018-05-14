@@ -9,7 +9,7 @@
 
 void syscall()
 {
-    asm volatile("mov $1, %rdi; int $50");
+    asm volatile("mov $1, %rdi; syscall");
 }
 
 void something_slow()
