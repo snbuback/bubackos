@@ -1,6 +1,7 @@
 #include <core/configuration.h>
 #include <core/logging.h>
 #include <core/memory_management.h>
+#include <hal/hal.h>
 #include <core/task_management.h>
 #include <hal/native_task.h>
 #include <stdbool.h>
@@ -32,7 +33,7 @@ task_id_t get_current_task(void)
     return current_task_id;
 }
 
-task_id_t task_create()
+task_id_t task_create(char *name, native_page_table_t* native_page_table)
 {
     task_id_t task_id = ++last_id;
     if (task_id >= SYSTEM_LIMIT_OF_TASKS) {
@@ -44,10 +45,12 @@ task_id_t task_create()
     memset(task, 0, sizeof(task_t));
 
     task->task_id = task_id;
+    task->name = name;
     task->priority = 1;
     task->status = TASK_STATUS_CREATED;
     task->stack_size = TASK_DEFAULT_STACK_SIZE;
     task->stack_address = (uintptr_t)kmem_alloc(TASK_DEFAULT_STACK_SIZE);
+    task->native_page_table = native_page_table;
     task_list[task->task_id] = task;
     log_trace("Created task %d at %p", task->task_id, task);
     return task->task_id;
@@ -123,6 +126,7 @@ void do_task_switch()
     if (task != NULL) {
         ++task->priority;
         current_task_id = task->task_id;
+        hal_switch_mmap(task->native_page_table);
         hal_switch_task(&task->native_task);
     } else {
         // halt until a new event

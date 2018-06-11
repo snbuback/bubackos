@@ -8,9 +8,13 @@
 #include <hal/console.h>
 #include <hal/gdt.h>
 #include <hal/idt.h>
+#include <hal/hal.h>
 #include <hal/native_task.h>
 
 static platform_t platform;
+
+extern uintptr_t __ADDR_KERNEL_START[];
+extern uintptr_t __ADDR_KERNEL_END[];
 
 void intel_start(uint64_t magic, uintptr_t addr)
 {

@@ -1,25 +1,10 @@
 // source: kernel/c/hal/x86_64/gdt.c
-// source: kernel/c/core/logging.c
-#include "unity.h"
-#include <stdio.h>
-#include <stdlib.h>
-#include <stdarg.h>
+#include <kernel_test.h>
 #include <hal/gdt.h>
 #include <hal/tss.h>
 
 #define GDT_ENTRY_BASE(i)       (((uint64_t) gdt_table[i].base_0_15) + ((uint64_t) gdt_table[i].base_16_23 << 16) + ((uint64_t) gdt_table[i].base_24_31 << 24) + ((uint64_t) gdt_table[i].base_32_63 << 32))
 #define GDT_ENTRY_LIMIT(i)      (((uint64_t) gdt_table[i].limit_0_15) + ((uint64_t) gdt_table[i].limit_16_19 << 16))
-
-// mocks
-void logging_output(char *log_line, size_t size)
-{
-    printf(">>>> %s\n", log_line);
-}
-
-void* kmem_alloc(size_t size)
-{
-    return malloc(size);
-}
 
 static bool gdt_flush_called = false;
 void gdt_flush(uintptr_t base, uint16_t limit)

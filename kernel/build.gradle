@@ -1,7 +1,7 @@
 apply plugin: "c"
 apply plugin: "assembler"
 
-def COMPILER_ARGS = ["-g", "-march=nehalem", "-std=gnu99", "-ffreestanding", "-Wall", "-Werror", "-mno-red-zone", "-Wextra", "-DNDEBUG", "-include", "hal/debugger.h"]
+def COMPILER_ARGS = ["-g", "-march=nehalem", "-std=gnu99", "-ffreestanding", "-Wall", "-Werror", "-Wextra", "-DNDEBUG", "-mno-red-zone", "-include", "hal/debugger.h"]
 
 model {
     platforms {
@@ -59,36 +59,55 @@ model {
     }
 }
 
-task run_tests(type:Exec) {
+task run_tests {
     description 'Run unity tests'
-    FileTree tree = fileTree(dir: 'src', include: '**/test/**/*.c')
+
+    FileTree tree = fileTree(dir: 'src', include: '**/test/**/test_*.c')
     inputs.files tree
 
-    def test_compiler_args = []
-    test_compiler_args.addAll COMPILER_ARGS
-    test_compiler_args.remove "-Werror"
-    test_compiler_args << "-Wno-unused-variable"
-    test_compiler_args << "-Wno-unused-parameter"
-    test_compiler_args << "-Wl,--warn-unresolved-symbols"
-    test_compiler_args << "-I./unity/src unity/src/unity.c"
-    test_compiler_args << "-I${project.projectDir}/src/kernel/headers"
-    test_compiler_args << "-I${project.projectDir}/src/libk/headers"
+    def script
+    def stdout = new ByteArrayOutputStream()
 
-    String script = """
-    set -e
-    UNITY_ROOT=${project.projectDir}/unity
-    BUILD_DIR=${project.buildDir}/tests
-    mkdir -p \$BUILD_DIR
-    """
-    tree.each { File file ->
-        def sourceFiles = getSourceFiles(file.text, "${project.projectDir}/src")
-        script += """
-            ruby \$UNITY_ROOT/auto/generate_test_runner.rb ${file} \$BUILD_DIR/${file.name}
-            gcc ${test_compiler_args.join(' ')}  ${file} \$BUILD_DIR/${file.name} ${sourceFiles.join(' ')} -o \$BUILD_DIR/${file.name}.run
-            echo "Running ${file.name}"; \$BUILD_DIR/${file.name}.run
+    doFirst {
+        def test_compiler_args = []
+        test_compiler_args.addAll COMPILER_ARGS
+        test_compiler_args.remove "-Werror"
+        test_compiler_args << "-Wno-unused-variable"
+        test_compiler_args << "-Wno-unused-parameter"
+        test_compiler_args << "-Wl,--warn-unresolved-symbols"
+        test_compiler_args << "-I${project.projectDir}/src/kernel/test"
+        test_compiler_args << "-I${project.projectDir}/unity/src"
+        test_compiler_args << "-I${project.projectDir}/src/kernel/headers"
+        test_compiler_args << "-I${project.projectDir}/src/libk/headers"
+        test_compiler_args << "${project.projectDir}/unity/src/unity.c"
+
+        script = """
+        set -e
+        UNITY_ROOT=${project.projectDir}/unity
+        BUILD_DIR=${project.buildDir}/tests
+        mkdir -p \$BUILD_DIR
         """
+        tree.each { File file ->
+            def sourceFiles = getSourceFiles(file.text, "${project.projectDir}/src")
+            script += """
+                echo "\n------------------ ${file.name} ------------------"
+                echo ">>> Compiling..."
+                ruby \$UNITY_ROOT/auto/generate_test_runner.rb ${file} \$BUILD_DIR/${file.name}
+                gcc -m64 ${test_compiler_args.join(' ')} ${file} \$BUILD_DIR/${file.name} ${sourceFiles.join(' ')} -o \$BUILD_DIR/${file.name}.run
+                echo ">>> Running: \$BUILD_DIR/${file.name}.run"
+                \$BUILD_DIR/${file.name}.run 2>&1
+            """
+        }
     }
-    commandLine "bash", "-c", script
+
+    doLast {
+        exec {
+            commandLine "bash", "-c", script
+            standardOutput = System.out;
+            errorOutput = System.err;
+            ignoreExitValue = true;
+        }
+    }
 }
 
 def getSourceFiles(String text, String baseDir) {
@@ -97,5 +116,6 @@ def getSourceFiles(String text, String baseDir) {
     while (matcher.find()) {
         result << new File(baseDir, matcher.group(1))
     }
+    result << "${project.projectDir}/src/kernel/test/kernel_mocks.c"
     return result
 }

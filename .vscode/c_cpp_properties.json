@@ -7,7 +7,8 @@
                 "${workspaceFolder}/sysroot/platform/include",
                 "${workspaceFolder}/kernel/src/kernel/headers",
                 "${workspaceFolder}/kernel/src/libk/headers",
-                "${workspaceFolder}/kernel/unity/src"
+                "${workspaceFolder}/kernel/unity/src",
+                "${workspaceFolder}/kernel/src/kernel/test"
             ],
             "defines": [],
             "intelliSenseMode": "clang-x64",

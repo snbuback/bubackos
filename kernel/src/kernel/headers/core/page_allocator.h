@@ -9,11 +9,6 @@
 #define PAGE_TYPE_SYSTEM  1
 #define PAGE_TYPE_USER    2
 
-/* defined by the linker */
-extern uintptr_t __ADDR_KERNEL_START[];
-extern uintptr_t __ADDR_KERNEL_END[];
-extern uintptr_t __ADDR_KERNEL_BASE[];
-
 typedef uint8_t page_type;
 
 uintptr_t align(uintptr_t addr);

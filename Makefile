@@ -57,6 +57,7 @@ debug:
 			./tools/gdb-startup.sh localhost:1234 \; \
 		split-window -h -d \
 			bash -c 'sleep 1; tail --pid=`pgrep qemu-system` -f /dev/null' \; \
+		select-pane -D \; \
 		attach
 
 dump-symbols:

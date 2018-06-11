@@ -1,3 +1,6 @@
+/**
+ * Module responsible to manage the physical memory pages.
+ */
 #include <string.h>
 #include <stdlib.h>
 #include <core/configuration.h>
