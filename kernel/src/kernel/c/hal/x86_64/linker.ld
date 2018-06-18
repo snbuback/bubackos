@@ -15,7 +15,8 @@ SECTIONS {
 
 		*(.multiboot2)
 		*(.text)
-		*(.rodata)
+		*(.init)
+		*(.fini)
 		*(.js)
 
 		__ADDR_CODE_END = .;
@@ -29,7 +30,13 @@ SECTIONS {
 		__ADDR_DATA_START = .;
 		
 		*(.data)
+		*(.rodata)
 		*(COMMON)
+
+	}
+
+	.bss ALIGN(4K):
+	{
 		*(.bss)
 
 		__ADDR_DATA_END = .;
