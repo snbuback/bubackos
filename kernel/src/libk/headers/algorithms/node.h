@@ -6,7 +6,7 @@
  */
 #ifndef ALGORITHM_NODE_H
 #define ALGORITHM_NODE_H
-#include <core/memory_management.h>
+#include <core/memory.h>
 
 #define LIBK_ALLOC(size)        kmem_alloc(size)
 #define LIBK_FREE(ptr)          kmem_free(ptr)

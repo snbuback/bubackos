@@ -1,6 +1,6 @@
 #include <core/configuration.h>
 #include <core/logging.h>
-#include <core/memory_management.h>
+#include <core/memory.h>
 #include <hal/hal.h>
 #include <core/task_management.h>
 #include <hal/native_task.h>

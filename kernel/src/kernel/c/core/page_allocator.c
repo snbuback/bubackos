@@ -4,7 +4,7 @@
 #include <string.h>
 #include <stdlib.h>
 #include <core/configuration.h>
-#include <core/memory_management.h>
+#include <core/memory.h>
 #include <core/page_allocator.h>
 #include <core/logging.h>
 

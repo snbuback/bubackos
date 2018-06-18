@@ -2,7 +2,7 @@
 #include <stdbool.h>
 #include <hal/hal.h>
 #include <core/logging.h>
-#include <core/memory_management.h>
+#include <core/memory.h>
 #include <core/configuration.h>
 
 page_entry_t* create_entries()

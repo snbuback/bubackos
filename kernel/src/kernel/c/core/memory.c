@@ -1,6 +1,6 @@
 #include <string.h>
 #include <core/logging.h>
-#include <core/memory_management.h>
+#include <core/memory.h>
 
 // TODO Replaces this dummy implementation
 #define MEMORY_BUFFER   2*1024*1024

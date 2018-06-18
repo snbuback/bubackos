@@ -2,7 +2,7 @@
 #include <string.h>
 #include <stdlib.h>
 #include <core/configuration.h>
-#include <core/memory_management.h>
+#include <core/memory.h>
 #include <core/logging.h>
 #include <hal/gdt.h>
 #include <hal/tss.h>

@@ -5,6 +5,6 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <core/logging.h>
-#include <core/memory_management.h>
+#include <core/memory.h>
 
 #endif

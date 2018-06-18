@@ -1,5 +1,5 @@
 #include <algorithms/linkedlist.h>
-#include <core/memory_management.h>
+#include <core/memory.h>
 
 linkedlist_t* linkedlist_create() {
     linkedlist_t* linkedlist = (linkedlist_t*) MEM_ALLOC(sizeof(linkedlist_t));
