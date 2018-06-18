@@ -4,11 +4,6 @@
 #include <hal/hal.h>
 #include <string.h>
 
-// internal functions on test
-int index_for_level(int level, uintptr_t virtual_addr);
-void fill_entry_value(page_entry_t* entry, int level, uintptr_t ptr, bool user, bool code, bool writable);
-page_entry_t* create_entries();
-
 // tests
 void test_create_entries_is_memory_aligned()
 {
@@ -63,24 +58,24 @@ void test_get_entry_value()
 
     // TODO Tests not working
     memset(&entry, 0, sizeof(entry));
-    fill_entry_value(&entry, 1, 0x0, true, true, true);
-    TEST_ASSERT_PAGE_TABLE(0x5, &entry);
+    fill_entry_value(&entry, 0x0, false, true, true);
+    TEST_ASSERT_PAGE_TABLE(0x3, &entry);
 
     memset(&entry, 0, sizeof(entry));
-    fill_entry_value(&entry, 1, 0x0, false, true, false);
+    fill_entry_value(&entry, 0x0, false, true, false);
     TEST_ASSERT_PAGE_TABLE(0x1, &entry);
 
     memset(&entry, 0, sizeof(entry));
-    fill_entry_value(&entry, 1, 0x0, true, false, true);
+    fill_entry_value(&entry, 0x0, true, false, true);
     TEST_ASSERT_PAGE_TABLE(0x8000000000000007, &entry);
 
     memset(&entry, 0, sizeof(entry));
-    fill_entry_value(&entry, 1, 0x0, false, false, true);
+    fill_entry_value(&entry, 0x0, false, false, true);
     TEST_ASSERT_PAGE_TABLE(0x8000000000000003, &entry);
 
     uintptr_t ptr = 0x525224245000;
     memset(&entry, 0, sizeof(entry));
-    fill_entry_value(&entry, 1, ptr, true, true, false);
+    fill_entry_value(&entry, ptr, true, true, false);
     TEST_ASSERT_PAGE_TABLE(0x525224245005, &entry);
 }
 

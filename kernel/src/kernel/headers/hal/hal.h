@@ -75,4 +75,11 @@ void hal_switch_mmap(native_page_table_t* hal_mmap);
  */
 void parse_intel_memory(page_entry_t* entries, entry_visited_func func);
 
+// TODO internal function, but used by test.
+int index_for_level(int level, uintptr_t virtual_addr);
+void fill_entry_value(page_entry_t* entry, uintptr_t ptr, bool user, bool code, bool writable);
+page_entry_t* create_entries();
+
+
+
 #endif
