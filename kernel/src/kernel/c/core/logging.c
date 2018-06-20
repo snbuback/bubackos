@@ -44,8 +44,9 @@ int logging_format(char* buf, int level, const char *tag, const char *format, va
 
 void logging_output(char *log_line, size_t size)
 {
-    console_write(log_line, size);
-    console_write("\n", 1);
+    log_line[size] = '\n';
+    log_line[size+1] = '\0';
+    console_write(log_line, size+1);
 }
 
 void logging(int level, const char* tag, const char* fmt, ...)
@@ -55,7 +56,7 @@ void logging(int level, const char* tag, const char* fmt, ...)
     }
 
     if (!L.quiet) {
-        char buf[LOGGING_MAX_LINE + 1];  // + \0
+        char buf[LOGGING_MAX_LINE + 2];  // + \n\0
         va_list args;
         va_start(args, fmt);
         int size = logging_format(buf, level, tag, fmt, args);
