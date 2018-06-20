@@ -19,7 +19,6 @@ typedef struct {
   char* name;
   task_priority_t priority;
   uintptr_t stack_address; // change to use memory management
-  size_t    stack_size;
   task_status_t status;
   native_task_t native_task;
   native_page_table_t* native_page_table;
@@ -31,7 +30,7 @@ task_id_t get_current_task(void);
 
 task_id_t task_create(char *name, native_page_table_t* native_page_table);
 
-bool task_start(task_id_t task_id, uintptr_t code);
+bool task_start(task_id_t task_id, uintptr_t code, uintptr_t stack);
 
 void task_update_current_state(native_task_t *native_task);
 

@@ -67,6 +67,28 @@ void handle_general_protection()
     do_task_switch();
 }
 
+extern void dump_current_page_table();
+
+void handle_general_page_fault(native_task_t *native_task)
+{
+    uintptr_t memory;
+    asm volatile( "mov %%cr2, %0"
+                   : "=r" (memory));
+
+    task_id_t task_id = get_current_task();
+    log_fatal("Page fault: addr=%p codeptr=%p stackpr=%p current_task_id=%d", memory, native_task->codeptr, native_task->stackptr, task_id);
+
+    DEBUGGER();
+    dump_current_page_table();
+    if (task_id != NULL_TASK) {
+        log_fatal("Page fault caused by task %d. Killing task.", task_id);
+        task_destroy(task_id);
+    } else {
+        log_fatal("Page fault caused by kernel :,(");
+    }
+    do_task_switch();
+}
+
 void interrupt_handler(native_task_t *native_task, int interrupt)
 {
     switch (interrupt) {
@@ -83,6 +105,10 @@ void interrupt_handler(native_task_t *native_task, int interrupt)
 
     case 0xD: // GP
         handle_general_protection();
+        break;
+
+    case 0xE: // Page fault
+        handle_general_page_fault(native_task);
         break;
 
     case 0x6: // Invalid OPCODE

@@ -5,6 +5,81 @@
 #include <core/memory.h>
 #include <core/configuration.h>
 
+// TODO this is a nightware. Refactor this code. Maybe a debug routine?
+// utility functions (used to debug) -- this function should be part of the core since it is agnostic to the memory page structure
+static void print_entry(page_map_entry_t* entry)
+{
+    log_debug("==> vaddr=%p paddr=%p size=%p (%d KB) %cr%c%c", 
+        entry->vaddr, entry->paddr, entry->size, entry->size/1024, entry->user?'u':'-', entry->writable?'w':'-', entry->code?'x':'-');
+}
+
+bool accumulate_entries(page_map_entry_t* acc, page_entry_t* entry, uintptr_t vaddr, entry_visited_func func)
+{
+    uintptr_t paddr = entry->addr_12_shifted << 12;
+    // merge if memory is contigous
+    if (acc->present && acc->paddr+acc->size == paddr) {
+        // merging
+        acc->size += SYSTEM_PAGE_SIZE;
+        // TODO missing consider user/code/writable properties
+        return true;
+    }
+
+    // call func only for 
+    if (acc->present) {
+        func(acc);
+    }
+
+    // update the entry
+    acc->paddr = paddr;
+    acc->vaddr = vaddr;
+    acc->size = SYSTEM_PAGE_SIZE;
+    acc->user = entry->user;
+    acc->writable = entry->writable;
+    acc->code = !entry->executeDisable;
+    acc->present = true;
+    return false;
+}
+
+void parse_entries(int level, page_entry_t* entries, page_map_entry_t* acc, uintptr_t base_virtual_addr, entry_visited_func func)
+{
+    // each set have PAGE_TABLE_NUMBER_OF_ENTRIES entries
+    for (int index=0; index<PAGE_TABLE_NUMBER_OF_ENTRIES; index++) {
+        page_entry_t entry = entries[index];
+        if (entry.present) {
+            uintptr_t addr = entry.addr_12_shifted << 12;
+            if (level == 1 || entry.entry_or_pat) {
+                accumulate_entries(acc, &entry, base_virtual_addr << 12, func);
+            } else {
+                parse_entries(level-1, (page_entry_t*) addr, acc, base_virtual_addr, func);
+            }
+        }
+
+        base_virtual_addr += 1LL << ((level-1) * 9);
+    }
+}
+
+void parse_intel_memory(page_entry_t* entries, entry_visited_func func)
+{
+    if (func == NULL) {
+        func = print_entry;
+    }
+    log_debug("--------- Dump page table begin ---------");
+    page_map_entry_t acc = {.present = 0};
+    parse_entries(4, entries, &acc, 0x0, func);
+
+    // is necessary flush and last accumulated entry
+    if (acc.present) {
+        func(&acc);
+    }
+    log_debug("--------- Dump page table end ---------");
+}
+
+void dump_current_page_table() {
+    uintptr_t mem;
+    asm volatile ("movq %%cr3, %0" : "=r"(mem));
+    parse_intel_memory((page_entry_t*) mem, NULL);
+}
+
 page_entry_t* create_entries()
 {
     // TODO creates memory allocation aligned
@@ -100,40 +175,8 @@ void hal_page_table_add_mapping(native_page_table_t* hal_mmap, uintptr_t virtual
  */
 void hal_switch_mmap(native_page_table_t* hal_mmap)
 {
-    // DEBUGGER();
+    // parse_intel_memory(hal_mmap->entries, print_entry);
     asm volatile ("movq %0, %%cr3" : : "r" (hal_mmap->cr3));
-}
-
-// utility functions (used to debug)
-static void print_entry(page_entry_t entry, uintptr_t virtual_addr)
-{
-    log_debug("Entry: virtual=%p addr=%p present=%d writable=%d user=%d executeDisable=%d\n", 
-        virtual_addr, (entry.addr_12_shifted << 12), (int) entry.present, (int) entry.writable, (int) entry.user, (int) entry.executeDisable);
-}
-
-void parse_entries(int level, page_entry_t* entries, uintptr_t base_virtual_addr, entry_visited_func func)
-{
-    // each set have PAGE_TABLE_NUMBER_OF_ENTRIES entries
-    for (int index=0; index<PAGE_TABLE_NUMBER_OF_ENTRIES; index++) {
-        page_entry_t entry = entries[index];
-        if (entry.present) {
-            uintptr_t addr = entry.addr_12_shifted << 12;
-            if (level == 1 || entry.entry_or_pat) {
-                func(entry, base_virtual_addr << 12);
-            } else {
-                parse_entries(level-1, (page_entry_t*) addr, base_virtual_addr, func);
-            }
-        }
-
-        base_virtual_addr += 1LL << ((level-1) * 9);
-    }
-}
-
-void parse_intel_memory(page_entry_t* entries, entry_visited_func func)
-{
-    if (func == NULL) {
-        func = print_entry;
-    }
-    parse_entries(4, entries, 0x0, func);
+    DEBUGGER();
 }
 

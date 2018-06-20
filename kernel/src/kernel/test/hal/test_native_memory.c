@@ -3,6 +3,7 @@
 #include <kernel_test.h>
 #include <hal/hal.h>
 #include <string.h>
+#include <core/configuration.h>
 
 // tests
 void test_create_entries_is_memory_aligned()
@@ -88,5 +89,17 @@ void test_hal_page_table_add_mapping()
 {
     native_page_table_t* hal_mmap = hal_page_table_create_mapping();
     hal_page_table_add_mapping(hal_mmap, 0x120000, 0x320000, true, true, true);
+}
+
+void test_print_memory_map()
+{
+    native_page_table_t* hal_mmap = hal_page_table_create_mapping();
+    hal_page_table_add_mapping(hal_mmap, 0x120000, 0x320000, true, true, true);
+    hal_page_table_add_mapping(hal_mmap, 0x3000, 0x123000, true, true, true);
+    for (int i=0; i<9; i++) {
+        hal_page_table_add_mapping(hal_mmap, 0x100000 + i*SYSTEM_PAGE_SIZE, 0x40000 + i*SYSTEM_PAGE_SIZE, true, true, true);
+    }
+    hal_page_table_add_mapping(hal_mmap, 0xb8000, 0xb8000, true, true, true);
+    
     parse_intel_memory(hal_mmap->entries, NULL);
 }

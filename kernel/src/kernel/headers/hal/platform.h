@@ -3,28 +3,53 @@
 
 #include <stdint.h>
 #include <stdlib.h>
-#include <algorithms/queue.h>
+#include <algorithms/linkedlist.h>
 
-typedef size_t console_pos_t;
+// TODO remover this dependency
+#include <hal/multiboot2.h>
+
 typedef uint8_t text_color_t;
 
+/**
+ * Generic address structure
+ */
 typedef struct {
-    console_pos_t width;
-    console_pos_t height;
-    console_pos_t pos_row;
-    console_pos_t pos_col;
-} text_console_t;
+    uintptr_t addr_start;
+    uintptr_t addr_end;
+    size_t size;
+} region_t;
 
+/**
+ * text console
+ */
 typedef struct {
-    uintptr_t heap_address;
+    int width;
+    int height;
+    int pos_row;
+    int pos_col;
+} info_console_info_t;
+
+/**
+ * Hardware Memory info
+ */
+typedef struct {
     size_t total_memory;
-    // List of multiboot_memory_map_t
-    Node *memory_segments; 
-} memory_info_t;
+    region_t kernel;
+    linkedlist_t* memory_segments; // multiboot_memory_map_t
+} info_memory_info_t;
+
+/**
+ * Module
+ */
+typedef struct {
+    char* param;
+    region_t region;
+} info_module_t;
 
 typedef struct {
-    memory_info_t memory_info;
-    text_console_t console;
+    info_memory_info_t memory;
+    info_console_info_t console;
+    linkedlist_t* modules; // info_module_t
 } platform_t;
 
 #endif

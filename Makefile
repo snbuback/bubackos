@@ -58,7 +58,9 @@ debug:
 		split-window -h -d \
 			bash -c 'sleep 1; tail --pid=`pgrep qemu-system` -f /dev/null' \; \
 		select-pane -D \; \
+		resize-pane -t 0 -x 20 -y 25 \; \
 		attach
+
 
 dump-symbols:
 	@$(CONTAINER) objdump -t $(BUILD_DIR)/bootloader/boot/bubackos.elf  | sort -n

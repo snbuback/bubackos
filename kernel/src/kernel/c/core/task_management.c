@@ -48,7 +48,6 @@ task_id_t task_create(char *name, native_page_table_t* native_page_table)
     task->name = name;
     task->priority = 1;
     task->status = TASK_STATUS_CREATED;
-    task->stack_size = TASK_DEFAULT_STACK_SIZE;
     task->stack_address = (uintptr_t)kmem_alloc(TASK_DEFAULT_STACK_SIZE);
     task->native_page_table = native_page_table;
     task_list[task->task_id] = task;
@@ -56,7 +55,7 @@ task_id_t task_create(char *name, native_page_table_t* native_page_table)
     return task->task_id;
 }
 
-bool task_start(task_id_t task_id, uintptr_t code)
+bool task_start(task_id_t task_id, uintptr_t code, uintptr_t stack)
 {
     task_t* task = get_task(task_id);
     if (task == NULL || task->status != TASK_STATUS_CREATED) {
@@ -64,7 +63,8 @@ bool task_start(task_id_t task_id, uintptr_t code)
         return false;
     }
 
-    hal_create_native_task(&task->native_task, code, task->stack_address + task->stack_size);
+    task->stack_address = stack;
+    hal_create_native_task(&task->native_task, code, task->stack_address);
     task->status = TASK_STATUS_READY;
     return true;
 }
@@ -80,6 +80,9 @@ bool task_destroy(task_id_t task_id)
     // TODO clean up task data
     kmem_free(task);
     task_list[task_id] = NULL;
+    if (current_task_id == task_id) {
+        current_task_id = 0;
+    }
     return true;
 }
 

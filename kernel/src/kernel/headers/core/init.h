@@ -3,6 +3,6 @@
 
 #include <hal/platform.h>
 
-void bubackos_init(platform_t platform);
+void bubackos_init();
 
 #endif

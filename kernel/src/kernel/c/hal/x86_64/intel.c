@@ -11,13 +11,25 @@
 #include <hal/hal.h>
 #include <hal/native_task.h>
 
-static platform_t platform;
-
+/* defined by the linker */
 extern uintptr_t __ADDR_KERNEL_START[];
 extern uintptr_t __ADDR_KERNEL_END[];
 
+// TODO Remove this declaration
+// TODO (Idea) Call first multiboot_parser and after intel_start with the platform object filled.
+int multiboot_parser(uint64_t magic, uintptr_t addr, platform_t* platform);
+
+// this reference should be allocate in the data section, to be available after this routine returns
+platform_t platform;
+
 void intel_start(uint64_t magic, uintptr_t addr)
 {
+	platform.memory.kernel.addr_start = (uintptr_t) __ADDR_KERNEL_START;
+	platform.memory.kernel.addr_end = (uintptr_t) __ADDR_KERNEL_END;
+	platform.memory.kernel.size = platform.memory.kernel.addr_end - platform.memory.kernel.addr_start;
+	platform.memory.memory_segments = linkedlist_create();
+	platform.modules = linkedlist_create();
+
 	// is necessary to initialize the terminal soon as possible to enable basic logging function
 	console_initialize();
 
@@ -30,7 +42,7 @@ void intel_start(uint64_t magic, uintptr_t addr)
 		return;
 	}
 
-	bubackos_init(platform);
+	bubackos_init(&platform);
 
 	idt_install();
 

@@ -3,8 +3,7 @@
 #include <stdbool.h>
 #include <stddef.h>
 #include <stdint.h>
-#include <hal/platform.h>
-#include <algorithms/node.h>
+#include <core/memory.h>
 
 /*  Check if MAGIC is valid and print the Multiboot information structure
   pointed by ADDR. */
@@ -27,8 +26,7 @@ int multiboot_parser(uint64_t magic, uintptr_t addr, platform_t *platform)
     }
 
     // prepare platform->memory_info
-    platform->memory_info.total_memory = 0;
-    platform->memory_info.memory_segments = NULL;
+    platform->memory.total_memory = 0;
 
     log_trace("Announced mbi size 0x%x", *(unsigned*) addr);
     for (tag = (struct multiboot_tag*)(addr + 8);
@@ -40,26 +38,40 @@ int multiboot_parser(uint64_t magic, uintptr_t addr, platform_t *platform)
                 ((struct multiboot_tag_string*)tag)->string);
             break;
         case MULTIBOOT_TAG_TYPE_BOOT_LOADER_NAME:
-            log_trace("Boot loader name = %s",
-                ((struct multiboot_tag_string*)tag)->string);
+            // log_trace("Boot loader name = %s",
+                // ((struct multiboot_tag_string*)tag)->string);
             break;
         case MULTIBOOT_TAG_TYPE_MODULE:
+        {
+            struct multiboot_tag_module* mb_module = ((struct multiboot_tag_module*)tag);
             log_trace("Module at 0x%x-0x%x. Command line %s",
-                ((struct multiboot_tag_module*)tag)->mod_start,
-                ((struct multiboot_tag_module*)tag)->mod_end,
-                ((struct multiboot_tag_module*)tag)->cmdline);
+                mb_module->mod_start,
+                mb_module->mod_end,
+                mb_module->cmdline);
+
+            // new data structure
+            info_module_t* module = (info_module_t*) kmem_alloc(sizeof(info_module_t));
+            module->param = mb_module->cmdline;
+            module->region.addr_start = mb_module->mod_start;
+            module->region.addr_end = mb_module->mod_end;
+            module->region.size = mb_module->mod_end - mb_module->mod_start;
+            linkedlist_append(platform->modules, module);
             break;
+        }
         case MULTIBOOT_TAG_TYPE_BASIC_MEMINFO:
+        {
+            struct multiboot_tag_basic_meminfo* meminfo = (struct multiboot_tag_basic_meminfo*) tag;
             log_trace("mem_lower = %dKB, mem_upper = %dKB",
-                ((struct multiboot_tag_basic_meminfo*)tag)->mem_lower,
-                ((struct multiboot_tag_basic_meminfo*)tag)->mem_upper);
-            platform->memory_info.total_memory = ((((struct multiboot_tag_basic_meminfo*)tag)->mem_upper) + ((struct multiboot_tag_basic_meminfo*)tag)->mem_lower) * 1024;
+                meminfo->mem_lower,
+                meminfo->mem_upper);
+            platform->memory.total_memory = (meminfo->mem_upper + meminfo->mem_lower) * 1024;
             break;
+        }
         case MULTIBOOT_TAG_TYPE_BOOTDEV:
-            log_trace("Boot device 0x%x,%u,%u",
-                ((struct multiboot_tag_bootdev*)tag)->biosdev,
-                ((struct multiboot_tag_bootdev*)tag)->slice,
-                ((struct multiboot_tag_bootdev*)tag)->part);
+            // log_trace("Boot device 0x%x,%u,%u",
+            //     ((struct multiboot_tag_bootdev*)tag)->biosdev,
+            //     ((struct multiboot_tag_bootdev*)tag)->slice,
+            //     ((struct multiboot_tag_bootdev*)tag)->part);
             break;
         case MULTIBOOT_TAG_TYPE_MMAP: {
             multiboot_memory_map_t* mmap;
@@ -76,12 +88,7 @@ int multiboot_parser(uint64_t magic, uintptr_t addr, platform_t *platform)
                 if (mmap->type == MULTIBOOT_MEMORY_AVAILABLE) {
                     continue;
                 }
-                Node *new_node = list_new(mmap);
-                if (platform->memory_info.memory_segments == NULL) {
-                    platform->memory_info.memory_segments = new_node;
-                } else {
-                    list_append(platform->memory_info.memory_segments, new_node);
-                }
+                linkedlist_append(platform->memory.memory_segments, mmap);
             }
         } break;
         case MULTIBOOT_TAG_TYPE_FRAMEBUFFER: {

@@ -40,7 +40,17 @@ typedef struct {
     void* entries;
 } native_page_table_t;
 
-typedef void (*entry_visited_func)(page_entry_t entry, uintptr_t virtual_address);
+typedef struct {
+    uintptr_t vaddr;
+    uintptr_t paddr;
+    size_t size;
+    bool user;
+    bool code;
+    bool writable;
+    bool present;
+} page_map_entry_t;
+
+typedef void (*entry_visited_func)(page_map_entry_t* entry);
 
 void initialize_native_page_table(uintptr_t kernel_start, size_t kernel_size);
 
