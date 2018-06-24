@@ -55,9 +55,10 @@ void handle_keyboard() {
     // log_trace("Key pressed: 0x%x", (unsigned int) key);
 }
 
-void handle_general_protection()
+void handle_general_protection(native_task_t *native_task)
 {
     task_id_t task_id = get_current_task();
+    log_fatal("GP: code=%p stack=%p task=%d", native_task->codeptr, native_task->stackptr, task_id);
     if (task_id != NULL_TASK) {
         log_fatal("General protection caused by task %d. Killing task.", task_id);
         task_destroy(task_id);
@@ -76,9 +77,8 @@ void handle_general_page_fault(native_task_t *native_task)
                    : "=r" (memory));
 
     task_id_t task_id = get_current_task();
-    log_fatal("Page fault: addr=%p codeptr=%p stackpr=%p current_task_id=%d", memory, native_task->codeptr, native_task->stackptr, task_id);
+    log_fatal("PF: addr=%p code=%p stack=%p task=%d", memory, native_task->codeptr, native_task->stackptr, task_id);
 
-    DEBUGGER();
     dump_current_page_table();
     if (task_id != NULL_TASK) {
         log_fatal("Page fault caused by task %d. Killing task.", task_id);
@@ -91,20 +91,26 @@ void handle_general_page_fault(native_task_t *native_task)
 
 void interrupt_handler(native_task_t *native_task, int interrupt)
 {
-    switch (interrupt) {
-    case 0x8: // timer
-        // log_debug("timer");
+
+    // timer interruption it is a special case:
+    if (interrupt == 0x8) {
+        // log_debug("timer with task=%d", get_current_task());
         // ack int (PIC_MASTER_CMD, PIC_CMD_EOI)
         outb(0x20, 0x20);
         task_update_current_state(native_task);
         do_task_switch();
+    }
 
+    log_debug("Interruption %d (0x%x) on task %d", interrupt, interrupt, get_current_task());
+    DEBUGGER();
+
+    switch (interrupt) {
     case 0x9: // keyboard
         handle_keyboard();
         break;
 
     case 0xD: // GP
-        handle_general_protection();
+        handle_general_protection(native_task);
         break;
 
     case 0xE: // Page fault
@@ -112,8 +118,8 @@ void interrupt_handler(native_task_t *native_task, int interrupt)
         break;
 
     case 0x6: // Invalid OPCODE
-        DEBUGGER();
-        handle_general_protection();
+        log_info("Invalid OPCODE");
+        handle_general_protection(native_task);
         break;
 
     case INT_SYSTEM_CALL:

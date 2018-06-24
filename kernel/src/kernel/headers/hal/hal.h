@@ -3,12 +3,12 @@
 #include <stdint.h>
 #include <stdlib.h>
 #include <stdbool.h>
+#include <core/utils.h>
 
 // x86_64 memory mapping is organized as array of arrays
 #define PAGE_TABLE_NUMBER_OF_ENTRIES    1024
 #define PAGE_TABLE_ALIGN                4096
 
-#define ALIGN(addr, a)                  (addr & ~(a - 1))
 #define PAGE_ENTRY_ADDR_MASK            0x0000fffffffff000L
 
 #define PAGE_ENTRY_PRESENT				(1LL << 0)

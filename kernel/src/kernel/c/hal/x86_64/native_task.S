@@ -1,3 +1,4 @@
+#include <core/configuration.h>
 #include <hal/gdt.h>
 #include <hal/native_task.h>
 #define REG_RESTORE(reg, pos)       movq 8*pos(%rdi), %reg
@@ -64,6 +65,11 @@ hal_switch_task:
 
 .globl hal_sleep
 hal_sleep:
+    # adjust kernel stack to the begin
+    mov     $cpu0_kernel_stack, %rbp
+    addq    $SYSTEM_STACKSIZE, %rbp
+    mov     %rbp, %rsp
+
     sti
     hlt
     jmp hal_sleep

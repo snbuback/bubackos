@@ -1,7 +1,6 @@
 #include <core/configuration.h>
 #include <core/logging.h>
 #include <core/memory.h>
-#include <hal/hal.h>
 #include <core/task_management.h>
 #include <hal/native_task.h>
 #include <stdbool.h>
@@ -33,7 +32,7 @@ task_id_t get_current_task(void)
     return current_task_id;
 }
 
-task_id_t task_create(char *name, native_page_table_t* native_page_table)
+task_id_t task_create(char *name, memory_t* memory_handler)
 {
     task_id_t task_id = ++last_id;
     if (task_id >= SYSTEM_LIMIT_OF_TASKS) {
@@ -49,9 +48,9 @@ task_id_t task_create(char *name, native_page_table_t* native_page_table)
     task->priority = 1;
     task->status = TASK_STATUS_CREATED;
     task->stack_address = (uintptr_t)kmem_alloc(TASK_DEFAULT_STACK_SIZE);
-    task->native_page_table = native_page_table;
+    task->memory_handler = memory_handler;
     task_list[task->task_id] = task;
-    log_trace("Created task %d at %p", task->task_id, task);
+    log_trace("Created task %d", task->task_id, task);
     return task->task_id;
 }
 
@@ -123,17 +122,27 @@ static task_t* get_next_task()
 /**
  * This function should NEVER ever returns!
  */
+static volatile task_id_t last_context_switch = 0;
 void do_task_switch()
 {
     task_t* task = get_next_task();
     if (task != NULL) {
         ++task->priority;
         current_task_id = task->task_id;
-        hal_switch_mmap(task->native_page_table);
+        if (current_task_id != last_context_switch) {
+            log_trace("Switching to task %d", current_task_id);
+            last_context_switch = current_task_id;
+            DEBUGGER();
+        }
+        hal_switch_mmap(task->memory_handler->pt);
         hal_switch_task(&task->native_task);
     } else {
         // halt until a new event
         current_task_id = 0;
+        if (current_task_id != last_context_switch) {
+            log_trace("Sleeping...zzz");
+            last_context_switch = 0;
+        }
         hal_sleep();
     }
 }

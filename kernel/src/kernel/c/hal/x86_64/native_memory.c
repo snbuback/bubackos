@@ -17,10 +17,10 @@ bool accumulate_entries(page_map_entry_t* acc, page_entry_t* entry, uintptr_t va
 {
     uintptr_t paddr = entry->addr_12_shifted << 12;
     // merge if memory is contigous
-    if (acc->present && acc->paddr+acc->size == paddr) {
+    if (acc->present && acc->paddr+acc->size == paddr && acc->code == !entry->executeDisable 
+        && acc->writable == entry->writable && acc->user == entry->user) {
         // merging
         acc->size += SYSTEM_PAGE_SIZE;
-        // TODO missing consider user/code/writable properties
         return true;
     }
 
@@ -63,7 +63,7 @@ void parse_intel_memory(page_entry_t* entries, entry_visited_func func)
     if (func == NULL) {
         func = print_entry;
     }
-    log_debug("--------- Dump page table begin ---------");
+    log_debug("========== Dump page table begin ==========");
     page_map_entry_t acc = {.present = 0};
     parse_entries(4, entries, &acc, 0x0, func);
 
@@ -74,19 +74,24 @@ void parse_intel_memory(page_entry_t* entries, entry_visited_func func)
     log_debug("--------- Dump page table end ---------");
 }
 
-void dump_current_page_table() {
-    uintptr_t mem;
+static inline page_entry_t* get_current_page_entries()
+{
+    page_entry_t* mem;
     asm volatile ("movq %%cr3, %0" : "=r"(mem));
-    parse_intel_memory((page_entry_t*) mem, NULL);
+    return mem;
+}
+
+void dump_current_page_table() {
+    parse_intel_memory(get_current_page_entries(), NULL);
 }
 
 page_entry_t* create_entries()
 {
-    // TODO creates memory allocation aligned
+    // TODO !important!!! creates memory allocation aligned
     uintptr_t addr = (uintptr_t) kmem_alloc(sizeof(page_entry_t)*PAGE_TABLE_NUMBER_OF_ENTRIES + PAGE_TABLE_ALIGN);
     addr += PAGE_TABLE_ALIGN;
     addr = ALIGN(addr, PAGE_TABLE_ALIGN);
-    log_debug("Page entries at %p", addr);
+    // log_debug("Page entries at %p", addr);
     return (page_entry_t*) addr;
 }
 
@@ -99,7 +104,7 @@ native_page_table_t* hal_page_table_create_mapping() {
     return pt;
 }
 
-int index_for_level(int level, uintptr_t virtual_addr)
+inline int index_for_level(int level, uintptr_t virtual_addr)
 {
     // 0 - 4096 - 12
     // 1 - 2M  - 21
@@ -113,7 +118,7 @@ int index_for_level(int level, uintptr_t virtual_addr)
     return index;
 }
 
-void fill_entry_value(page_entry_t* entry, uintptr_t ptr, bool user, bool code, bool writable)
+inline void fill_entry_value(page_entry_t* entry, uintptr_t ptr, bool user, bool code, bool writable)
 {
     // initialize flags
     entry->present = 1;
@@ -134,10 +139,10 @@ void fill_entry_value(page_entry_t* entry, uintptr_t ptr, bool user, bool code, 
 static void set_entry(int level, page_entry_t* entries, uintptr_t virtual_addr, uintptr_t physical_address, bool user, bool code, bool writable)
 {
     int index = index_for_level(level, virtual_addr);
-    // log_trace("Level %d entries=%p virtual_addr=%p physical_addr=%p user=%d code=%d : (index=%d)", level, entries, virtual_addr, physical_address, (int) user, (int) code, index);
     page_entry_t entry = entries[index];
 
     if (level == 1) {
+        // log_trace("Mapped vaddr=%p paddr=%p u=%d c=%d w=%d", virtual_addr, physical_address, (int) user, (int) code, (int) writable);
         fill_entry_value(&entries[index], physical_address, user, code, writable);
     } else {
         page_entry_t* entry_ptr = (page_entry_t*) (uintptr_t) (entry.addr_12_shifted << 12);
@@ -175,8 +180,8 @@ void hal_page_table_add_mapping(native_page_table_t* hal_mmap, uintptr_t virtual
  */
 void hal_switch_mmap(native_page_table_t* hal_mmap)
 {
-    // parse_intel_memory(hal_mmap->entries, print_entry);
-    asm volatile ("movq %0, %%cr3" : : "r" (hal_mmap->cr3));
-    DEBUGGER();
+    if ((uintptr_t) get_current_page_entries() != hal_mmap->cr3) {
+        asm volatile ("movq %0, %%cr3" : : "r" (hal_mmap->cr3));
+    }
 }
 

@@ -36,15 +36,15 @@ int elf_parser(void* raw_elf, size_t size, elf_t* elf)
         THROW_ERROR(ELF_ERROR_INCOMPATIBLE);
     }
 
-    uintptr_t base_address = (uintptr_t) raw_elf;
-    elf->ident = (elf_ident_t*) raw_elf;
+    elf->base = (uintptr_t) raw_elf;
+    elf->ident = (elf_ident_t*) elf->base;
     // assuming only 64 bits ELF
     elf->entry_point = *((uintptr_t*) (raw_elf + 0x18));
     elf->flags = *((uint32_t*) (raw_elf + 0x30));
 
     size_t program_header_entries = *((uint16_t*) (raw_elf + 0x38));
     uintptr_t program_header_next_address = *((uintptr_t*) (raw_elf + 0x20));
-    program_header_next_address += base_address; // offset base on base_address
+    program_header_next_address += elf->base;
     elf->program_headers = linkedlist_create();
     for (size_t entry=0; entry < program_header_entries; ++entry) {
         linkedlist_append(elf->program_headers, (void*) program_header_next_address);

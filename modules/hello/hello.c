@@ -12,21 +12,18 @@ void strcpy(char* dst, char* src) {
     };
 }
 
-static void syscall() {
-    asm volatile("mov $1, %rdi; syscall");
-}
-
-int x = 4;
+/*int x = 4;
 char data[452];
-
-void module_init(void)
+*/
+void module_init(int arg)
 {
     char* msg = "H e l l o   W o r d";
-    if (data[0] == 1) {
+/*    if (data[0] == 1) {
         data[1]++;
         x++;
-    }
+    }*/
     strcpy((char*) (0xb8000 + 20*80+50), msg);
-    syscall();
-    for(;;);
+    if (arg == 3456) {
+        strcpy((char*) (0xb8000 + 30*80+50), msg);
+    }
 }

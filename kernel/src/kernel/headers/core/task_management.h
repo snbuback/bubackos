@@ -3,7 +3,7 @@
 #include <stdint.h>
 #include <stdbool.h>
 #include <hal/native_task.h>
-#include <hal/hal.h>
+#include <core/memory_management.h>
 
 #define TASK_DEFAULT_STACK_SIZE  1024
 
@@ -15,20 +15,20 @@ typedef unsigned int task_priority_t;
 typedef enum { TASK_STATUS_CREATED, TASK_STATUS_READY } task_status_t;
 
 typedef struct {
-  task_id_t task_id;
-  char* name;
-  task_priority_t priority;
-  uintptr_t stack_address; // change to use memory management
-  task_status_t status;
-  native_task_t native_task;
-  native_page_table_t* native_page_table;
+    task_id_t task_id;
+    char* name;
+    task_priority_t priority;
+    uintptr_t stack_address; // change to use memory management
+    task_status_t status;
+    native_task_t native_task;
+    memory_t* memory_handler;
 } task_t;
 
 void task_management_initialize(void);
 
 task_id_t get_current_task(void);
 
-task_id_t task_create(char *name, native_page_table_t* native_page_table);
+task_id_t task_create(char *name, memory_t* memory_handler);
 
 bool task_start(task_id_t task_id, uintptr_t code, uintptr_t stack);
 

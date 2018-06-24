@@ -44,7 +44,15 @@ void page_allocator_initialize(size_t t)
     for (size_t p = 0; p < total_of_pages; ++p) {
         pages[p] = PAGE_TYPE_FREE;
     }
+
+    // TODO Keeping this logic until ensure these areas are ok to use
+    // lock the first 4mb
+    for (int i=0; i<4*1024*1024 / SYSTEM_PAGE_SIZE; ++i) {
+        pages[i] = PAGE_TYPE_SYSTEM;
+    }
+
     log_debug("Page Allocator initialized");
+
 }
 
 /*

@@ -8,7 +8,6 @@
 #include <hal/console.h>
 #include <hal/gdt.h>
 #include <hal/idt.h>
-#include <hal/hal.h>
 #include <hal/native_task.h>
 
 /* defined by the linker */

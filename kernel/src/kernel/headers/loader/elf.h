@@ -330,7 +330,7 @@ typedef struct {
 typedef struct {
     uint32_t type;
     uint32_t flags;
-    void* offset;
+    uint64_t offset;
     uintptr_t vaddr;
     uintptr_t paddr;
     size_t file_size;
@@ -341,6 +341,7 @@ typedef struct {
 typedef struct {
     elf_ident_t* ident;
     uintptr_t entry_point;
+    uintptr_t base;
     uint32_t flags;
     linkedlist_t* program_headers; // list of elf_program_header_t
     
