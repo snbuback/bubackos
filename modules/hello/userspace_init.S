@@ -12,7 +12,7 @@ _start:
     movq       $0x3456, %rdi   # just a test
     # setup the user stack
     movq       $_stack_area, %rbp
-    addq       $4000, %rbp
+    addq       $4096, %rbp
     movq       %rbp, %rsp
 
     call       module_init
@@ -21,7 +21,7 @@ _start:
 # exit the current process
 _exit:
     movq $1, %rdi
-    syscall
+    int $50
     jmp _exit      // this should never happens... but in case...
 
 .bss

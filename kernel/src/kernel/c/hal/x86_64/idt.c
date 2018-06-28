@@ -70,6 +70,7 @@ void handle_general_protection(native_task_t *native_task)
 
 extern void dump_current_page_table();
 
+// TODO move CR2 interpreter to native method
 void handle_general_page_fault(native_task_t *native_task)
 {
     uintptr_t memory;
@@ -77,7 +78,7 @@ void handle_general_page_fault(native_task_t *native_task)
                    : "=r" (memory));
 
     task_id_t task_id = get_current_task();
-    log_fatal("PF: addr=%p code=%p stack=%p task=%d", memory, native_task->codeptr, native_task->stackptr, task_id);
+    log_fatal("PF: addr=%p cd=%p st=%p fl=%x tk=%d", memory, native_task->codeptr, native_task->stackptr, native_task->orig_rax, task_id);
 
     dump_current_page_table();
     if (task_id != NULL_TASK) {

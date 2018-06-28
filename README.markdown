@@ -70,3 +70,4 @@ Requires parameter ```magic_break: enabled=1```
 * Fix stack address of the hal_sleep / check if switch task saves the kernel stack so is necessary reset the kernel stack before
 * When create new region of memory, verify if there is no overlap
 * reuse kernel pages during paging. Also, change the kernel to use big pages (maybe grow small after)
+* Syscall is broken. Only int $50 is working

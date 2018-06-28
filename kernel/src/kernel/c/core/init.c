@@ -34,9 +34,9 @@ static bool copy_program_header(uintptr_t virtual_address, void* src, size_t siz
 
 bool allocate_program_header(elf_t* elf, elf_program_header_t* ph, memory_t* memory_handler)
 {
-    bool writable = ph->flags & ELF_PF_FLAGS_W;
-    bool code = ph->flags & ELF_PF_FLAGS_X;
-    memory_region_t* region = memory_management_region_create(memory_handler, ph->vaddr, ph->mem_size, true, writable, code);
+    // bool writable = ph->flags & ELF_PF_FLAGS_W;
+    // bool code = ph->flags & ELF_PF_FLAGS_X;
+    memory_region_t* region = memory_management_region_create(memory_handler, ph->vaddr, ph->mem_size, true, true, true);
     if (!region) {
         return false;
     }

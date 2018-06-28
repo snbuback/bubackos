@@ -9,8 +9,8 @@
 // utility functions (used to debug) -- this function should be part of the core since it is agnostic to the memory page structure
 static void print_entry(page_map_entry_t* entry)
 {
-    log_debug("==> vaddr=%p paddr=%p size=%p (%d KB) %cr%c%c", 
-        entry->vaddr, entry->paddr, entry->size, entry->size/1024, entry->user?'u':'-', entry->writable?'w':'-', entry->code?'x':'-');
+    log_debug("==> vaddr=%p-%p paddr=%p size=%d KB %cr%c%c", 
+        entry->vaddr, entry->vaddr + entry->size, entry->paddr, entry->size/1024, entry->user?'u':'-', entry->writable?'w':'-', entry->code?'x':'-');
 }
 
 bool accumulate_entries(page_map_entry_t* acc, page_entry_t* entry, uintptr_t vaddr, entry_visited_func func)
