@@ -41,7 +41,6 @@ publish_hardware_event(...???)
 ```
 
 # Project structure
-
 ```
 ├── bootloader (+builded kernel to make the iso image)
 │   └── boot
