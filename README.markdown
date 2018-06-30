@@ -54,6 +54,9 @@ Requires parameter ```magic_break: enabled=1```
 * https://wiki.osdev.org/Main_Page
 * https://github.com/torvalds/linux
 
+## CMake command line
+
+    cmake -DCMAKE_TOOLCHAIN_FILE=/Users/snbuback/Projects/bubackos/intel-x86_64.cmake -H. -Bbuild -G "Unix Makefiles"
 
 ## TODO
 * Create utils
