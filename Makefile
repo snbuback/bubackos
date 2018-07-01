@@ -21,7 +21,7 @@ default: iso
 
 clean:
 	@echo cleaning...
-	@rm -rf build kernel/build
+	@rm -rf build src/build
 
 # build/%.o: js/%.js prepare
 # @$(OBJCOPY) -I binary -O elf64-x86-64 -B i386:x86-64 --rename-section .data=.js $< $@
@@ -31,11 +31,16 @@ clean:
 # $(SRC_DIR)/loader/javascript/gen_load_all_js_module.c: gen_js_load_all.awk $(js_object_files)
 # @find js -name \*.js | awk -f gen_js_load_all.awk > $@
 
-build:
-	@$(CONTAINER) ./gradlew build
+prepare-build:
+	@$(CONTAINER) bash -c 'cd src ; rm -rf build ; cmake -DCMAKE_TOOLCHAIN_FILE=/Users/snbuback/Projects/bubackos/intel-x86_64.cmake -H. -Bbuild -G "Unix Makefiles"'
 
-iso:
-	@$(CONTAINER) ./gradlew iso
+
+build:
+	@$(CONTAINER) bash -c '(cd src && cmake --build build)'
+
+iso: build
+	@$(CONTAINER) bash -c 'rm -rf build ; mkdir -p build && cp -Rv bootloader build && cp -v src/build/kernel.elf build/bootloader/boot/ && \
+	grub-mkrescue -o build/bubackos.iso build/bootloader'
 
 test:
 	@$(CONTAINER) ./gradlew kernel:run_tests

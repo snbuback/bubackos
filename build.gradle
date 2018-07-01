@@ -11,7 +11,7 @@ allprojects {
 subprojects {
 }
 
-task prepareIso(type: Copy, dependsOn: ':kernel:build') {
+task prepareIso(type: Copy) {
     from('bootloader/boot')
     from('kernel/build/exe/kernel/kernel') {
         rename 'kernel', 'bubackos.elf'
