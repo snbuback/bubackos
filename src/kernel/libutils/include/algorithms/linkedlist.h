@@ -4,8 +4,11 @@
 #include <stdbool.h>
 
 #ifndef MEM_ALLOC
-#define MEM_ALLOC(size)        kmem_alloc(size)
-#define MEM_FREE(ptr)          kmem_free(ptr)
+#define MEM_ALLOC(size)        malloc(size)
+#endif
+
+#ifndef MEM_FREE
+#define MEM_FREE(ptr)          free(ptr)
 #endif
 
 typedef struct linkedlist_node_t {

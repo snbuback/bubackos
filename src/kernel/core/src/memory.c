@@ -24,6 +24,11 @@ void* kmem_alloc(size_t size)
     return ptr;
 }
 
+void* malloc(size_t size)
+{
+    return kmem_alloc(size);
+}
+
 /**
  * Release
  */
@@ -36,4 +41,7 @@ void kmem_free(void *addr)
     // TODO not implemented yet
 }
 
-
+void free(void* addr)
+{
+    return kmem_free(addr);
+}
