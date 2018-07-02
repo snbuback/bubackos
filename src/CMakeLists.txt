@@ -14,9 +14,6 @@ string(APPEND CMAKE_EXE_LINKER_FLAGS "-nostdlib -Wl,-n,-L/usr/local/x86_64-elf/l
 file(GLOB_RECURSE CORE_SOURCES FOLLOW_SYMLINKS kernel/core/src/*.c)
 include_directories("${CMAKE_SOURCE_DIR}/kernel/core/include")
 
-file(GLOB_RECURSE LIBC_SOURCES FOLLOW_SYMLINKS kernel/libc/src/*.c)
-include_directories("${CMAKE_SOURCE_DIR}/kernel/libc/include")
-
 file(GLOB_RECURSE HAL_SOURCES FOLLOW_SYMLINKS kernel/hal/src/*.c kernel/hal/src/*.S)
 include_directories("${CMAKE_SOURCE_DIR}/kernel/hal/include")
 
@@ -28,8 +25,13 @@ set(SOURCES
 
 add_executable(kernel.elf ${SOURCES})
 
-# references libutils
+# libc
+add_subdirectory(kernel/libc)
+include_directories("kernel/libc/include")
+target_link_libraries(kernel.elf PUBLIC c)
+
+# libutils
 add_subdirectory(kernel/libutils)
-include_directories("kernel/libutils/include") # FIXME
+include_directories("kernel/libutils/include")
 target_link_libraries(kernel.elf PUBLIC utils)
 
