@@ -31,8 +31,8 @@ clean:
 # $(SRC_DIR)/loader/javascript/gen_load_all_js_module.c: gen_js_load_all.awk $(js_object_files)
 # @find js -name \*.js | awk -f gen_js_load_all.awk > $@
 
-prepare-build:
-	@$(CONTAINER) bash -c 'cd src ; rm -rf build ; cmake -DCMAKE_TOOLCHAIN_FILE=/Users/snbuback/Projects/bubackos/intel-x86_64.cmake -H. -Bbuild -G "Unix Makefiles"'
+prepare-build: clean
+	@$(CONTAINER) bash -c 'cd src ; cmake -DCMAKE_TOOLCHAIN_FILE=/Users/snbuback/Projects/bubackos/intel-x86_64.cmake -H. -Bbuild -G "Unix Makefiles"'
 
 
 build:

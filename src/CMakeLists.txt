@@ -20,14 +20,16 @@ include_directories("${CMAKE_SOURCE_DIR}/kernel/libc/include")
 file(GLOB_RECURSE HAL_SOURCES FOLLOW_SYMLINKS kernel/hal/src/*.c kernel/hal/src/*.S)
 include_directories("${CMAKE_SOURCE_DIR}/kernel/hal/include")
 
-file(GLOB_RECURSE LIBU_SOURCES FOLLOW_SYMLINKS kernel/libutils/src/*.c)
-include_directories("${CMAKE_SOURCE_DIR}/kernel/libutils/include")
-
 set(SOURCES
     ${CORE_SOURCES}
     ${LIBC_SOURCES}
     ${HAL_SOURCES}
-    ${LIBU_SOURCES}
 )
 
 add_executable(kernel.elf ${SOURCES})
+
+# references libutils
+add_subdirectory(kernel/libutils)
+include_directories("kernel/libutils/include") # FIXME
+target_link_libraries(kernel.elf PUBLIC utils)
+
