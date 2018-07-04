@@ -1,7 +1,7 @@
 #include <core/configuration.h>
 #include <core/memory_management.h>
 #include <core/memory.h>
-#include <core/utils.h>
+#include <libutils/utils.h>
 #include <core/page_allocator.h>
 #include <core/logging.h>
 

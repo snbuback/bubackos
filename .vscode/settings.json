@@ -56,7 +56,8 @@
         "memory_management.h": "c",
         "utils.h": "c",
         "unity.h": "c",
-        "elf.h": "c"
+        "elf.h": "c",
+        "stdlib.h": "c"
     },
     "python.pythonPath": "/usr/local/bin/python3",
     "java.configuration.updateBuildConfiguration": "automatic",

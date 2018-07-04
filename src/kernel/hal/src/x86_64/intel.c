@@ -1,5 +1,7 @@
+#define __TAG "==init=="
 #include <string.h>
 #include <stdlib.h>
+#include <stdio.h>
 #include <core/logging.h>
 #include <hal/platform.h>
 #include <core/init.h>
@@ -9,6 +11,7 @@
 #include <x86_64/gdt.h>
 #include <x86_64/idt.h>
 #include <hal/native_task.h>
+#include <libutils/utils.h>
 
 /* defined by the linker */
 extern uintptr_t __ADDR_KERNEL_START[];
@@ -46,4 +49,16 @@ void intel_start(uint64_t magic, uintptr_t addr)
 	idt_install();
 
     log_info("Intel System ready");
+}
+
+void logging_write(int level, char* text, size_t text_size __attribute__((unused)))
+{
+	#define CONSOLE_LINE 		80
+    char output[CONSOLE_LINE + 1];  // + \0
+
+    // print logging line header
+    int size = snprintf(output, CONSOLE_LINE+1, "%s: %s\n", LOGGING_LEVEL_NAMES[level], text);
+	size = MIN(size, CONSOLE_LINE);
+    output[size] = '\0';
+    console_write(output, size);
 }

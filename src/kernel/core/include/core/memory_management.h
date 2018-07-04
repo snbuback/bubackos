@@ -6,6 +6,7 @@
 #include <hal/hal.h>
 
 #define MEMORY_MANAGEMENT_MAX_NUMBER_OF_REGIONS     10
+#define MEM_ALIGN(addr)			ALIGN(addr, SYSTEM_PAGE_SIZE)
 
 typedef unsigned int memory_id_t;
 typedef unsigned int region_id_t;

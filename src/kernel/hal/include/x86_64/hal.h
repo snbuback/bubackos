@@ -3,7 +3,7 @@
 #include <stdint.h>
 #include <stdlib.h>
 #include <stdbool.h>
-#include <core/utils.h>
+#include <libutils/utils.h>
 
 // x86_64 memory mapping is organized as array of arrays
 #define PAGE_TABLE_NUMBER_OF_ENTRIES    1024
