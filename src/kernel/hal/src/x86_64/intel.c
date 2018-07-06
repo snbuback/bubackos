@@ -1,4 +1,3 @@
-#define __TAG "==init=="
 #include <string.h>
 #include <stdlib.h>
 #include <stdio.h>
@@ -12,6 +11,7 @@
 #include <x86_64/idt.h>
 #include <hal/native_task.h>
 #include <libutils/utils.h>
+#include <x86_64/serial.h>
 
 /* defined by the linker */
 extern uintptr_t __ADDR_KERNEL_START[];
@@ -26,6 +26,9 @@ platform_t platform;
 
 void intel_start(uint64_t magic, uintptr_t addr)
 {
+
+	serial_init();
+
 	platform.memory.kernel.addr_start = (uintptr_t) __ADDR_KERNEL_START;
 	platform.memory.kernel.addr_end = (uintptr_t) __ADDR_KERNEL_END;
 	platform.memory.kernel.size = platform.memory.kernel.addr_end - platform.memory.kernel.addr_start;
@@ -51,14 +54,18 @@ void intel_start(uint64_t magic, uintptr_t addr)
     log_info("Intel System ready");
 }
 
+
 void logging_write(int level, char* text, size_t text_size __attribute__((unused)))
 {
-	#define CONSOLE_LINE 		80
-    char output[CONSOLE_LINE + 1];  // + \0
+    char output[LOGGING_MAX_LINE + 1];  // + \0
 
     // print logging line header
-    int size = snprintf(output, CONSOLE_LINE+1, "%s: %s\n", LOGGING_LEVEL_NAMES[level], text);
-	size = MIN(size, CONSOLE_LINE);
+    int size = snprintf(output, LOGGING_MAX_LINE+1, "%s: %s\n", LOGGING_LEVEL_NAMES[level], text);
+	size = MIN(size, LOGGING_MAX_LINE);
     output[size] = '\0';
-    console_write(output, size);
+
+	if (level >= LOG_INFO) {
+	    console_write(output, size);
+	}
+	serial_write(output, size);
 }

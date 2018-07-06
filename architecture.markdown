@@ -14,12 +14,28 @@ The communication between Loader and the Core (there is no direct access to HAL)
 
 ### Shared functions
 ```c
-void boot_hal(); // hardware startup. Call bubackos_init()
-time_t hal_current_time();
-bool hal_lock(lock_t lock);
-void hal_unlock(lock_t lock);
-void hal_platform_events();
-void hal_switch_task(native_task_t *task);
+// boot module
+void _boot(); // entry point
+void native_boot(); // hardware startup. Call kernel_init(platform_t)
+
+// task
+native_task_t* hal_create_native_task()
+void native_switch_task(native_task_t *task);
+void native_sleep();
+
+// pagging
+native_page_table_t* native_pagetable_create() {
+void native_pagetable_set(native_page_table_t* hal_mmap, address_mapping_t)
+void native_pagetable_switch(native_page_table_t* hal_mmap)
+address_mapping_t = uintptr_t virtual_address, uintptr_t physical_address, bool user, bool code, bool writable
+
+// timer
+time_t hal_current_time();  // time contains the number of tickets since the kernel starts
+
+// locking
+bool lock_init(lock_t* lock);
+bool lock(lock_t* lock);
+void unlock(lock_t* lock);
 ```
 
 These functions are #define to the real function name, to make easy write kernel tests and mock them.
@@ -31,12 +47,15 @@ These functions are #define to the real function name, to make easy write kernel
 * Task switch
 * Timer
 * Memory Paging/Memory isolation
+* locking
 
 ## Core
 
 ```c
-void bubackos_init(platform_t platform);
-task_t* get_next_task(): list of Task (first version always returning 1 task)
+void kernel_init(platform_t platform);
+
+// 
+task_t* get_next_task(): list of Task
 publish_hardware_event(...???)
 ```
 

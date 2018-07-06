@@ -59,17 +59,18 @@ Requires parameter ```magic_break: enabled=1```
     cmake -DCMAKE_TOOLCHAIN_FILE=/Users/snbuback/Projects/bubackos/intel-x86_64.cmake -H. -Bbuild -G "Unix Makefiles"
 
 ## TODO
+* Hal library (done)
+* Core library (done)
+* Create hal function defines in core, so core knows it and the hal implements it exactly as expected by the core
+
 * Create utils
 * Create new generic types and define functions
     * permission_t - rwx
     * id_t
     * arraylist (java style) - growing exponential
 * Possibility of run individual tests
-* Hal library
-* Core library
 * Module loader library (but this should be linked with the kernel)
 * Move kernel to high memory address
-* Create hal function defines in core, so core knows it and the hal implements it exactly as expected by the core
 * Fix stack address of the hal_sleep / check if switch task saves the kernel stack so is necessary reset the kernel stack before
 * When create new region of memory, verify if there is no overlap
 * reuse kernel pages during paging. Also, change the kernel to use big pages (maybe grow small after)

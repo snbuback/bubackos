@@ -5,16 +5,16 @@
             "includePath": [
                 "${workspaceFolder}/sysroot/gcc/include",
                 "${workspaceFolder}/sysroot/platform/include",
-                "${workspaceFolder}/kernel/src/kernel/headers",
-                "${workspaceFolder}/kernel/src/libk/headers",
-                "${workspaceFolder}/kernel/unity/src",
-                "${workspaceFolder}/kernel/src/kernel/test"
+                "${workspaceFolder}/src/kernel/libc/include",
+                "${workspaceFolder}/src/kernel/core/include",
+                "${workspaceFolder}/src/kernel/hal/include",
+                "${workspaceFolder}/src/kernel/libutils/include"
             ],
             "defines": [],
             "intelliSenseMode": "clang-x64",
             "browse": {
                 "path": [
-                    "${workspaceFolder}/kernel/src/kernel"
+                    "${workspaceFolder}/src/kernel"
                 ],
                 "limitSymbolsToIncludedHeaders": true,
                 "databaseFilename": ""
