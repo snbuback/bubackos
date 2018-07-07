@@ -39,7 +39,7 @@ typedef struct {
     bool executeDisable: 1;    
 } page_entry_t;
 
-#define NATIVE_PAGETABLE_MEM_BUFFER_SIZE    (80*PAGE_TABLE_NUMBER_OF_ENTRIES*sizeof(page_entry_t))
+#define NATIVE_PAGETABLE_MEM_BUFFER_SIZE    (10*PAGE_TABLE_NUMBER_OF_ENTRIES*sizeof(page_entry_t))
 
 typedef struct {
     void* entries;
