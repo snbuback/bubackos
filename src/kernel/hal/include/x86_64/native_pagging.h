@@ -6,8 +6,7 @@
 #include <libutils/utils.h>
 
 // x86_64 memory mapping is organized as array of arrays
-#define PAGE_TABLE_NUMBER_OF_ENTRIES    1024
-#define PAGE_TABLE_ALIGN                4096
+#define PAGE_TABLE_NUMBER_OF_ENTRIES    512   // 64 bits 512 entry - 32 bits 1024 entries
 
 #define PAGE_TABLE_NATIVE_SIZE_SMALL          4096      // 4K
 #define PAGE_TABLE_NATIVE_SIZE_BIG            2097152   // 2M
@@ -42,18 +41,9 @@ typedef struct {
     void* entries;
 } native_page_table_t;
 
-typedef void (*entry_visited_func)(page_map_entry_t* entry);
-
-void native_pagetable_init(uintptr_t kernel_start, size_t kernel_size);
-
-/**
- * Utility function for debugging propose
- */
-void parse_intel_memory(page_entry_t* entries, entry_visited_func func);
-
-int index_for_level(int level, uintptr_t virtual_addr);
-void fill_entry_value(page_entry_t* entry, uintptr_t ptr, bool user, bool code, bool writable);
-page_entry_t* create_entries();
+// int index_for_level(int level, uintptr_t virtual_addr);
+// void fill_entry_value(page_entry_t* entry, uintptr_t ptr, bool user, bool code, bool writable);
+// page_entry_t* create_entries();
 
 
 

@@ -120,6 +120,9 @@ void finish_kernel_initialization()
 
 void switch_kernel_pages()
 {
+    log_debug("Switching kernel pages...");
+    DEBUGGER();
+    native_pagetable_dump(NULL);
     memory_t* memory_handler = memory_management_create();
     // memory_region_t* region = memory_management_region_create(memory_handler, 0x0, 0, true, true, true);
     // fill_kernel_pages(region);
@@ -152,7 +155,6 @@ void bubackos_init() {
 
     task_management_initialize();
 
-    log_debug("Switching kernel pages...");
     switch_kernel_pages();
 
     log_info("System ready");

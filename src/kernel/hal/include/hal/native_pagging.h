@@ -10,6 +10,8 @@ typedef struct {
     bool present;
 } page_map_entry_t;
 
+typedef void (*entry_visited_func)(page_map_entry_t* entry);
+
 #include <x86_64/native_pagging.h>
 
 // alocate memory to the native page structure
@@ -25,5 +27,11 @@ void native_pagetable_set(native_page_table_t* pt, page_map_entry_t entry);
  * Switches the current cpu to the native_page_table_t
  */
 void native_pagetable_switch(native_page_table_t* pt);
+
+/**
+ * Dump current page table
+ * pt == NULL dumps active page table
+ */
+void native_pagetable_dump(native_page_table_t* pt);
 
 #endif

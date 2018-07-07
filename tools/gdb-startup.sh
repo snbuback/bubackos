@@ -2,13 +2,14 @@
 set -e
 set -x
 
-if [ ! $# -eq 1 ]; then
+if [ ! $# -eq 2 ]; then
     echo "Missing gdb endpoint"
     exit 1
 fi
 
 
-ENDPOINT=$1
+KERNEL_IMAGE=$1
+ENDPOINT=$2
 GDB_SCRIPT_1=`mktemp`
 GDB_SCRIPT_2=`mktemp`
 
@@ -24,14 +25,14 @@ define exit
 end
 
 set architecture i386:x86-64:intel
-file ./build/bootloader/boot/bubackos.elf
+file $KERNEL_IMAGE
 target remote $ENDPOINT
-break intel_start
+break native_boot
 continue
 # After change to long, gdb will disconnect. So, debugging continue on next script
 EOF
 
-BREAKPOINTS=$(objdump -t --section=.text build/bootloader/boot/bubackos.elf | grep kernel_debug | egrep -io '([a-z0-9_.]*kernel_debug[a-z0-9_.]*)' | sed "s/^/break /")
+BREAKPOINTS=$(objdump -t --section=.text $KERNEL_IMAGE | grep kernel_debug | egrep -io '([a-z0-9_.]*kernel_debug[a-z0-9_.]*)' | sed "s/^/break /")
 
 cat > $GDB_SCRIPT_2 <<EOF
 set architecture i386:x86-64

@@ -6,35 +6,53 @@
 #include <core/configuration.h>
 #include <core/types.h>
 
-// TODO this is a nightware. Refactor this code. Maybe a debug routine?
-// utility functions (used to debug) -- this function should be part of the core since it is agnostic to the memory page structure
-static void print_entry(page_map_entry_t* entry)
+static inline int shifting_bits(int level)
+{
+    // 0 - 4096 - 12
+    // 1 - 2M  - 21
+    // 2 - 1GB - 30
+    // 3 - 512GB - 39
+    // 4 - 256T - 48
+    return (level) * 9 + 12; // 9 bits each level + 12 bits level 0
+}
+
+static inline int index_for_level(int level, uintptr_t virtual_addr)
+{
+
+    int bits_min = shifting_bits(level-1);
+    int bits_max = shifting_bits(level);
+    int index = (virtual_addr % (1LL<<bits_max)) >> bits_min;
+    return index;
+}
+
+/// debugging functions ///
+static void log_pagetable_entry(page_map_entry_t* entry)
 {
     log_debug("==> vaddr=%p-%p paddr=%p size=%d KB %cr%c%c", 
         entry->virtual_addr, entry->virtual_addr + entry->size, entry->physical_addr, entry->size/1024, !PERM_IS_KERNEL_MODE(entry->permission)?'u':'-', 
         PERM_IS_WRITE(entry->permission)?'w':'-', PERM_IS_EXEC(entry->permission)?'x':'-');
 }
 
-bool accumulate_entries(page_map_entry_t* acc, page_entry_t* entry, uintptr_t vaddr, entry_visited_func func)
+static bool accumulate_entries(int level, page_map_entry_t* acc, page_entry_t* entry, uintptr_t vaddr)
 {
     uintptr_t paddr = entry->addr_12_shifted << 12;
-    // merge if memory is contigous
+    // merge if next segment have equal attributes
     if (acc->present && acc->physical_addr+acc->size == paddr && PERM_IS_EXEC(acc->permission) == !entry->executeDisable 
         && PERM_IS_WRITE(acc->permission) == entry->writable &&  PERM_IS_KERNEL_MODE(acc->permission) == !entry->user) {
         // merging
-        acc->size += PAGE_TABLE_NATIVE_SIZE_SMALL;
+        acc->size += 1LL << shifting_bits(level-1);
         return true;
     }
 
-    // call func only for 
+    // call func only for present pages
     if (acc->present) {
-        func(acc);
+        log_pagetable_entry(acc);
     }
 
-    // update the entry
+    // refresh entry
     acc->physical_addr = paddr;
     acc->virtual_addr = vaddr;
-    acc->size = SYSTEM_PAGE_SIZE;
+    acc->size = 1LL << shifting_bits(level-1);
     PERM_SET_KERNEL_MODE(acc->permission, !entry->user);
     PERM_SET_WRITE(acc->permission, entry->writable);
     PERM_SET_EXEC(acc->permission, !entry->executeDisable);
@@ -43,7 +61,7 @@ bool accumulate_entries(page_map_entry_t* acc, page_entry_t* entry, uintptr_t va
     return false;
 }
 
-void parse_entries(int level, page_entry_t* entries, page_map_entry_t* acc, uintptr_t base_virtual_addr, entry_visited_func func)
+static void parse_entries(int level, page_entry_t* entries, page_map_entry_t* acc, uintptr_t base_virtual_addr)
 {
     // each set have PAGE_TABLE_NUMBER_OF_ENTRIES entries
     for (int index=0; index<PAGE_TABLE_NUMBER_OF_ENTRIES; index++) {
@@ -51,9 +69,9 @@ void parse_entries(int level, page_entry_t* entries, page_map_entry_t* acc, uint
         if (entry.present) {
             uintptr_t addr = entry.addr_12_shifted << 12;
             if (level == 1 || entry.entry_or_pat) {
-                accumulate_entries(acc, &entry, base_virtual_addr << 12, func);
+                accumulate_entries(level, acc, &entry, base_virtual_addr << 12);
             } else {
-                parse_entries(level-1, (page_entry_t*) addr, acc, base_virtual_addr, func);
+                parse_entries(level-1, (page_entry_t*) addr, acc, base_virtual_addr);
             }
         }
 
@@ -61,20 +79,15 @@ void parse_entries(int level, page_entry_t* entries, page_map_entry_t* acc, uint
     }
 }
 
-void parse_intel_memory(page_entry_t* entries, entry_visited_func func)
+static void parse_intel_memory(page_entry_t* entries)
 {
-    if (func == NULL) {
-        func = print_entry;
-    }
-    log_debug("========== Dump page table begin ==========");
     page_map_entry_t acc = {.present = 0};
-    parse_entries(4, entries, &acc, 0x0, func);
+    parse_entries(4, entries, &acc, 0x0);
 
     // is necessary flush and last accumulated entry
     if (acc.present) {
-        func(&acc);
+        log_pagetable_entry(&acc);
     }
-    log_debug("--------- Dump page table end ---------");
 }
 
 static inline page_entry_t* get_current_page_entries()
@@ -84,43 +97,17 @@ static inline page_entry_t* get_current_page_entries()
     return mem;
 }
 
-void dump_current_page_table() {
-    parse_intel_memory(get_current_page_entries(), NULL);
-}
-
-page_entry_t* create_entries()
+static page_entry_t* create_entries()
 {
     // TODO !important!!! creates memory allocation aligned
-    uintptr_t addr = (uintptr_t) kmem_alloc(sizeof(page_entry_t)*PAGE_TABLE_NUMBER_OF_ENTRIES + PAGE_TABLE_ALIGN);
-    addr += PAGE_TABLE_ALIGN;
-    addr = ALIGN(addr, PAGE_TABLE_ALIGN);
+    uintptr_t addr = (uintptr_t) kmem_alloc(sizeof(page_entry_t)*PAGE_TABLE_NUMBER_OF_ENTRIES + PAGE_TABLE_NATIVE_SIZE_SMALL);
+    addr += PAGE_TABLE_NATIVE_SIZE_SMALL;
+    addr = ALIGN(addr, PAGE_TABLE_NATIVE_SIZE_SMALL);
     // log_debug("Page entries at %p", addr);
     return (page_entry_t*) addr;
 }
 
-// alocate memory to the native page structure
-native_page_table_t* native_pagetable_create() {
-
-    native_page_table_t* pt = (native_page_table_t*) kmem_alloc(sizeof(native_page_table_t));
-    pt->entries = create_entries();
-    return pt;
-}
-
-inline int index_for_level(int level, uintptr_t virtual_addr)
-{
-    // 0 - 4096 - 12
-    // 1 - 2M  - 21
-    // 2 - 1GB - 30
-    // 3 - 512GB - 39
-    // 4 - 256T - 48
-
-    int bits_min = (level-1) * 9 + 12; // 9 bits each level + 12 bits level 0
-    int bits_max = (level) * 9 + 12; // 9 bits each level + 12 bits level 0
-    int index = (virtual_addr % (1LL<<bits_max)) >> bits_min;
-    return index;
-}
-
-inline void fill_entry_value(page_entry_t* entry, uintptr_t ptr, bool user, bool code, bool writable)
+static inline void fill_entry_value(page_entry_t* entry, uintptr_t ptr, bool user, bool code, bool writable)
 {
     // initialize flags
     entry->present = 1;
@@ -154,6 +141,28 @@ static void set_entry(int level, page_entry_t* entries, uintptr_t virtual_addr, 
         }
         set_entry(level-1, entry_ptr, virtual_addr, physical_address, user, code, writable);
     }
+}
+
+void native_pagetable_dump(native_page_table_t* pt)
+{
+    // if pt is NULL use current ones.
+    page_entry_t* entries;
+    if (!pt) {
+        entries = get_current_page_entries();
+    } else {
+        entries = pt->entries;
+    }
+    log_debug("========== Dump page table begin ==========");
+    parse_intel_memory(entries);
+    log_debug("--------- Dump page table end ---------");
+}
+
+// alocate memory to the native page structure
+native_page_table_t* native_pagetable_create() {
+
+    native_page_table_t* pt = (native_page_table_t*) kmem_alloc(sizeof(native_page_table_t));
+    pt->entries = create_entries();
+    return pt;
 }
 
 /**

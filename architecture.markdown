@@ -23,7 +23,6 @@ void logging_write(); // provides logging in the boot process
 native_page_table_t* native_pagetable_create()
 void native_pagetable_set(native_page_table_t* hal_mmap, address_mapping_t)
 void native_pagetable_switch(native_page_table_t* hal_mmap)
-address_mapping_t = uintptr_t virtual_address, uintptr_t physical_address, bool user, bool code, bool writable
 
 // task
 native_task_t* hal_create_native_task()

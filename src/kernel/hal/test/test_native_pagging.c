@@ -11,7 +11,7 @@ void test_create_entries_is_memory_aligned()
     // creates some allocation and ensure all of them are memory align
     for (int i=0; i<10; i++) {
         uintptr_t addr = (uintptr_t) create_entries();
-        uintptr_t addr_align = ALIGN(addr, PAGE_TABLE_ALIGN);
+        uintptr_t addr_align = ALIGN(addr, PAGE_TABLE_NATIVE_SIZE_SMALL);
         TEST_ASSERT_EQUAL_HEX(addr, addr_align);
         kmem_alloc(i); // insert some unliagned in memory allocation
     }

@@ -5,6 +5,7 @@
 #include <core/logging.h>
 #include <core/task_management.h>
 #include <core/syscall.h>
+#include <hal/native_pagging.h>
 
 /** Declare an IDT of 256 entries.  Although we will only use the
  * first 32 entries in this tutorial, the rest exists as a bit
@@ -68,8 +69,6 @@ void handle_general_protection(native_task_t *native_task)
     do_task_switch();
 }
 
-extern void dump_current_page_table();
-
 // TODO move CR2 interpreter to native method
 void handle_general_page_fault(native_task_t *native_task)
 {
@@ -80,7 +79,7 @@ void handle_general_page_fault(native_task_t *native_task)
     task_id_t task_id = get_current_task();
     log_fatal("PF: addr=%p cd=%p st=%p fl=%x tk=%d", memory, native_task->codeptr, native_task->stackptr, native_task->orig_rax, task_id);
 
-    dump_current_page_table();
+    native_pagetable_dump(NULL);
     if (task_id != NULL_TASK) {
         log_fatal("Page fault caused by task %d. Killing task.", task_id);
         task_destroy(task_id);
