@@ -102,7 +102,6 @@ void interrupt_handler(native_task_t *native_task, int interrupt)
     }
 
     log_debug("Interruption %d (0x%x) on task %d", interrupt, interrupt, get_current_task());
-    DEBUGGER();
 
     switch (interrupt) {
     case 0x9: // keyboard

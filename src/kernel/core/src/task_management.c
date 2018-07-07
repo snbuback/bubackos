@@ -132,7 +132,6 @@ void do_task_switch()
         if (current_task_id != last_context_switch) {
             log_trace("Switching to task %d", current_task_id);
             last_context_switch = current_task_id;
-            DEBUGGER();
         }
         native_pagetable_switch(task->memory_handler->pt);
         hal_switch_task(&task->native_task);

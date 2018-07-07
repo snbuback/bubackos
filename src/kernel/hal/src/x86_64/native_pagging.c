@@ -97,13 +97,32 @@ static inline page_entry_t* get_current_page_entries()
     return mem;
 }
 
-static page_entry_t* create_entries()
+static uintptr_t allocated_aligned_memory(native_page_table_t* pt, size_t size)
 {
-    // TODO !important!!! creates memory allocation aligned
-    uintptr_t addr = (uintptr_t) kmem_alloc(sizeof(page_entry_t)*PAGE_TABLE_NUMBER_OF_ENTRIES + PAGE_TABLE_NATIVE_SIZE_SMALL);
-    addr += PAGE_TABLE_NATIVE_SIZE_SMALL;
-    addr = ALIGN(addr, PAGE_TABLE_NATIVE_SIZE_SMALL);
-    // log_debug("Page entries at %p", addr);
+    if (size > pt->mem_available_size) {
+        // ignore the memory available. Since the allocation is in blocks, the remaining block is less than one unit
+        void* new_block = kmem_alloc(NATIVE_PAGETABLE_MEM_BUFFER_SIZE);
+        linkedlist_append(pt->allocated_memory, new_block);
+
+        pt->mem_available_size = NATIVE_PAGETABLE_MEM_BUFFER_SIZE;
+        pt->mem_available_addr = ALIGN((uintptr_t) new_block, PAGE_TABLE_ENTRIES_ALIGNMENT);
+
+        // check if memory is aligned (the ALIGN function is always reducing the memory address)
+        if (pt->mem_available_addr != (uintptr_t) new_block) {
+            pt->mem_available_addr += PAGE_TABLE_ENTRIES_ALIGNMENT;
+            pt->mem_available_size -= pt->mem_available_addr - (uintptr_t)new_block;
+        }
+    }
+    uintptr_t addr = pt->mem_available_addr;
+    pt->mem_available_size -= size;
+    pt->mem_available_addr += size;
+    // log_debug("Pagetable: requested %d bytes. Allocated at %p. Memory available %d bytes. pt=%p", size, addr, pt->mem_available_size, pt);
+    return addr;
+}
+
+static page_entry_t* create_entries(native_page_table_t* pt)
+{
+    uintptr_t addr = allocated_aligned_memory(pt, sizeof(page_entry_t)*PAGE_TABLE_NUMBER_OF_ENTRIES);
     return (page_entry_t*) addr;
 }
 
@@ -125,7 +144,7 @@ static inline void fill_entry_value(page_entry_t* entry, uintptr_t ptr, bool use
     return;
 }
 
-static void set_entry(int level, page_entry_t* entries, uintptr_t virtual_addr, uintptr_t physical_address, bool user, bool code, bool writable)
+static void set_entry(native_page_table_t* pt, int level, page_entry_t* entries, uintptr_t virtual_addr, uintptr_t physical_address, bool user, bool code, bool writable)
 {
     int index = index_for_level(level, virtual_addr);
     page_entry_t entry = entries[index];
@@ -136,10 +155,10 @@ static void set_entry(int level, page_entry_t* entries, uintptr_t virtual_addr, 
     } else {
         page_entry_t* entry_ptr = (page_entry_t*) (uintptr_t) (entry.addr_12_shifted << 12);
         if (!entry.present) {
-            entry_ptr = create_entries();
+            entry_ptr = create_entries(pt);
             fill_entry_value(&entries[index], (uintptr_t) entry_ptr, user, code, writable);
         }
-        set_entry(level-1, entry_ptr, virtual_addr, physical_address, user, code, writable);
+        set_entry(pt, level-1, entry_ptr, virtual_addr, physical_address, user, code, writable);
     }
 }
 
@@ -160,8 +179,10 @@ void native_pagetable_dump(native_page_table_t* pt)
 // alocate memory to the native page structure
 native_page_table_t* native_pagetable_create() {
 
-    native_page_table_t* pt = (native_page_table_t*) kmem_alloc(sizeof(native_page_table_t));
-    pt->entries = create_entries();
+    native_page_table_t* pt = NEW(native_page_table_t);
+    pt->allocated_memory = linkedlist_create();
+    pt->mem_available_size = 0;
+    pt->entries = create_entries(pt);
     return pt;
 }
 
@@ -173,7 +194,7 @@ void native_pagetable_set(native_page_table_t* pt, page_map_entry_t entry)
     page_entry_t* entries_l4 = pt->entries;
     // TODO Add Support to big pages
     for (size_t i=0; i<entry.size / PAGE_TABLE_NATIVE_SIZE_SMALL; i++) {
-        set_entry(4, entries_l4, entry.virtual_addr, entry.physical_addr, !PERM_IS_KERNEL_MODE(entry.permission), 
+        set_entry(pt, 4, entries_l4, entry.virtual_addr, entry.physical_addr, !PERM_IS_KERNEL_MODE(entry.permission), 
             PERM_IS_EXEC(entry.permission), PERM_IS_WRITE(entry.permission));
     }
 }

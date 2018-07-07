@@ -4,9 +4,11 @@
 #include <stdlib.h>
 #include <stdbool.h>
 #include <libutils/utils.h>
+#include <algorithms/linkedlist.h>
 
 // x86_64 memory mapping is organized as array of arrays
 #define PAGE_TABLE_NUMBER_OF_ENTRIES    512   // 64 bits 512 entry - 32 bits 1024 entries
+#define PAGE_TABLE_ENTRIES_ALIGNMENT    4096
 
 #define PAGE_TABLE_NATIVE_SIZE_SMALL          4096      // 4K
 #define PAGE_TABLE_NATIVE_SIZE_BIG            2097152   // 2M
@@ -37,8 +39,17 @@ typedef struct {
     bool executeDisable: 1;    
 } page_entry_t;
 
+#define NATIVE_PAGETABLE_MEM_BUFFER_SIZE    (80*PAGE_TABLE_NUMBER_OF_ENTRIES*sizeof(page_entry_t))
+
 typedef struct {
     void* entries;
+
+    // since my allocation system doesn't support allocate memory ensure aligned, the trick is allocate more
+    // than required and do a manual allocation. To avoid waste memory, I'm allocating buffer of 
+    // 10 times the size of page entries
+    linkedlist_t* allocated_memory;
+    uintptr_t mem_available_addr;
+    size_t mem_available_size;
 } native_page_table_t;
 
 // int index_for_level(int level, uintptr_t virtual_addr);

@@ -121,7 +121,6 @@ void finish_kernel_initialization()
 void switch_kernel_pages()
 {
     log_debug("Switching kernel pages...");
-    DEBUGGER();
     native_pagetable_dump(NULL);
     memory_t* memory_handler = memory_management_create();
     // memory_region_t* region = memory_management_region_create(memory_handler, 0x0, 0, true, true, true);
