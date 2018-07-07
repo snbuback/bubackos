@@ -31,7 +31,7 @@ void native_switch_task(native_task_t *task);
 void native_sleep();
 
 // timer
-time_t hal_current_time();  // time contains the number of tickets since the kernel starts
+time_t get_current_time();  // time contains the number of tickets since the kernel starts
 
 // locking
 bool lock_init(lock_t* lock);

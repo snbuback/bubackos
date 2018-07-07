@@ -1,7 +1,7 @@
 // source: kernel/c/hal/x86_64/native_memory.c
 #include <stdbool.h>
 #include <kernel_test.h>
-#include <hal/hal.h>
+#include <hal/native_pagging.h>
 #include <string.h>
 #include <core/configuration.h>
 

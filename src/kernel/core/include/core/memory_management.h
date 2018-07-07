@@ -3,7 +3,7 @@
 #include <stdint.h>
 #include <stdlib.h>
 #include <algorithms/linkedlist.h>
-#include <hal/hal.h>
+#include <hal/native_pagging.h>
 
 #define MEMORY_MANAGEMENT_MAX_NUMBER_OF_REGIONS     10
 #define MEM_ALIGN(addr)			ALIGN(addr, SYSTEM_PAGE_SIZE)

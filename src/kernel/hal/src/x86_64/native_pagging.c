@@ -1,26 +1,28 @@
 #include <stdint.h>
 #include <stdbool.h>
-#include <hal/hal.h>
+#include <hal/native_pagging.h>
 #include <core/logging.h>
 #include <core/memory.h>
 #include <core/configuration.h>
+#include <core/types.h>
 
 // TODO this is a nightware. Refactor this code. Maybe a debug routine?
 // utility functions (used to debug) -- this function should be part of the core since it is agnostic to the memory page structure
 static void print_entry(page_map_entry_t* entry)
 {
     log_debug("==> vaddr=%p-%p paddr=%p size=%d KB %cr%c%c", 
-        entry->vaddr, entry->vaddr + entry->size, entry->paddr, entry->size/1024, entry->user?'u':'-', entry->writable?'w':'-', entry->code?'x':'-');
+        entry->virtual_addr, entry->virtual_addr + entry->size, entry->physical_addr, entry->size/1024, !PERM_IS_KERNEL_MODE(entry->permission)?'u':'-', 
+        PERM_IS_WRITE(entry->permission)?'w':'-', PERM_IS_EXEC(entry->permission)?'x':'-');
 }
 
 bool accumulate_entries(page_map_entry_t* acc, page_entry_t* entry, uintptr_t vaddr, entry_visited_func func)
 {
     uintptr_t paddr = entry->addr_12_shifted << 12;
     // merge if memory is contigous
-    if (acc->present && acc->paddr+acc->size == paddr && acc->code == !entry->executeDisable 
-        && acc->writable == entry->writable && acc->user == entry->user) {
+    if (acc->present && acc->physical_addr+acc->size == paddr && PERM_IS_EXEC(acc->permission) == !entry->executeDisable 
+        && PERM_IS_WRITE(acc->permission) == entry->writable &&  PERM_IS_KERNEL_MODE(acc->permission) == !entry->user) {
         // merging
-        acc->size += SYSTEM_PAGE_SIZE;
+        acc->size += PAGE_TABLE_NATIVE_SIZE_SMALL;
         return true;
     }
 
@@ -30,12 +32,13 @@ bool accumulate_entries(page_map_entry_t* acc, page_entry_t* entry, uintptr_t va
     }
 
     // update the entry
-    acc->paddr = paddr;
-    acc->vaddr = vaddr;
+    acc->physical_addr = paddr;
+    acc->virtual_addr = vaddr;
     acc->size = SYSTEM_PAGE_SIZE;
-    acc->user = entry->user;
-    acc->writable = entry->writable;
-    acc->code = !entry->executeDisable;
+    PERM_SET_KERNEL_MODE(acc->permission, !entry->user);
+    PERM_SET_WRITE(acc->permission, entry->writable);
+    PERM_SET_EXEC(acc->permission, !entry->executeDisable);
+    // PERM_SET_READ(acc->permission, entry->present);
     acc->present = true;
     return false;
 }
@@ -96,11 +99,10 @@ page_entry_t* create_entries()
 }
 
 // alocate memory to the native page structure
-native_page_table_t* hal_page_table_create_mapping() {
+native_page_table_t* native_pagetable_create() {
 
     native_page_table_t* pt = (native_page_table_t*) kmem_alloc(sizeof(native_page_table_t));
     pt->entries = create_entries();
-    pt->cr3 = (uintptr_t) pt->entries;
     return pt;
 }
 
@@ -156,32 +158,24 @@ static void set_entry(int level, page_entry_t* entries, uintptr_t virtual_addr, 
 
 /**
  * Add a new memory mapping to the native page structure.
- * This function is called with one 1 page.
  */
-void hal_page_table_add_mapping(native_page_table_t* hal_mmap, uintptr_t virtual_address, uintptr_t physical_address, bool user, bool code, bool writable)
+void native_pagetable_set(native_page_table_t* pt, page_map_entry_t entry)
 {
-    page_entry_t* entries_l4 = hal_mmap->entries;
-    set_entry(4, entries_l4, virtual_address, physical_address, user, code, writable);
+    page_entry_t* entries_l4 = pt->entries;
+    // TODO Add Support to big pages
+    for (size_t i=0; i<entry.size / PAGE_TABLE_NATIVE_SIZE_SMALL; i++) {
+        set_entry(4, entries_l4, entry.virtual_addr, entry.physical_addr, !PERM_IS_KERNEL_MODE(entry.permission), 
+            PERM_IS_EXEC(entry.permission), PERM_IS_WRITE(entry.permission));
+    }
 }
 
 /**
- * Remove a memory mapping.
- * This function is called with one 1 page.
+ * Switch the current processor to the page tables.
  */
-// void hal_page_table_del_mapping(native_page_table_t hal_mmap, uintptr_t virtual_address);
-
-/**
- * Release the memory map entries
- */
-// void hal_page_table_destroy_mapping(native_page_table_t hal_mmap);
-
-/**
- * Makes the mmap active
- */
-void hal_switch_mmap(native_page_table_t* hal_mmap)
+void native_pagetable_switch(native_page_table_t* pt)
 {
-    if ((uintptr_t) get_current_page_entries() != hal_mmap->cr3) {
-        asm volatile ("movq %0, %%cr3" : : "r" (hal_mmap->cr3));
+    if ((uintptr_t) get_current_page_entries() != (uintptr_t) pt->entries) {
+        asm volatile ("movq %0, %%cr3" : : "r" (pt->entries));
     }
 }
 

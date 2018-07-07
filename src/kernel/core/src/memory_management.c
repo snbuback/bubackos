@@ -18,13 +18,24 @@ memory_t* memory_management_create()
 {
     memory_t* memory = NEW(memory_t);
     memory->id = ++last_id;
-    memory->pt = hal_page_table_create_mapping();
+    memory->pt = native_pagetable_create();
     memory->regions = linkedlist_create();
     memory->map = linkedlist_create();
 
     native_page_table_t* pt = memory->pt;
     for (uintptr_t addr = 0; addr <= 128*1024*1024; addr += SYSTEM_PAGE_SIZE) {
-        hal_page_table_add_mapping(pt, addr, addr, true, true, true);
+        page_map_entry_t entry = {
+            .virtual_addr = addr,
+            .physical_addr = addr,
+            .size = SYSTEM_PAGE_SIZE,
+            .permission = 0,
+            .present = true,
+            };
+        PERM_SET_KERNEL_MODE(entry.permission, true);
+        PERM_SET_WRITE(entry.permission, true);
+        PERM_SET_READ(entry.permission, true);
+        PERM_SET_EXEC(entry.permission, true);
+        native_pagetable_set(pt, entry);
     }
 
     // add to the global list
@@ -45,7 +56,20 @@ static void fill_region_pages(memory_region_t* region)
         }
         // TODO no page release so far, so I don't need to save
         // linkedlist_append(paddr);
-        hal_page_table_add_mapping(region->memory->pt, vaddr, paddr, region->user, region->executable, region->writable);
+        page_map_entry_t entry = {
+            .virtual_addr = vaddr,
+            .physical_addr = paddr,
+            .size = SYSTEM_PAGE_SIZE,
+            .permission = 0,
+            .present = true,
+            };
+
+        PERM_SET_KERNEL_MODE(entry.permission, !region->user);
+        PERM_SET_WRITE(entry.permission, region->writable);
+        PERM_SET_EXEC(entry.permission, region->executable);
+        PERM_SET_READ(entry.permission, true);
+
+        native_pagetable_set(region->memory->pt, entry);
         memory_map_t* map = NEW(memory_map_t);
         map->physical_addr = paddr;
         map->virtual_addr = vaddr;

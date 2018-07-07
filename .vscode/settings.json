@@ -6,6 +6,9 @@
     "C_Cpp.dimInactiveRegions": false,
     "files.associations": {
         "serial.h": "c",
-        "logging.h": "c"
+        "logging.h": "c",
+        "__functional_03": "cpp",
+        "functional": "cpp",
+        "types.h": "c"
     }
 }

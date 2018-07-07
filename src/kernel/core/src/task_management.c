@@ -134,7 +134,7 @@ void do_task_switch()
             last_context_switch = current_task_id;
             DEBUGGER();
         }
-        hal_switch_mmap(task->memory_handler->pt);
+        native_pagetable_switch(task->memory_handler->pt);
         hal_switch_task(&task->native_task);
     } else {
         // halt until a new event

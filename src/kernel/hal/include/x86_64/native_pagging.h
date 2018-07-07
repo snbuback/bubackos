@@ -9,6 +9,9 @@
 #define PAGE_TABLE_NUMBER_OF_ENTRIES    1024
 #define PAGE_TABLE_ALIGN                4096
 
+#define PAGE_TABLE_NATIVE_SIZE_SMALL          4096      // 4K
+#define PAGE_TABLE_NATIVE_SIZE_BIG            2097152   // 2M
+
 #define PAGE_ENTRY_ADDR_MASK            0x0000fffffffff000L
 
 #define PAGE_ENTRY_PRESENT				(1LL << 0)
@@ -36,56 +39,18 @@ typedef struct {
 } page_entry_t;
 
 typedef struct {
-    uint64_t cr3;
     void* entries;
 } native_page_table_t;
 
-typedef struct {
-    uintptr_t vaddr;
-    uintptr_t paddr;
-    size_t size;
-    bool user;
-    bool code;
-    bool writable;
-    bool present;
-} page_map_entry_t;
-
 typedef void (*entry_visited_func)(page_map_entry_t* entry);
 
-void initialize_native_page_table(uintptr_t kernel_start, size_t kernel_size);
-
-// alocate memory to the native page structure
-native_page_table_t* hal_page_table_create_mapping();
-
-/**
- * Add a new memory mapping to the native page structure.
- * This function is called with one 1 page.
- */
-void hal_page_table_add_mapping(native_page_table_t* hal_mmap, uintptr_t virtual_address, uintptr_t physical_address, bool user, bool code, bool writable);
-
-/**
- * Remove a memory mapping.
- * This function is called with one 1 page.
- */
-void hal_page_table_del_mapping(native_page_table_t* hal_mmap, uintptr_t virtual_address);
-
-/**
- * Release the memory map entries
- */
-void hal_page_table_destroy_mapping(native_page_table_t* hal_mmap);
-
-/**
- * Makes the mmap active
- */
-void hal_switch_mmap(native_page_table_t* hal_mmap);
-
+void native_pagetable_init(uintptr_t kernel_start, size_t kernel_size);
 
 /**
  * Utility function for debugging propose
  */
 void parse_intel_memory(page_entry_t* entries, entry_visited_func func);
 
-// TODO internal function, but used by test.
 int index_for_level(int level, uintptr_t virtual_addr);
 void fill_entry_value(page_entry_t* entry, uintptr_t ptr, bool user, bool code, bool writable);
 page_entry_t* create_entries();
