@@ -89,7 +89,6 @@
 
 #ifndef __ASSEMBLER__
 #include <stdint.h>
-#include <hal/platform.h>
 
 typedef unsigned char           multiboot_uint8_t;
 typedef unsigned short          multiboot_uint16_t;

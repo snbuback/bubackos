@@ -17,17 +17,18 @@ The communication between Loader and the Core (there is no direct access to HAL)
 // boot module
 void _boot(); // entry point
 void native_boot(); // hardware startup. Call kernel_init(platform_t)
+void logging_write(); // provides logging in the boot process
+
+// pagging
+native_page_table_t* native_pagetable_create()
+void native_pagetable_set(native_page_table_t* hal_mmap, address_mapping_t)
+void native_pagetable_switch(native_page_table_t* hal_mmap)
+address_mapping_t = uintptr_t virtual_address, uintptr_t physical_address, bool user, bool code, bool writable
 
 // task
 native_task_t* hal_create_native_task()
 void native_switch_task(native_task_t *task);
 void native_sleep();
-
-// pagging
-native_page_table_t* native_pagetable_create() {
-void native_pagetable_set(native_page_table_t* hal_mmap, address_mapping_t)
-void native_pagetable_switch(native_page_table_t* hal_mmap)
-address_mapping_t = uintptr_t virtual_address, uintptr_t physical_address, bool user, bool code, bool writable
 
 // timer
 time_t hal_current_time();  // time contains the number of tickets since the kernel starts

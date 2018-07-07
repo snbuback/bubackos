@@ -3,7 +3,7 @@ project (metaOS-core VERSION 0.9)
 enable_language(C ASM)
 set(CMAKE_VERBOSE_MAKEFILE on)
 
-string(APPEND CMAKE_C_FLAGS "${FLAGS_COMMON_ARCH} -std=gnu99 -ffreestanding -Wall -Werror -Wextra -DNDEBUG -include hal/debugger.h")
+string(APPEND CMAKE_C_FLAGS "${FLAGS_COMMON_ARCH} -std=gnu11 -ffreestanding -Wall -Werror -Wextra -DNDEBUG -include hal/debugger.h")
 
 # TODO Move append of "-include", "hal/debugger.h" to Debug profile
 string(APPEND CMAKE_ASM_FLAGS "${FLAGS_COMMON_ARCH} -Wall -Werror -Wextra -DNDEBUG")

@@ -1,11 +1,9 @@
-#include <hal/console.h>
-#include <logging.h>
 #include <stdarg.h>
+#include <stdlib.h>
 #include <stdio.h>
-#include <stdlib.h>
 #include <string.h>
+#include <logging.h>
 #include <libutils/utils.h>
-#include <stdlib.h>
 
 typedef struct {
     int level;

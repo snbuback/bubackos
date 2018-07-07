@@ -139,10 +139,10 @@ void bubackos_init() {
 
     // mark page of system segments
     linkedlist_iter_t iter;
-    linkedlist_iter_initialize(platform.memory.memory_segments, &iter);
-    multiboot_memory_map_t* mmap;
-    while ((mmap = (multiboot_memory_map_t*) linkedlist_iter_next(&iter))) {
-        page_allocator_mark_as_system(mmap->addr, mmap->len);
+    linkedlist_iter_initialize(platform.memory.reserved_segments, &iter);
+    region_t* region;
+    while ((region = (region_t*) linkedlist_iter_next(&iter))) {
+        page_allocator_mark_as_system(region->addr_start, region->size);
     }
 
     // mark pages of the kernel

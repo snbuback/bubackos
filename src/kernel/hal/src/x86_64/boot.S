@@ -1,9 +1,9 @@
 #include <core/configuration.h>
 
-.globl boot_hal
+.globl _boot
 
 .text
-boot_hal:
+_boot:
 .code32
   /* save grub parameters in the data section */
   mov     $cpu0_kernel_stack + SYSTEM_STACKSIZE, %ebp
@@ -144,7 +144,7 @@ k_64bits:
   popq   %rdi
 
   call  enable_sse
-  call  intel_start
+  call  native_boot
   
   // do_task_switch should never returns... but just to ensure the return address is 1234
   jmp   do_task_switch
