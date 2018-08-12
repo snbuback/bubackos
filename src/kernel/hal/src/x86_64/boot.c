@@ -1,7 +1,7 @@
 #include <string.h>
 #include <stdlib.h>
 #include <stdio.h>
-#include <core/logging.h>
+#include <logging.h>
 #include <hal/platform.h>
 #include <core/init.h>
 #include <core/page_allocator.h>

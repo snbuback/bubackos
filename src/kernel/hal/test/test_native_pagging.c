@@ -1,19 +1,21 @@
-// source: kernel/c/hal/x86_64/native_memory.c
+// source: src/x86_64/native_pagging.c
+// source: ../libutils/src/algorithms/linkedlist.c
 #include <stdbool.h>
 #include <kernel_test.h>
 #include <hal/native_pagging.h>
 #include <string.h>
-#include <core/configuration.h>
+#include <hal/configuration.h>
 
 // tests
 void test_create_entries_is_memory_aligned()
 {
+    native_page_table_t* pt = native_pagetable_create();
     // creates some allocation and ensure all of them are memory align
     for (int i=0; i<10; i++) {
-        uintptr_t addr = (uintptr_t) create_entries();
-        uintptr_t addr_align = ALIGN(addr, PAGE_TABLE_NATIVE_SIZE_SMALL);
-        TEST_ASSERT_EQUAL_HEX(addr, addr_align);
-        kmem_alloc(i); // insert some unliagned in memory allocation
+        uintptr_t addr = (uintptr_t) create_entries(pt);
+        uintptr_t addr_align = ALIGN(addr, PAGE_TABLE_ENTRIES_ALIGNMENT);
+        TEST_ASSERT_EQUAL_HEX(addr_align, addr);
+        malloc(i); // insert some unliagned in memory allocation
     }
 }
 
@@ -80,26 +82,44 @@ void test_get_entry_value()
     TEST_ASSERT_PAGE_TABLE(0x525224245005, &entry);
 }
 
-void test_hal_page_table_create_mapping_returns_non_null()
+void test_native_pagetable_create_returns_non_null()
 {
-    TEST_ASSERT_NOT_NULL(hal_page_table_create_mapping());
+    TEST_ASSERT_NOT_NULL(native_pagetable_create());
 }
 
 void test_hal_page_table_add_mapping()
 {
-    native_page_table_t* hal_mmap = hal_page_table_create_mapping();
-    hal_page_table_add_mapping(hal_mmap, 0x120000, 0x320000, true, true, true);
+    native_page_table_t* hal_mmap = native_pagetable_create();
+//  typedef struct {
+//     uintptr_t virtual_addr;
+//     uintptr_t physical_addr;
+//     size_t size;
+//     permission_t permission;
+//     bool present;
+// } page_map_entry_t;
+    permission_t perm;
+    page_map_entry_t entry = { .virtual_addr = 0x120000, .physical_addr = 0x320000, .size = SYSTEM_PAGE_SIZE, .present = true };
+    PERM_SET_READ(entry.permission, true);
+    PERM_SET_WRITE(entry.permission, true);
+    native_pagetable_set(hal_mmap, entry);
 }
 
 void test_print_memory_map()
 {
-    native_page_table_t* hal_mmap = hal_page_table_create_mapping();
-    hal_page_table_add_mapping(hal_mmap, 0x120000, 0x320000, true, true, true);
-    hal_page_table_add_mapping(hal_mmap, 0x3000, 0x123000, true, true, true);
+    native_page_table_t* hal_mmap = native_pagetable_create();
+    page_map_entry_t entry = { .virtual_addr = 0x120000, .physical_addr = 0x320000, .size = SYSTEM_PAGE_SIZE, .present = true };
+    PERM_SET_READ(entry.permission, true);
+    PERM_SET_WRITE(entry.permission, true);
+
+    native_pagetable_set(hal_mmap, entry);
+    entry.virtual_addr = 0x3000; entry.physical_addr = 0x123000;
+    native_pagetable_set(hal_mmap, entry);
     for (int i=0; i<9; i++) {
-        hal_page_table_add_mapping(hal_mmap, 0x100000 + i*SYSTEM_PAGE_SIZE, 0x40000 + i*SYSTEM_PAGE_SIZE, true, true, true);
+        entry.virtual_addr = 0x100000 + i*SYSTEM_PAGE_SIZE; entry.physical_addr = 0x40000 + i*SYSTEM_PAGE_SIZE;
+        native_pagetable_set(hal_mmap, entry);
     }
-    hal_page_table_add_mapping(hal_mmap, 0xb8000, 0xb8000, true, true, true);
+    entry.virtual_addr = 0xb8000; entry.physical_addr = 0xb8000;
+    native_pagetable_set(hal_mmap, entry);
     
-    parse_intel_memory(hal_mmap->entries, NULL);
+    native_pagetable_dump(hal_mmap);
 }

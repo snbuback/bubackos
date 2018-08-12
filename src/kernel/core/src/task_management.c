@@ -1,5 +1,5 @@
-#include <core/configuration.h>
-#include <core/logging.h>
+#include <hal/configuration.h>
+#include <logging.h>
 #include <core/memory.h>
 #include <core/task_management.h>
 #include <hal/native_task.h>
@@ -40,14 +40,14 @@ task_id_t task_create(char *name, memory_t* memory_handler)
         return NULL_TASK;
     }
 
-    task_t* task = kmem_alloc(sizeof(task_t));
+    task_t* task = malloc(sizeof(task_t));
     memset(task, 0, sizeof(task_t));
 
     task->task_id = task_id;
     task->name = name;
     task->priority = 1;
     task->status = TASK_STATUS_CREATED;
-    task->stack_address = (uintptr_t)kmem_alloc(TASK_DEFAULT_STACK_SIZE);
+    task->stack_address = (uintptr_t)malloc(TASK_DEFAULT_STACK_SIZE);
     task->memory_handler = memory_handler;
     task_list[task->task_id] = task;
     log_trace("Created task %d", task->task_id, task);
@@ -77,7 +77,7 @@ bool task_destroy(task_id_t task_id)
     }
     log_debug("Destroying task %d", task_id);
     // TODO clean up task data
-    kmem_free(task);
+    free(task);
     task_list[task_id] = NULL;
     if (current_task_id == task_id) {
         current_task_id = 0;

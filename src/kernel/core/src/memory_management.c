@@ -1,9 +1,9 @@
-#include <core/configuration.h>
+#include <hal/configuration.h>
 #include <core/memory_management.h>
 #include <core/memory.h>
 #include <libutils/utils.h>
 #include <core/page_allocator.h>
-#include <core/logging.h>
+#include <logging.h>
 
 static volatile memory_id_t last_id;
 static linkedlist_t* list_of_memory; // list of memory_t

@@ -38,16 +38,15 @@ clean:
 prepare-build: clean
 	@$(CONTAINER) bash -c 'cd src ; cmake -DCMAKE_TOOLCHAIN_FILE=/Users/snbuback/Projects/bubackos/intel-x86_64.cmake -H. -Bbuild -G "Unix Makefiles"'
 
-
 build:
 	@$(CONTAINER) bash -c '(cd src && cmake --build build)'
+
+test:
+	@$(CONTAINER) bash -c '(cd src && cmake -DTARGET_GROUP=test --build build && cd build && make && ctest -VV)'
 
 iso: build
 	@$(CONTAINER) bash -c 'rm -rf build ; mkdir -p build && cp -Rv bootloader build && cp -v src/build/kernel.elf $(KERNEL_IMAGE) && \
 	grub-mkrescue -o build/bubackos.iso build/bootloader'
-
-test:
-	@$(CONTAINER) ./gradlew kernel:run_tests
 
 run:
 	@qemu-system-x86_64 $(QEMU_ARGS) -monitor stdio

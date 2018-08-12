@@ -1,7 +1,7 @@
 #include <string.h>
 #include <javascript/js_engine.h>
 #include <core/platform.h>
-#include <core/logging.h>
+#include <logging.h>
 #include <jerryscript/jerryscript.h>
 #include <jerryscript/jerryscript-ext/handler.h>
 

@@ -1,37 +1,41 @@
 cmake_minimum_required (VERSION 3.7)
-project (metaOS-core VERSION 0.9)
+project (metaOS-core 
+    VERSION 0.9
+    LANGUAGES NONE    
+)
+
 enable_language(C ASM)
 set(CMAKE_VERBOSE_MAKEFILE on)
+set(CMAKE_CROSSCOMPILING on)
 
-string(APPEND CMAKE_C_FLAGS "${FLAGS_COMMON_ARCH} -g -std=gnu11 -ffreestanding -Wall -Werror -Wextra -DNDEBUG -include hal/debugger.h")
+set(CMAKE_C_STANDARD 11)
+# string(APPEND CMAKE_C_FLAGS "${FLAGS_COMMON_ARCH} -g -ffreestanding -Wall -Werror -Wextra -DNDEBUG -include hal/debugger.h")
+string(APPEND CMAKE_C_FLAGS "${FLAGS_COMMON_ARCH} -fPIC -g -ffreestanding -Wall -Werror -Wextra")
 
 # TODO Move append of "-include", "hal/debugger.h" to Debug profile
 string(APPEND CMAKE_ASM_FLAGS "${FLAGS_COMMON_ARCH} -Wall -Werror -Wextra -DNDEBUG")
-string(APPEND CMAKE_EXE_LINKER_FLAGS "-nostdlib -Wl,-n,-L/usr/local/x86_64-elf/lib -T ${CMAKE_SOURCE_DIR}/kernel/hal/src/x86_64/linker.ld")
+set(UNITY_ROOT ${CMAKE_SOURCE_DIR}/kernel/tests/unity)
 
-file(GLOB_RECURSE HAL_SOURCES FOLLOW_SYMLINKS kernel/hal/src/*.c kernel/hal/src/*.S)
-include_directories("${CMAKE_SOURCE_DIR}/kernel/hal/include")
+include(CMakeListsUtils.txt)
 
-set(SOURCES
-    ${HAL_SOURCES}
-)
+set(OS_EXEC_TARGET "kernel.elf")
+add_executable(${OS_EXEC_TARGET} "")
 
-add_executable(kernel.elf ${SOURCES})
+# add_executable(kernel.elf "")
 
 # libc
-add_subdirectory(kernel/libc)
-include_directories("kernel/libc/include")
-target_link_libraries(kernel.elf PUBLIC c)
+include(kernel/libc/CMakeLists.txt)
 
 # libutils
-add_subdirectory(kernel/libutils)
-include_directories("kernel/libutils/include")
-target_link_libraries(kernel.elf PUBLIC utils)
+include(kernel/libutils/CMakeLists.txt)
 
-# libcore
-add_subdirectory(kernel/core)
-include_directories("kernel/core/include")
-target_link_libraries(kernel.elf PUBLIC core)
+set_target_properties(${OS_EXEC_TARGET} PROPERTIES LINK_FLAGS "-fPIC -nostdlib -Wl,-n,-L/usr/local/x86_64-elf/lib -T ${CMAKE_SOURCE_DIR}/kernel/hal/src/x86_64/linker.ld")
+target_link_libraries(${OS_EXEC_TARGET} PUBLIC utils)
+target_link_libraries(${OS_EXEC_TARGET} PUBLIC c)
 
-# circular dependency with malloc/free
-target_link_libraries(kernel.elf PUBLIC c)
+# # hal
+include(kernel/hal/CMakeLists.txt)
+
+# # libcore
+include(kernel/core/CMakeLists.txt)
+

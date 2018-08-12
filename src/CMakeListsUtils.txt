@@ -1,0 +1,64 @@
+enable_testing()
+include(CTest)
+
+function(parse_includes filename)
+    file(READ ${filename} contents)
+    string(REPLACE "\n" ";" contents ${contents})
+
+    set(included_files "")
+    foreach(line ${contents})
+        if(line MATCHES "^// source: ")
+            string(REGEX REPLACE "^// source: " "" line ${line})
+            set(included_files "" PARENT_SCOPE)
+            list(APPEND included_files "${CMAKE_CURRENT_LIST_DIR}/${line}")
+        endif()
+    endforeach()
+
+    # export values to parent scope
+    set(included_files "${included_files}" PARENT_SCOPE)
+endfunction(parse_includes)
+
+function(generate_test test_name test_file)
+    get_filename_component(TEST_BASENAME ${test_file} NAME)
+    set(TEST_GEN_SOURCE ${CMAKE_CURRENT_BINARY_DIR}/${TEST_BASENAME}.gen.c)
+    parse_includes(${test_file})
+
+    # TODO Fixme!!!
+    # get_target_property(includes_dir utils INCLUDE_DIRECTORIES)
+    # message("====> TODO FIX ${OS_EXEC_TARGET} ---- ${includes_dir} ;")
+
+    # to avoid the "always build" of custom target, I have defined a add_custom_command with output as dependency
+    add_custom_target(${test_name}
+        DEPENDS run-${test_name}
+    )
+
+    add_custom_command(OUTPUT build-${test_name}
+        COMMENT "Building test case ${test_name}"
+        COMMAND ruby ${UNITY_ROOT}/auto/generate_test_runner.rb ${test_file} ${TEST_GEN_SOURCE}
+        COMMAND /usr/bin/gcc -O0 -g $(CMAKE_C_FLAGS)
+            -I"${UNITY_ROOT}/src" -I"${UNITY_ROOT}/../" -I${CMAKE_CURRENT_SOURCE_DIR}/../tests
+            -I${CMAKE_SOURCE_DIR}/kernel/libc/include
+            -I${CMAKE_SOURCE_DIR}/kernel/libutils/include
+            -I${CMAKE_SOURCE_DIR}/kernel/core/include
+            -I${CMAKE_SOURCE_DIR}/kernel/hal/include
+            -Wno-unused-variable -o ${CMAKE_CURRENT_BINARY_DIR}/build-${test_name} 
+            "${test_file}" "${TEST_GEN_SOURCE}" ${included_files} "${UNITY_ROOT}/src/unity.c" "${UNITY_ROOT}/../kernel_mocks.c"
+        DEPENDS ${test_file} ${included_files} ${UNITY_ROOT}/src/unity.c ${UNITY_ROOT}/../kernel_mocks.c
+    )
+
+    # the "touch" in the run command to avoid the Make delete the test file after a failure running the tests
+    add_custom_command(OUTPUT run-${test_name}
+        COMMENT "Building test case ${test_name}: ${CMAKE_BINARY_DIR}/build-${test_name}"
+        COMMAND ${CMAKE_BINARY_DIR}/build-${test_name} && touch ${CMAKE_BINARY_DIR}/run-${test_name}
+        DEPENDS build-${test_name}
+    )
+endfunction(generate_test)
+
+function(target_add_test target_name test_name test_file)
+    generate_test(${test_name} ${test_file})
+
+    # to allow rebuild and run the tests after the build or after the test code change, 
+    # the target depends on the test (who depends on the test source)
+    add_dependencies(${target_name} ${test_name})
+endfunction(target_add_test)
+

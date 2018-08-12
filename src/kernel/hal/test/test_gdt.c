@@ -1,6 +1,6 @@
-// source: kernel/c/hal/x86_64/gdt.c
+// source: src/x86_64/gdt.c
 #include <kernel_test.h>
-#include <hal/gdt.h>
+#include <x86_64/gdt.h>
 #include <hal/tss.h>
 
 #define GDT_ENTRY_BASE(i)       (((uint64_t) gdt_table[i].base_0_15) + ((uint64_t) gdt_table[i].base_16_23 << 16) + ((uint64_t) gdt_table[i].base_24_31 << 24) + ((uint64_t) gdt_table[i].base_32_63 << 32))

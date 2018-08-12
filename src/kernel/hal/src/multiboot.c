@@ -4,7 +4,7 @@
 #include <hal/platform.h>
 #include <hal/boot.h>
 #include <hal/multiboot2_spec.h>
-#include <core/logging.h>
+#include <logging.h>
 #include <core/memory.h>
 
 /*  Check if MAGIC is valid and print the Multiboot information structure

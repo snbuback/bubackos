@@ -1,8 +1,8 @@
 #include <core/init.h>
-#include <core/logging.h>
+#include <logging.h>
 #include <core/page_allocator.h>
 #include <core/task_management.h>
-#include <core/configuration.h>
+#include <hal/configuration.h>
 #include <core/elf.h>
 #include <core/memory.h>
 #include <string.h>
@@ -105,7 +105,7 @@ void finish_kernel_initialization()
     // memory_region_t* region = memory_management_region_create(memory_handler, 0x0, 0, true, true, true);
     // fill_kernel_pages(region);
 
-    uintptr_t stack_addr = (uintptr_t) kmem_alloc(8192);
+    uintptr_t stack_addr = (uintptr_t) malloc(8192);
     stack_addr += 4000;
     task_id_t task1 = task_create("user1", memory_handler);
     task_start(task1, (uintptr_t) &initialize_modules, stack_addr);

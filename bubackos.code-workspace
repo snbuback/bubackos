@@ -1,0 +1,23 @@
+{
+	"folders": [
+		{
+			"path": "."
+		}
+	],
+	"settings": {
+		"java.configuration.updateBuildConfiguration": "automatic",
+		"files.associations": {
+			"serial.h": "c",
+			"logging.h": "c",
+			"__functional_03": "cpp",
+			"functional": "cpp",
+			"types.h": "c",
+			"stdio.h": "c",
+			"string.h": "c",
+			"kernel_test.h": "c",
+			"memory.h": "c",
+			"elf.h": "c",
+			"memory_management.h": "c"
+		}
+	}
+}

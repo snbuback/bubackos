@@ -2,7 +2,7 @@
 #include <string.h>
 #include <x86_64/gdt.h>
 #include <x86_64/idt.h>
-#include <core/logging.h>
+#include <logging.h>
 #include <core/task_management.h>
 #include <core/syscall.h>
 #include <hal/native_pagging.h>

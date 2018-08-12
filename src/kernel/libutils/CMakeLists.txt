@@ -1,4 +1,15 @@
-file(GLOB_RECURSE UTILS_SOURCES FOLLOW_SYMLINKS src/*.c)
-include_directories("include")
+add_library(utils "")
 
-add_library (utils STATIC ${UTILS_SOURCES})
+target_sources(utils
+    PRIVATE
+        "${CMAKE_CURRENT_LIST_DIR}/src/algorithms/linkedlist.c"
+        "${CMAKE_CURRENT_LIST_DIR}/src/logging.c"
+    PUBLIC
+        "${CMAKE_CURRENT_LIST_DIR}/include/libutils/utils.h"
+        "${CMAKE_CURRENT_LIST_DIR}/include/algorithms/linkedlist.h"
+        "${CMAKE_CURRENT_LIST_DIR}/include/logging.h"
+)
+
+target_include_directories(utils PUBLIC "${CMAKE_CURRENT_LIST_DIR}/include")
+
+target_add_test(utils test_linkedlist ${CMAKE_CURRENT_LIST_DIR}/test/test_linkedlist.c)

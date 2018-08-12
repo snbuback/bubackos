@@ -9,3 +9,5 @@
 
 // debug kernel memory allocation
 // #define SYSTEM_DEBUG_MEMORY
+
+// TODO Add in the configuration an include per platform

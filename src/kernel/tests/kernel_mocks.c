@@ -1,9 +1,10 @@
 // mock implementations
 #include <kernel_test.h>
+#include <stdarg.h>
 
-void logging(int level, const char *tag, const char *fmt, ...)
+void logging(int level, const char *fmt, ...)
 {
-    printf(">>>%d %s:", level, tag);
+    printf(">>>%d: ", level);
     va_list args;
     va_start(args, fmt);
 
@@ -11,14 +12,4 @@ void logging(int level, const char *tag, const char *fmt, ...)
     va_end(args);
     printf("\n");
     fflush(stdout);  // disable buffering
-}
-
-void* kmem_alloc(size_t size)
-{
-    return malloc(size);
-}
-
-void kmem_free(void *ptr)
-{
-    free(ptr);
 }

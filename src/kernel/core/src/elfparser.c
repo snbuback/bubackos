@@ -1,7 +1,7 @@
 #include <stdint.h>
 #include <stdlib.h>
 #include <stdbool.h>
-#include <core/logging.h>
+#include <logging.h>
 #include <core/elf.h>
 #include <algorithms/linkedlist.h>
 

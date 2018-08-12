@@ -1,12 +1,12 @@
-// source: kernel/c/core/memory_management.c
-// source: libk/c/algorithms/linkedlist.c
+// source: src/memory_management.c
+// source: ../libutils/src/algorithms/linkedlist.c
 #include <kernel_test.h>
 #include <core/memory_management.h>
 
 // mocks
 #define CALLED_HAL_PAGE_TABLE     0x1034343
 #define CALLED_PAGE_ALLOCATE      0x2649739
-native_page_table_t* hal_page_table_create_mapping()
+native_page_table_t* native_pagetable_create()
 {
     return (void*) CALLED_HAL_PAGE_TABLE;
 }
@@ -16,7 +16,7 @@ uintptr_t page_allocator_allocate()
     return CALLED_PAGE_ALLOCATE;
 }
 
-void hal_page_table_add_mapping(native_page_table_t* hal_mmap, uintptr_t virtual_address, uintptr_t physical_address, bool user, bool code, bool writable)
+void native_pagetable_set(native_page_table_t* pt, page_map_entry_t entry)
 {
     // do nothing
 }

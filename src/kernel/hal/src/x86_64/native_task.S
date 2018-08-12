@@ -1,4 +1,4 @@
-#include <core/configuration.h>
+#include <hal/configuration.h>
 #include <x86_64/gdt.h>
 #include <x86_64/native_task.h>
 #define REG_RESTORE(reg, pos)       movq 8*pos(%rdi), %reg

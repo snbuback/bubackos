@@ -1,4 +1,4 @@
-// source: kernel/c/core/task_management.c
+// source: src/task_management.c
 #include <kernel_test.h>
 #include <core/task_management.h>
 #include <hal/native_task.h>
@@ -12,9 +12,14 @@ static native_task_t* task_switch_called = NULL;
 #define DO_TASK_SWITCH()         if (!setjmp(state)) { do_task_switch(); }
 static jmp_buf state;
 
-native_page_table_t* hal_page_table_create_mapping()
+void hal_create_native_task(native_task_t *task, uintptr_t code, uintptr_t stack)
 {
-    return NULL;
+
+}
+
+void native_pagetable_switch(native_page_table_t* pt)
+{
+    
 }
 
 void hal_switch_task(native_task_t *task)

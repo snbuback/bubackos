@@ -1,14 +1,14 @@
-// source: kernel/c/loader/elfparser.c
-// source: libk/c/algorithms/linkedlist.c
+// source: src/elfparser.c
+// source: ../libutils/src/algorithms/linkedlist.c
 #include <kernel_test.h>
-#include <loader/elf.h>
+#include <core/elf.h>
 #include <stdio.h>
 #include <string.h>
 #include <algorithms/linkedlist.h>
 
 static char* raw_elf;
 static size_t raw_elf_size;
-static const char* ELF_TEST_FILE = "src/kernel/test/loader/hello.elf";
+static const char* ELF_TEST_FILE = "../kernel/core/test/hello.elf";
 
 void setUp(void)
 {

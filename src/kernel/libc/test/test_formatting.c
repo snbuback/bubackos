@@ -1,8 +1,10 @@
-// source: libk/c/formatting.c
-#include "unity.h"
+// source: src/formatting.c
+#include <unity.h>
 #include <stdio.h>
 #include <string.h>
 #include <stdarg.h>
+
+// TODO Fix the differences between my implementation and the C standard lib
 
 #define BUFFER_SIZE     10000
 char buffer[BUFFER_SIZE];
@@ -48,6 +50,7 @@ void test_no_format_simple_string(void)
 
 void test_no_format_simple_string_with_buffer_overflow(void)
 {
+
     VALIDATE_NFORMATTING("my strin", 9, "my string");
 }
 
@@ -100,7 +103,7 @@ void test_number_with_overflow(void) {
 void test_null_pointer(void)
 {
     void* ptr = NULL;
-    VALIDATE_FORMATTING("ptr=(null).", "ptr=%p.", ptr);
+    VALIDATE_FORMATTING("ptr=(nil).", "ptr=%p.", ptr);
 }
 
 void test_pointer(void)
@@ -123,7 +126,7 @@ void test_high_char(void)
 void test_null_string(void)
 {
     char* ptr = NULL;
-    VALIDATE_FORMATTING("str=(null).", "str=%s.", ptr);
+    VALIDATE_FORMATTING("str=(nil).", "str=%s.", ptr);
 }
 
 void test_null_string_with_overflow(void)

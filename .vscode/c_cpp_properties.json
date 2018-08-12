@@ -8,7 +8,9 @@
                 "${workspaceFolder}/src/kernel/libc/include",
                 "${workspaceFolder}/src/kernel/core/include",
                 "${workspaceFolder}/src/kernel/hal/include",
-                "${workspaceFolder}/src/kernel/libutils/include"
+                "${workspaceFolder}/src/kernel/libutils/include",
+                "${workspaceFolder}/src/kernel/tests/unity/src",
+                "${workspaceFolder}/src/kernel/tests"
             ],
             "defines": [],
             "intelliSenseMode": "clang-x64",

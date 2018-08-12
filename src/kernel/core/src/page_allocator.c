@@ -3,10 +3,10 @@
  */
 #include <string.h>
 #include <stdlib.h>
-#include <core/configuration.h>
+#include <hal/configuration.h>
 #include <core/memory.h>
 #include <core/page_allocator.h>
-#include <core/logging.h>
+#include <logging.h>
 
 size_t total_of_pages;
 size_t total_memory;
@@ -36,7 +36,7 @@ void page_allocator_initialize(size_t t)
 {
     total_memory = t;
     total_of_pages = total_memory / SYSTEM_PAGE_SIZE;
-    pages = (page_type*) kmem_alloc(sizeof(page_type) * total_of_pages);
+    pages = (page_type*) malloc(sizeof(page_type) * total_of_pages);
 
     log_trace("Page allocator data: start=%p end=%p total_of_pages=%d page size=%d", (void*)pages, (void*)pages + (total_of_pages + 1), total_of_pages, SYSTEM_PAGE_SIZE);
 

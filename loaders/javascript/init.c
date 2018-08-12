@@ -1,4 +1,4 @@
-#include <core/logging.h>
+#include <logging.h>
 #include <javascript/js_engine.h>
 
 // generated automatically during the build stage

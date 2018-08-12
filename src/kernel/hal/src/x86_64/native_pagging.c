@@ -1,9 +1,9 @@
 #include <stdint.h>
 #include <stdbool.h>
 #include <hal/native_pagging.h>
-#include <core/logging.h>
+#include <logging.h>
 #include <core/memory.h>
-#include <core/configuration.h>
+#include <hal/configuration.h>
 #include <core/types.h>
 
 static inline int shifting_bits(int level)
@@ -16,7 +16,7 @@ static inline int shifting_bits(int level)
     return (level) * 9 + 12; // 9 bits each level + 12 bits level 0
 }
 
-static inline int index_for_level(int level, uintptr_t virtual_addr)
+inline int index_for_level(int level, uintptr_t virtual_addr)
 {
 
     int bits_min = shifting_bits(level-1);
@@ -28,7 +28,7 @@ static inline int index_for_level(int level, uintptr_t virtual_addr)
 /// debugging functions ///
 static void log_pagetable_entry(page_map_entry_t* entry)
 {
-    log_debug("==> vaddr=%p-%p paddr=%p size=%d KB %cr%c%c", 
+    log_debug("==> vaddr=%p-%p \tpaddr=%p \tsize=%d KB \t%cr%c%c", 
         entry->virtual_addr, entry->virtual_addr + entry->size, entry->physical_addr, entry->size/1024, !PERM_IS_KERNEL_MODE(entry->permission)?'u':'-', 
         PERM_IS_WRITE(entry->permission)?'w':'-', PERM_IS_EXEC(entry->permission)?'x':'-');
 }
@@ -101,7 +101,7 @@ static uintptr_t allocated_aligned_memory(native_page_table_t* pt, size_t size)
 {
     if (size > pt->mem_available_size) {
         // ignore the memory available. Since the allocation is in blocks, the remaining block is less than one unit
-        void* new_block = kmem_alloc(NATIVE_PAGETABLE_MEM_BUFFER_SIZE);
+        void* new_block = malloc(NATIVE_PAGETABLE_MEM_BUFFER_SIZE);
         linkedlist_append(pt->allocated_memory, new_block);
 
         pt->mem_available_size = NATIVE_PAGETABLE_MEM_BUFFER_SIZE;
@@ -116,17 +116,17 @@ static uintptr_t allocated_aligned_memory(native_page_table_t* pt, size_t size)
     uintptr_t addr = pt->mem_available_addr;
     pt->mem_available_size -= size;
     pt->mem_available_addr += size;
-    // log_debug("Pagetable: requested %d bytes. Allocated at %p. Memory available %d bytes. pt=%p", size, addr, pt->mem_available_size, pt);
+    log_debug("Pagetable: requested %d (0x%x) bytes. Allocated at %p. Memory available %d bytes. pt=%p", size, size, addr, pt->mem_available_size, pt);
     return addr;
 }
 
-static page_entry_t* create_entries(native_page_table_t* pt)
+page_entry_t* create_entries(native_page_table_t* pt)
 {
     uintptr_t addr = allocated_aligned_memory(pt, sizeof(page_entry_t)*PAGE_TABLE_NUMBER_OF_ENTRIES);
     return (page_entry_t*) addr;
 }
 
-static inline void fill_entry_value(page_entry_t* entry, uintptr_t ptr, bool user, bool code, bool writable)
+inline void fill_entry_value(page_entry_t* entry, uintptr_t ptr, bool user, bool code, bool writable)
 {
     // initialize flags
     entry->present = 1;
@@ -171,9 +171,9 @@ void native_pagetable_dump(native_page_table_t* pt)
     } else {
         entries = pt->entries;
     }
-    log_debug("========== Dump page table begin ==========");
+    log_debug("=============== Dump page table begin ===============");
     parse_intel_memory(entries);
-    log_debug("--------- Dump page table end ---------");
+    log_debug("---------------  Dump page table end  ---------------");
 }
 
 // alocate memory to the native page structure
@@ -181,6 +181,7 @@ native_page_table_t* native_pagetable_create() {
 
     native_page_table_t* pt = NEW(native_page_table_t);
     pt->allocated_memory = linkedlist_create();
+    pt->mem_available_addr = 0;
     pt->mem_available_size = 0;
     pt->entries = create_entries(pt);
     return pt;

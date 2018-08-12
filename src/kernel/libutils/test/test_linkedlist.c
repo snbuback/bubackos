@@ -1,4 +1,4 @@
-// source: libk/c/algorithms/linkedlist.c
+// source: src/algorithms/linkedlist.c
 #include <kernel_test.h>
 #include <stdio.h>
 #include <string.h>
