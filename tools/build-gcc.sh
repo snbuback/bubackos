@@ -22,6 +22,6 @@ cd ${BUILD_DIR}/gcc-${GCC_VERSION}
 ./contrib/download_prerequisites
 mkdir -p ${BUILD_DIR}/build-gcc
 cd ${BUILD_DIR}/build-gcc
-${BUILD_DIR}/gcc-${GCC_VERSION}/configure --target=${CROSS_TRIPLE} --disable-nls --enable-languages=c --with-newlib --without-headers 
+${BUILD_DIR}/gcc-${GCC_VERSION}/configure --target=${CROSS_TRIPLE} --disable-nls --enable-languages=c --without-headers 
 make all-gcc
 make install-gcc

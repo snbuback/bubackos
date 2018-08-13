@@ -2,8 +2,6 @@ FROM debian:stretch
 ARG LOCALE=en_GB.UTF-8
 ARG BINUTILS_VERSION
 ARG GCC_VERSION
-ARG NEWLIB_VERSION
-ARG JERRYSCRIPT_VERSION
 ARG SYSROOT
 ARG CROSS_TRIPLE
 ENV PYTHONUNBUFFERED=1
@@ -15,7 +13,7 @@ RUN apt-get -qq update && \
     apt-get -qq -y upgrade && \
     apt-get -qq -y install locales bash curl wget pkg-config build-essential make automake autogen \
         tar xz-utils bzip2 gzip file rsync sed vim binutils gcc nasm grub-pc-bin xorriso python3 \
-        gdb git libtool cmake automake1.11 autoconf2.64 gawk openjdk-8-jdk ruby qemu-system-x86 tmux
+        gdb git libtool cmake automake1.11 autoconf2.64 gawk ruby qemu-system-x86 tmux
 
 # setup default locale
 RUN echo -n "LC_ALL=${LOCALE}\n\
@@ -24,22 +22,8 @@ LC_CTYPE=${LOCALE}\n\
 LC_COLLATE=${LOCALE}\n" > /etc/default/locale && echo "${LOCALE} UTF-8" > /etc/locale.gen && locale-gen ${LOCALE}
 ENV LC_ALL=${LOCALE} LANG=${LOCALE} LANGUAGE=${LOCALE}
 
-ADD tools/build-gcc.sh tools/build-binutils.sh tools/build-newlib.sh /tools/
+ADD tools/build-gcc.sh tools/build-binutils.sh /tools/
 RUN cd /tools && \
     ./build-binutils.sh ${BINUTILS_VERSION} && \
     ./build-gcc.sh ${GCC_VERSION} && \
-    ./build-newlib.sh ${GCC_VERSION} ${NEWLIB_VERSION} && \
     rm -rf ${BUILD_DIR}
-
-# jerryscript
-ADD tools/crt0.S tools/build-jerryscript.sh tools/toolchain_bubackos.cmake /tools/
-RUN cd /tools && \
-    ./build-jerryscript.sh ${JERRYSCRIPT_VERSION} && \
-    rm -rf ${BUILD_DIR}
-
-# Initialize gradew
-ADD settings.gradle gradlew /tools/builder/
-ADD gradle /tools/builder/gradle/
-RUN cd /tools/builder/ && chmod +x ./gradlew && ls -la ; ./gradlew -version
-
-

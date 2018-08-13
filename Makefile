@@ -1,5 +1,5 @@
 BASE_DIR=$(CURDIR)
-include $(BASE_DIR)/gradle.properties
+include $(BASE_DIR)/dependencies.properties
 
 OS_NAME_LOWER=$(shell echo $(OS_NAME) | tr '[:upper:]' '[:lower:]')
 BUILD_DIR=$(BASE_DIR)/build
@@ -27,26 +27,18 @@ clean:
 	@echo cleaning...
 	@rm -rf build src/build
 
-# build/%.o: js/%.js prepare
-# @$(OBJCOPY) -I binary -O elf64-x86-64 -B i386:x86-64 --rename-section .data=.js $< $@
-
-# gen_load_all_js_module: $(SRC_DIR)/loader/javascript/gen_load_all_js_module.c
-
-# $(SRC_DIR)/loader/javascript/gen_load_all_js_module.c: gen_js_load_all.awk $(js_object_files)
-# @find js -name \*.js | awk -f gen_js_load_all.awk > $@
-
 prepare-build: clean
-	@$(CONTAINER) bash -c 'cd src ; cmake -DCMAKE_TOOLCHAIN_FILE=/Users/snbuback/Projects/bubackos/intel-x86_64.cmake -H. -Bbuild -G "Unix Makefiles"'
+	@$(CONTAINER) bash -c 'cd src ; cmake -DCMAKE_TOOLCHAIN_FILE=$(BASE_DIR)/src/intel-x86_64.cmake -H. -Bbuild -G "Unix Makefiles"'
 
 build:
-	@$(CONTAINER) bash -c '(cd src && cmake --build build)'
+	@$(CONTAINER) bash -c '(cd $(BASE_DIR)/src && cmake --build build)'
 
 test:
-	@$(CONTAINER) bash -c '(cd src && cmake -DTARGET_GROUP=test --build build && cd build && make && ctest -VV)'
+	@$(CONTAINER) bash -c '(cd $(BASE_DIR)/src/build && ctest -VV)'
 
 iso: build
-	@$(CONTAINER) bash -c 'rm -rf build ; mkdir -p build && cp -Rv bootloader build && cp -v src/build/kernel.elf $(KERNEL_IMAGE) && \
-	grub-mkrescue -o build/bubackos.iso build/bootloader'
+	@$(CONTAINER) bash -c 'rm -rf $(BASE_DIR)/build ; mkdir -p $(BASE_DIR)/build && cp -Rv $(BASE_DIR)/bootloader $(BASE_DIR)/build && cp -v $(BASE_DIR)/src/build/kernel.elf $(KERNEL_IMAGE) && \
+	grub-mkrescue -o $(BASE_DIR)/build/bubackos.iso $(BASE_DIR)/build/bootloader'
 
 run:
 	@qemu-system-x86_64 $(QEMU_ARGS) -monitor stdio
@@ -76,7 +68,6 @@ dump-symbols:
 dump-asm:
 	@$(CONTAINER) objdump -xd $(KERNEL_IMAGE)
 
-
 shell:
 	@$(CONTAINER) bash
 
@@ -85,8 +76,6 @@ docker-build:
 	--build-arg CROSS_TRIPLE=$(TARGET) \
 	--build-arg BINUTILS_VERSION=$(BINUTILS_VERSION) \
 	--build-arg GCC_VERSION=$(GCC_VERSION) \
-	--build-arg NEWLIB_VERSION=$(NEWLIB_VERSION) \
-	--build-arg JERRYSCRIPT_VERSION=$(JERRYSCRIPT_VERSION) \
 	-t bubackos:latest .
 	# build sysroot (just to auto-complete in visual studio)
 	@$(CONTAINER) bash -c 'rm -rf $(SYSROOT) && \

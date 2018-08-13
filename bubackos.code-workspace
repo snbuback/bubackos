@@ -6,6 +6,11 @@
 	],
 	"settings": {
 		"java.configuration.updateBuildConfiguration": "automatic",
+		"python.pythonPath": "/usr/local/bin/python3",
+		"editor.tabSize": 4,
+		"editor.useTabStops": false,
+		"C_Cpp.dimInactiveRegions": false,
+		"cmake.cmakePath": "/usr/local/bin/cmake",
 		"files.associations": {
 			"serial.h": "c",
 			"logging.h": "c",
@@ -17,7 +22,8 @@
 			"kernel_test.h": "c",
 			"memory.h": "c",
 			"elf.h": "c",
-			"memory_management.h": "c"
-		}
+			"memory_management.h": "c",
+			"CMakeListsUtils.txt": "cmake",
+		},
 	}
 }
