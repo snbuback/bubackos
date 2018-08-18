@@ -24,6 +24,7 @@
 			"elf.h": "c",
 			"memory_management.h": "c",
 			"CMakeListsUtils.txt": "cmake",
+			"CMakeListsModule.txt": "cmake",
 		},
 	}
 }

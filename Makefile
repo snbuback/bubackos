@@ -6,6 +6,7 @@ BUILD_DIR=$(BASE_DIR)/build
 TARGET=$(OS_ARCH)-elf
 SYSROOT=$(BASE_DIR)/sysroot
 UNAME_S := $(shell uname -s)
+MODULES_DIR=$(BUILD_DIR)/bootloader/boot
 KERNEL_IMAGE=$(BUILD_DIR)/bootloader/boot/kernel.elf
 ifeq ($(UNAME_S),Darwin)
     CONTAINER=docker run --rm -it --privileged -v $(BASE_DIR):$(BASE_DIR) -w $(BASE_DIR) bubackos
@@ -36,8 +37,26 @@ build:
 test:
 	@$(CONTAINER) bash -c '(cd $(BASE_DIR)/src/build && ctest -VV)'
 
-iso: build
-	@$(CONTAINER) bash -c 'rm -rf $(BASE_DIR)/build ; mkdir -p $(BASE_DIR)/build && cp -Rv $(BASE_DIR)/bootloader $(BASE_DIR)/build && cp -v $(BASE_DIR)/src/build/kernel.elf $(KERNEL_IMAGE) && \
+module-clean:
+	@find src/modules -name build -type d | xargs rm -rf
+
+module-prepare-build: module-clean
+	@$(CONTAINER) bash -c 'cd src/modules ; for module in `cat modules.list`; do \
+		echo "Building $$module"; cd $$module && cmake -DCMAKE_TOOLCHAIN_FILE=$(BASE_DIR)/src/intel-x86_64.cmake -H. -Bbuild -G "Unix Makefiles" ; \
+	done'
+
+module-build:
+	@$(CONTAINER) bash -c 'cd src/modules ; for module in `cat modules.list`; do \
+		echo "Building $$module"; cd $$module && cmake --build build; \
+	done'
+
+iso: build module-build
+	@$(CONTAINER) bash -c ' \
+	rm -rf $(BASE_DIR)/build ; \
+	mkdir -p $(BASE_DIR)/build && \
+	cp -Rv $(BASE_DIR)/bootloader $(BASE_DIR)/build && \
+	cp -v $(BASE_DIR)/src/build/kernel.elf $(KERNEL_IMAGE) && \
+	for module in `cat src/modules/modules.list`; do cp -v $(BASE_DIR)/src/modules/$$module/build/$$module.mod $(MODULES_DIR); done ; \
 	grub-mkrescue -o $(BASE_DIR)/build/bubackos.iso $(BASE_DIR)/build/bootloader'
 
 run:
@@ -76,8 +95,8 @@ docker-build:
 	--build-arg CROSS_TRIPLE=$(TARGET) \
 	--build-arg BINUTILS_VERSION=$(BINUTILS_VERSION) \
 	--build-arg GCC_VERSION=$(GCC_VERSION) \
+	--build-arg NEWLIB_VERSION=$(NEWLIB_VERSION) \
 	-t bubackos:latest .
 	# build sysroot (just to auto-complete in visual studio)
 	@$(CONTAINER) bash -c 'rm -rf $(SYSROOT) && \
-		mkdir -p $(SYSROOT)/gcc && cp -a /usr/local/lib/gcc/x86_64-elf/6.3.0/include $(SYSROOT)/gcc && \
-		mkdir -p $(SYSROOT)/platform && cp -a /usr/local/x86_64-elf/include $(SYSROOT)/platform/'
+		mkdir -p $(SYSROOT)/gcc && cp -a /usr/local/lib/gcc/x86_64-elf/6.3.0/include $(SYSROOT)/gcc'

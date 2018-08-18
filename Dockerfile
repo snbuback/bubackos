@@ -2,6 +2,7 @@ FROM debian:stretch
 ARG LOCALE=en_GB.UTF-8
 ARG BINUTILS_VERSION
 ARG GCC_VERSION
+ARG NEWLIB_VERSION
 ARG SYSROOT
 ARG CROSS_TRIPLE
 ENV PYTHONUNBUFFERED=1
@@ -22,8 +23,9 @@ LC_CTYPE=${LOCALE}\n\
 LC_COLLATE=${LOCALE}\n" > /etc/default/locale && echo "${LOCALE} UTF-8" > /etc/locale.gen && locale-gen ${LOCALE}
 ENV LC_ALL=${LOCALE} LANG=${LOCALE} LANGUAGE=${LOCALE}
 
-ADD tools/build-gcc.sh tools/build-binutils.sh /tools/
+ADD tools/build-gcc.sh tools/build-binutils.sh tools/build-newlib.sh /tools/
 RUN cd /tools && \
     ./build-binutils.sh ${BINUTILS_VERSION} && \
     ./build-gcc.sh ${GCC_VERSION} && \
+    ./build-newlib.sh ${GCC_VERSION} ${NEWLIB_VERSION} && \
     rm -rf ${BUILD_DIR}
