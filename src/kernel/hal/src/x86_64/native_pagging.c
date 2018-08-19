@@ -206,6 +206,7 @@ void native_pagetable_set(native_page_table_t* pt, page_map_entry_t entry)
 void native_pagetable_switch(native_page_table_t* pt)
 {
     if ((uintptr_t) get_current_page_entries() != (uintptr_t) pt->entries) {
+        native_pagetable_dump(pt);
         asm volatile ("movq %0, %%cr3" : : "r" (pt->entries));
     }
 }

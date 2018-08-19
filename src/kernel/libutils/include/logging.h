@@ -2,7 +2,8 @@
 #define LOG_H
 #include <stdlib.h>
 
-#define LOGGING_MAX_LINE    255
+#define LOGGING_MAX_LINE                255
+#define LOGGING_AGGREGATE_MESSAGES      30  // number of repetitive message to avoid rewrite
 
 enum { LOG_TRACE, LOG_DEBUG, LOG_INFO, LOG_WARN, LOG_ERROR, LOG_FATAL };
 extern const char* LOGGING_LEVEL_NAMES[];

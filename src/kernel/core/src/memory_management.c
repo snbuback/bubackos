@@ -23,7 +23,7 @@ memory_t* memory_management_create()
     memory->map = linkedlist_create();
 
     native_page_table_t* pt = memory->pt;
-    for (uintptr_t addr = 0; addr <= 2*1024*1024; addr += SYSTEM_PAGE_SIZE) {
+    for (uintptr_t addr = 0; addr <= 8*1024*1024; addr += SYSTEM_PAGE_SIZE) {
         page_map_entry_t entry = {
             .virtual_addr = addr,
             .physical_addr = addr,

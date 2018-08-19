@@ -89,16 +89,21 @@ void handle_general_page_fault(native_task_t *native_task)
     do_task_switch();
 }
 
+void handle_task_switch(native_task_t *native_task)
+{
+    log_debug("timer with task=%d", get_current_task());
+    // ack int (PIC_MASTER_CMD, PIC_CMD_EOI)
+    outb(0x20, 0x20);
+    task_update_current_state(native_task);
+    do_task_switch();
+}
+
 void interrupt_handler(native_task_t *native_task, int interrupt)
 {
 
     // timer interruption it is a special case:
     if (interrupt == 0x8) {
-        // log_debug("timer with task=%d", get_current_task());
-        // ack int (PIC_MASTER_CMD, PIC_CMD_EOI)
-        outb(0x20, 0x20);
-        task_update_current_state(native_task);
-        do_task_switch();
+        handle_task_switch(native_task);
     }
 
     log_debug("Interruption %d (0x%x) on task %d", interrupt, interrupt, get_current_task());
