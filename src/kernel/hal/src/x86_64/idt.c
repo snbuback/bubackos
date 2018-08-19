@@ -91,24 +91,30 @@ void handle_general_page_fault(native_task_t *native_task)
 
 void handle_task_switch(native_task_t *native_task)
 {
-    log_debug("timer with task=%d", get_current_task());
     // ack int (PIC_MASTER_CMD, PIC_CMD_EOI)
     outb(0x20, 0x20);
     task_update_current_state(native_task);
     do_task_switch();
 }
 
+static inline void* get_stack_address()
+{
+    void* memory;
+    asm volatile( "mov %%rsp, %0"
+                   : "=r" (memory));
+    return memory;
+}
+
 void interrupt_handler(native_task_t *native_task, int interrupt)
 {
 
-    // timer interruption it is a special case:
-    if (interrupt == 0x8) {
-        handle_task_switch(native_task);
-    }
-
-    log_debug("Interruption %d (0x%x) on task %d", interrupt, interrupt, get_current_task());
+    log_debug("Interruption %d (0x%x) on task %d current stack=%p", interrupt, interrupt, get_current_task(), get_stack_address());
 
     switch (interrupt) {
+    case 0x8: // timer
+        handle_task_switch(native_task);
+        break;
+
     case 0x9: // keyboard
         handle_keyboard();
         break;

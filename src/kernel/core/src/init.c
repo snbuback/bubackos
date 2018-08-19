@@ -84,6 +84,7 @@ void initialize_modules() {
         if (!abort) {
             char name[] = "hello";
             task_id_t task = task_create(name, memory_handler);
+            task_set_kernel_mode(task);
             log_info("task=%d", task);
             task_start(task, elf.entry_point, 0x0);
         } else {
@@ -108,6 +109,7 @@ void finish_kernel_initialization()
     uintptr_t stack_addr = (uintptr_t) malloc(8192);
     stack_addr += 4000;
     task_id_t task1 = task_create("user1", memory_handler);
+    task_set_kernel_mode(task1);
     task_start(task1, (uintptr_t) &initialize_modules, stack_addr);
     log_info("Continuing initialization on task %d", task1);
 

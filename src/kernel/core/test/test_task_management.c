@@ -12,7 +12,7 @@ static native_task_t* task_switch_called = NULL;
 #define DO_TASK_SWITCH()         if (!setjmp(state)) { do_task_switch(); }
 static jmp_buf state;
 
-void hal_create_native_task(native_task_t *task, uintptr_t code, uintptr_t stack)
+void hal_create_native_task(native_task_t *task, uintptr_t code, uintptr_t stack, int permission_mode)
 {
 
 }

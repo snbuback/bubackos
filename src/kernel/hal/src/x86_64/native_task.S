@@ -7,18 +7,27 @@
 .section .text
 .code64
 
-/* void hal_create_native_task(native_task_t *task, uintptr_t code, uintptr_t stack); */
+/* void hal_create_native_task(native_task_t *task, uintptr_t code, uintptr_t stack, int permission_mode); */
 .globl hal_create_native_task
 hal_create_native_task:
     enter $0, $0
 
-    movq    $(GDT_SEGMENT(GDT_ENTRY_USER_CS)+GDT_RING_USER), REG_ENTRY(17)     // user code segment with bottom 2 bits set for ring 3
-    movq    $(GDT_SEGMENT(GDT_ENTRY_USER_DS)+GDT_RING_USER), REG_ENTRY(20)     // user data segment with bottom 2 bits set for ring 3
     movq    %rdx, REG_ENTRY(4)      // rbp
     movq    %rdx, REG_ENTRY(19)     // rsp
     movq    %rsi, REG_ENTRY(16)     // code
     movq    $INITIAL_EFLAGS, REG_ENTRY(18)  // eflags
 
+    jrcxz   1f
+    // kernel mode
+    movq    $(GDT_SEGMENT(GDT_ENTRY_KERNEL_CS)+GDT_RING_SYSTEM), REG_ENTRY(17)     // user code segment with bottom 2 bits set for ring 3
+    movq    $(GDT_SEGMENT(GDT_ENTRY_KERNEL_DS)+GDT_RING_SYSTEM), REG_ENTRY(20)     // user data segment with bottom 2 bits set for ring 3
+    jmp     2f
+1:
+    // user mode
+    movq    $(GDT_SEGMENT(GDT_ENTRY_USER_CS)+GDT_RING_USER), REG_ENTRY(17)     // user code segment with bottom 2 bits set for ring 3
+    movq    $(GDT_SEGMENT(GDT_ENTRY_USER_DS)+GDT_RING_USER), REG_ENTRY(20)     // user data segment with bottom 2 bits set for ring 3
+
+2:
     leave
     ret
 

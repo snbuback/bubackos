@@ -45,6 +45,7 @@ task_id_t task_create(char *name, memory_t* memory_handler)
 
     task->task_id = task_id;
     task->name = name;
+    task->kernel = false;
     task->priority = 1;
     task->status = TASK_STATUS_CREATED;
     task->stack_address = (uintptr_t)malloc(TASK_DEFAULT_STACK_SIZE);
@@ -52,6 +53,17 @@ task_id_t task_create(char *name, memory_t* memory_handler)
     task_list[task->task_id] = task;
     log_trace("Created task %d", task->task_id, task);
     return task->task_id;
+}
+
+bool task_set_kernel_mode(task_id_t task_id)
+{
+    task_t* task = get_task(task_id);
+    if (task == NULL || task->status != TASK_STATUS_CREATED) {
+        log_warn("Invalid task status: %d", task_id);
+        return false;
+    }
+    task->kernel = true;
+    return true;
 }
 
 bool task_start(task_id_t task_id, uintptr_t code, uintptr_t stack)
@@ -63,7 +75,7 @@ bool task_start(task_id_t task_id, uintptr_t code, uintptr_t stack)
     }
 
     task->stack_address = stack;
-    hal_create_native_task(&task->native_task, code, task->stack_address);
+    hal_create_native_task(&task->native_task, code, task->stack_address, task->kernel);
     task->status = TASK_STATUS_READY;
     return true;
 }

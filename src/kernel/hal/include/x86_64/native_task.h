@@ -110,8 +110,11 @@ typedef struct {
 /**
  * Given a pointer to a zero-filled native_task_t structure, fill the platform dependent information, apart
  * from the code pointer (entry function) and the stack ponter.
+ * permission_mode: 
+ *      0 -> user
+ *      1 -> kernel
  */
-void hal_create_native_task(native_task_t *task, uintptr_t code, uintptr_t stack);
+void hal_create_native_task(native_task_t *task, uintptr_t code, uintptr_t stack, int kernel_mode);
 
 // assembly
 void hal_switch_task(native_task_t *task) __attribute__ ((noreturn));

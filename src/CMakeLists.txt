@@ -5,7 +5,7 @@ project (metaOS-core
 )
 
 enable_language(C ASM)
-set(CMAKE_VERBOSE_MAKEFILE on)
+set(CMAKE_VERBOSE_MAKEFILE off)
 set(CMAKE_CROSSCOMPILING on)
 
 set(CMAKE_C_STANDARD 11)

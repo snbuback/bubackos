@@ -17,6 +17,7 @@ typedef enum { TASK_STATUS_CREATED, TASK_STATUS_READY } task_status_t;
 typedef struct {
     task_id_t task_id;
     char* name;
+    bool kernel;
     task_priority_t priority;
     uintptr_t stack_address; // change to use memory management
     task_status_t status;
@@ -29,6 +30,8 @@ void task_management_initialize(void);
 task_id_t get_current_task(void);
 
 task_id_t task_create(char *name, memory_t* memory_handler);
+
+bool task_set_kernel_mode(task_id_t task_id);
 
 bool task_start(task_id_t task_id, uintptr_t code, uintptr_t stack);
 
