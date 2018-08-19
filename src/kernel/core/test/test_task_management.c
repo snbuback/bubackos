@@ -1,7 +1,9 @@
 // source: src/task_management.c
+// source: ../libutils/src/algorithms/linkedlist.c
 #include <kernel_test.h>
 #include <core/task_management.h>
 #include <hal/native_task.h>
+#include <algorithms/linkedlist.h>
 
 // pointer to 0x1 means hal_sleep called
 #define TASK_SWITCH_SLEEP       ((native_task_t*) 0x1)

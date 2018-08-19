@@ -6,25 +6,36 @@
 #include <stdbool.h>
 #include <stdlib.h>
 #include <string.h>
+#include <algorithms/linkedlist.h>
 
 static volatile task_id_t last_id;
-static task_t* task_list[SYSTEM_LIMIT_OF_TASKS];
+static linkedlist_t* task_list;
 static volatile task_id_t current_task_id;
 
-void task_management_initialize(void)
+bool task_management_initialize(void)
 {
-    memset(task_list, 0, sizeof(task_list));
+    task_list = linkedlist_create();
+    if (task_list) {
+        log_fatal("Error allocating memory for list of tasks");
+        return false;
+    }
     last_id = 0;
     current_task_id = 0;
     log_debug("task_management_initialization started");
+    return true;
 }
 
 static inline task_t* get_task(task_id_t task_id)
 {
-    if (task_id >= SYSTEM_LIMIT_OF_TASKS) {
-        return NULL_TASK;
+    linkedlist_iter_t iter;
+    linkedlist_iter_initialize(task_list, &iter);
+    task_t* task;
+    while ((task = linkedlist_iter_next(&iter))) {
+        if (task->task_id == task_id) {
+            return task;
+        }
     }
-    return task_list[task_id];
+    return NULL_TASK;
 }
 
 task_id_t get_current_task(void)
@@ -32,26 +43,64 @@ task_id_t get_current_task(void)
     return current_task_id;
 }
 
-task_id_t task_create(char *name, memory_t* memory_handler)
+/**
+ * Release all resources allocate by a task, inclusive the task_metadata itself
+ */
+static void task_release_resources(task_t* task)
+{
+    if (!task) {
+        // no resources allocated
+        return;
+    }
+
+    task_id_t task_id = task->task_id;
+
+    // remove task from the task_list
+    linkedlist_remove_element(task_list, task);
+
+    if (task->name) {
+        free(task->name);
+    }
+
+    // TODO missing release stack address
+
+    // if the task is running, remove from it from current task.
+    if (current_task_id == task_id) {
+        current_task_id = 0;
+    }
+}
+
+task_id_t task_create(const char* name, memory_t* memory_handler)
 {
     task_id_t task_id = ++last_id;
-    if (task_id >= SYSTEM_LIMIT_OF_TASKS) {
-        log_fatal("Limit of tasks reached: %d", task_id);
+
+    task_t* task = NEW(task_t);
+    if (!task) {
+        log_fatal("Unable to allocate memory for new task");
         return NULL_TASK;
     }
 
-    task_t* task = malloc(sizeof(task_t));
-    memset(task, 0, sizeof(task_t));
-
     task->task_id = task_id;
-    task->name = name;
     task->kernel = false;
     task->priority = 1;
     task->status = TASK_STATUS_CREATED;
-    task->stack_address = (uintptr_t)malloc(TASK_DEFAULT_STACK_SIZE);
+    task->stack_address = 0;
     task->memory_handler = memory_handler;
-    task_list[task->task_id] = task;
-    log_trace("Created task %d", task->task_id, task);
+
+    if (name) {
+        size_t name_size = strlen(name) + 1;
+        char* new_name = (char*) malloc(name_size);
+        strncpy(new_name, name, name_size);
+        task->name = new_name;
+    }
+
+    // append task to the list
+    if (!linkedlist_append(task_list, task)) {
+        log_fatal("Unable to allocate memory for insert a new task");
+        task_release_resources(task);
+        return NULL_TASK;
+    }
+    log_trace("Created task %d with name %s", task->task_id, task->name);
     return task->task_id;
 }
 
@@ -88,12 +137,7 @@ bool task_destroy(task_id_t task_id)
         return false;
     }
     log_debug("Destroying task %d", task_id);
-    // TODO clean up task data
-    free(task);
-    task_list[task_id] = NULL;
-    if (current_task_id == task_id) {
-        current_task_id = 0;
-    }
+    task_release_resources(task);
     return true;
 }
 

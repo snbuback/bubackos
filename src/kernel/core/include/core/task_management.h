@@ -25,11 +25,11 @@ typedef struct {
     memory_t* memory_handler;
 } task_t;
 
-void task_management_initialize(void);
+bool task_management_initialize(void);
 
 task_id_t get_current_task(void);
 
-task_id_t task_create(char *name, memory_t* memory_handler);
+task_id_t task_create(const char* name, memory_t* memory_handler);
 
 bool task_set_kernel_mode(task_id_t task_id);
 
