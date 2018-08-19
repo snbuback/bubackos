@@ -130,6 +130,54 @@ void test_linkedlist_pop_3_elements_list()
     linkedlist_destroy(ll);
 }
 
+void test_linkedlist_remove_element_first()
+{
+    char* my_data[] = { "my data1", "my-data2", "mydata3"};
+    linkedlist_t* ll = linkedlist_create();
+    linkedlist_append(ll, my_data[0]);
+    linkedlist_append(ll, my_data[1]);
+    linkedlist_append(ll, my_data[2]);
+
+    linkedlist_remove_element(ll, my_data[0]);
+
+    TEST_ASSERT_EQUAL(2, ll->size); // ensure size is still 0
+    TEST_ASSERT_EQUAL(my_data[1], linkedlist_get(ll, 0));
+    TEST_ASSERT_EQUAL(my_data[2], linkedlist_get(ll, 1));
+    linkedlist_destroy(ll);
+}
+
+void test_linkedlist_remove_element_latest()
+{
+    char* my_data[] = { "my data1", "my-data2", "mydata3"};
+    linkedlist_t* ll = linkedlist_create();
+    linkedlist_append(ll, my_data[0]);
+    linkedlist_append(ll, my_data[1]);
+    linkedlist_append(ll, my_data[2]);
+
+    linkedlist_remove_element(ll, my_data[2]);
+
+    TEST_ASSERT_EQUAL(2, ll->size); // ensure size is still 0
+    TEST_ASSERT_EQUAL(my_data[0], linkedlist_get(ll, 0));
+    TEST_ASSERT_EQUAL(my_data[1], linkedlist_get(ll, 1));
+    linkedlist_destroy(ll);
+}
+
+void test_linkedlist_remove_element_middle()
+{
+    char* my_data[] = { "my data1", "my-data2", "mydata3"};
+    linkedlist_t* ll = linkedlist_create();
+    linkedlist_append(ll, my_data[0]);
+    linkedlist_append(ll, my_data[1]);
+    linkedlist_append(ll, my_data[2]);
+
+    linkedlist_remove_element(ll, my_data[1]);
+
+    TEST_ASSERT_EQUAL(2, ll->size); // ensure size is still 0
+    TEST_ASSERT_EQUAL(my_data[0], linkedlist_get(ll, 0));
+    TEST_ASSERT_EQUAL(my_data[2], linkedlist_get(ll, 1));
+    linkedlist_destroy(ll);
+}
+
 void test_linkedlist_get()
 {
     char* my_data[] = { "my data1", "my-data2", "mydata3"};

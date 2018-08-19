@@ -119,6 +119,45 @@ bool linkedlist_append(linkedlist_t* ll, void* const data)
     return true;
 }
 
+static void linkedlist_remove_node(linkedlist_t* ll, linkedlist_node_t* previous, linkedlist_node_t* removed)
+{
+    if (!removed) {
+        return;
+    }
+
+    if (previous) {
+        previous->next = removed->next;
+    }
+
+    if (ll->first == removed) {
+        ll->first = removed->next;
+    }
+
+    MEM_FREE(removed);
+    --ll->size;
+}
+
+bool linkedlist_remove_element(linkedlist_t* ll, const void* addr)
+{
+    if (!ll) {
+        return false;
+    }
+
+    linkedlist_iter_t iter;
+    linkedlist_iter_initialize(ll, &iter);
+    linkedlist_node_t* next = NULL;
+    linkedlist_node_t* previous = NULL;
+    while ((next = linkedlist_iter_next_node(&iter))) {
+        if (next->val == addr) {
+            // element to remove
+            linkedlist_remove_node(ll, previous, next);
+            return true;
+        }
+        previous = next;
+    }
+    return false;
+}
+
 void* linkedlist_pop(linkedlist_t* ll)
 {
     if (!ll || !ll->first) {
@@ -126,25 +165,19 @@ void* linkedlist_pop(linkedlist_t* ll)
         return NULL;
     }
 
-    linkedlist_node_t* last;
-    if (ll->size == 1) {
-        last = ll->first;
-        ll->first = NULL;
-    } else {
-        // iterate until the last element. Size the last have at least 1 element, last != NULL
-        linkedlist_iter_t iter;
-        linkedlist_iter_initialize(ll, &iter);
-        linkedlist_node_t* next = NULL;
-        linkedlist_node_t* previous = NULL;
-        while ((next = linkedlist_iter_next_node(&iter))) {
-            previous = last;
-            last = next;
-        }
-        previous->next = NULL; //  release the last
+    // iterate until the last element. Size the last have at least 1 element, last != NULL
+    linkedlist_iter_t iter;
+    linkedlist_iter_initialize(ll, &iter);
+    linkedlist_node_t* previous = NULL; // before the last element
+    linkedlist_node_t* last = NULL;
+    linkedlist_node_t* next = NULL;
+    while ((next = linkedlist_iter_next_node(&iter))) {
+        previous = last;
+        last = next;
     }
-    --ll->size;
+
     void* data = last->val;
-    MEM_FREE(last);
+    linkedlist_remove_node(ll, previous, last);
     return data;
 }
 

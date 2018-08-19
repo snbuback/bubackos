@@ -71,4 +71,10 @@ bool linkedlist_iter_initialize(linkedlist_t* ll, linkedlist_iter_t* iter);
  */
 void* linkedlist_iter_next(linkedlist_iter_t* iter);
 
+/**
+ * Remove the element with pointer to addr
+ * Returns if the element was found and deleted.
+ */
+bool linkedlist_remove_element(linkedlist_t* ll, const void* addr);
+
 #endif
