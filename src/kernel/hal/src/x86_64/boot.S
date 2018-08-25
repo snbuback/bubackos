@@ -43,20 +43,12 @@ enable_paging:
   ; three. So we're going to set up PML4E, PDPTE, and PDE tables here, each
   ; with a single entry.
   */
-#define PML4E_ADDR  0x8000
-#define PDPTE_ADDR  0x9000
-#define PDE_ADDR    0xa000
-
-  /* clean memory around all page tables: 4*4096 */
-  mov   $12288, %eax
-  mov   $PML4E_ADDR, %ebx
-  call  clear_memory
 
   /* Set up PML4 entry, which will point to PDPT entry. */
-  movl  $PDPTE_ADDR, %eax
-  movl  $PML4E_ADDR, %ebx
-  movl  $PDE_ADDR, %ecx
-  movl  $PDPTE_ADDR, %edx
+  movl  $page_table_level2, %eax
+  movl  $page_table_level3, %ebx
+  movl  $page_table_level1, %ecx
+  movl  $page_table_level2, %edx
 
   /* The low 12 bits of the PML4E entry are zeroed out when it's dereferenced,
   ; and used to encode metadata instead. Here we're setting the Present and
@@ -92,7 +84,7 @@ enable_paging:
 
   /* Page 2749
   ; Set master (PML4) page table in CR3. */
-  movl    $PML4E_ADDR, %eax
+  movl    $page_table_level3, %eax
   movl    %eax, %cr3
 
   /* Page 4382
@@ -184,4 +176,9 @@ gdt_end:
 .bss
 .globl cpu0_kernel_stack
 .lcomm cpu0_kernel_stack, SYSTEM_STACKSIZE
+
+.align 4096
+.lcomm page_table_level1, 4096
+.lcomm page_table_level2, 4096
+.lcomm page_table_level3, 4096
 
