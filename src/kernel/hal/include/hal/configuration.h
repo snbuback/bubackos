@@ -6,7 +6,10 @@
 #define SYSTEM_DEBUG
 #define SYSTEM_STACKSIZE    32768
 
-// debug kernel memory allocation
-// #define SYSTEM_DEBUG_MEMORY
+#ifndef __ASSEMBLER__
+#include <stdint.h>
+typedef uintmax_t argument_t;
+
+#endif
 
 // TODO Add in the configuration an include per platform

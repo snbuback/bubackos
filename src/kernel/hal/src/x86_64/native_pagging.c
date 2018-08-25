@@ -116,7 +116,7 @@ static uintptr_t allocated_aligned_memory(native_page_table_t* pt, size_t size)
     uintptr_t addr = pt->mem_available_addr;
     pt->mem_available_size -= size;
     pt->mem_available_addr += size;
-    log_debug("Pagetable: requested %d (0x%x) bytes. Allocated at %p. Memory available %d bytes. pt=%p", size, size, addr, pt->mem_available_size, pt);
+    // log_debug("Pagetable: requested %d (0x%x) bytes. Allocated at %p. Memory available %d bytes. pt=%p", size, size, addr, pt->mem_available_size, pt);
     return addr;
 }
 

@@ -15,7 +15,7 @@ static volatile task_id_t current_task_id;
 bool task_management_initialize(void)
 {
     task_list = linkedlist_create();
-    if (task_list) {
+    if (!task_list) {
         log_fatal("Error allocating memory for list of tasks");
         return false;
     }
@@ -62,7 +62,7 @@ static void task_release_resources(task_t* task)
         free(task->name);
     }
 
-    // TODO missing release stack address
+    // TODO missing release memory resources
 
     // if the task is running, remove from it from current task.
     if (current_task_id == task_id) {
@@ -84,7 +84,7 @@ task_id_t task_create(const char* name, memory_t* memory_handler)
     task->kernel = false;
     task->priority = 1;
     task->status = TASK_STATUS_CREATED;
-    task->stack_address = 0;
+    task->userdata = 0;
     task->memory_handler = memory_handler;
 
     if (name) {
@@ -115,7 +115,83 @@ bool task_set_kernel_mode(task_id_t task_id)
     return true;
 }
 
-bool task_start(task_id_t task_id, uintptr_t code, uintptr_t stack)
+/**
+ * Compact argument data (copying) in the given memory.
+ * In case there is no enough memory, NULL is returned (but the memory is partially filled)
+ * 
+ * Structure:
+ *      array(char*, num_arguments) -> pointer to each argument. size = sizeof(argument_t) * num_arguments)
+ *      NULL
+ *      argument[0] (ending with \0)
+ *      argument[1] (ending with \0)
+ *      ...
+ *      task_userdata_t
+ * 
+ */
+uintptr_t copy_arguments_to_task(task_t* task, uintptr_t stack, size_t stack_size, size_t num_arguments, const char* arguments[])
+{
+    // first element is the vector with all arguments position on the stack
+    uintptr_t arguments_ptr = stack;
+    argument_t* arguments_ptr_phys = (argument_t*) memory_management_get_physical_address(task->memory_handler, arguments_ptr);
+    if (!arguments_ptr_phys) {
+        log_error("Error finding the physical memory address of %p", arguments_ptr_phys);
+        return 0;
+    }
+
+    // arguments data pointer
+    uintptr_t arguments_data = stack + sizeof(argument_t) * (num_arguments + 1); // ends with NULL
+    void* arguments_data_phys = (void*) memory_management_get_physical_address(task->memory_handler, arguments_data);
+    if (!arguments_data_phys) {
+        log_error("Error finding the physical memory address of %p", arguments_data);
+        return 0;
+    }
+
+    for (size_t i=0; i<num_arguments; ++i) {
+        // copy argument to the program data area
+        size_t data_size = strlen(arguments[i]) + 1; // + null terminator
+
+        // check if there is enough space for the data + num
+        if (arguments_data + data_size > (uintptr_t) stack + stack_size - sizeof(task_userdata_t)) {
+            return 0;
+        }
+
+        memcpy(arguments_data_phys, arguments[i], data_size);
+
+        arguments_ptr_phys[i] = arguments_data;
+
+        // increments
+        arguments_data += data_size;
+        arguments_data_phys += data_size;
+    }
+
+    // now stores the task_userdata_t
+    task_userdata_t* userdata = (task_userdata_t*) arguments_data_phys;
+    userdata->num_arguments = num_arguments;
+    userdata->argument_list_ptr = arguments_ptr;
+    return arguments_data; // task_userdata_t is stored virtually on arguments_data
+}
+
+bool task_set_arguments(task_id_t task_id, size_t num_arguments, const char* arguments[])
+{
+    task_t* task = get_task(task_id);
+    if (task == NULL || task->status != TASK_STATUS_CREATED || task->userdata) {
+        log_warn("Invalid task (or status) to set arguments: %d", task_id);
+        return false;
+    }
+
+    // TODO fix permissions
+    memory_region_t* region = memory_management_region_create(task->memory_handler, 0, TASK_DEFAULT_STACK_SIZE, true, true, true);
+    if (!region) {
+        log_warn("Error allocating userdata for task %d", task_id);
+        return false;
+    }
+    log_debug("Task data allocated at %p with size %d", region->start, region->size);
+
+    task->userdata = copy_arguments_to_task(task, region->start, region->size, num_arguments, arguments);
+    return true;
+}
+
+bool task_start(task_id_t task_id, uintptr_t code)
 {
     task_t* task = get_task(task_id);
     if (task == NULL || task->status != TASK_STATUS_CREATED) {
@@ -123,8 +199,14 @@ bool task_start(task_id_t task_id, uintptr_t code, uintptr_t stack)
         return false;
     }
 
-    task->stack_address = stack;
-    hal_create_native_task(&task->native_task, code, task->stack_address, task->kernel);
+    memory_region_t* region = memory_management_region_create(task->memory_handler, 0, TASK_DEFAULT_STACK_SIZE, true, true, true);
+    if (!region) {
+        log_warn("Error allocating stack address for task %d", task_id);
+        return false;
+    }
+
+    // missing add the userdata parameter
+    hal_create_native_task(&task->native_task, code, region->start + region->size - 8, task->kernel, task->userdata);
     task->status = TASK_STATUS_READY;
     return true;
 }

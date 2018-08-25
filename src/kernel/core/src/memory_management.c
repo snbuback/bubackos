@@ -55,7 +55,7 @@ static void fill_region_pages(memory_region_t* region)
             return;
         }
         // TODO no page release so far, so I don't need to save
-        // linkedlist_append(paddr);
+        linkedlist_append(region->pages, (void*) paddr);
         page_map_entry_t entry = {
             .virtual_addr = vaddr,
             .physical_addr = paddr,
@@ -81,10 +81,32 @@ static void fill_region_pages(memory_region_t* region)
     }
 }
 
+static uintptr_t find_next_memory_address(memory_t* memory)
+{
+    uintptr_t addr = 0;
+    linkedlist_iter_t iter;
+    linkedlist_iter_initialize(memory->map, &iter);
+    memory_map_t* next;
+    while ((next = linkedlist_iter_next(&iter))) {
+        addr = MAX(addr, next->virtual_addr + next->region->size);
+    }
+    // align memory address
+    uintptr_t aligned_addr = MEM_ALIGN(addr);
+    if (aligned_addr != addr) {
+        aligned_addr += SYSTEM_PAGE_SIZE;
+    }
+    return aligned_addr;
+}
+
 memory_region_t* memory_management_region_create(memory_t* memory, uintptr_t start, size_t size, bool user, bool writable, bool executable)
 {
     if (!memory) {
         return NULL;
+    }
+
+    if (start == 0) {
+        // next memory address available
+        start = find_next_memory_address(memory);
     }
 
     if (MEM_ALIGN(start) != start) {

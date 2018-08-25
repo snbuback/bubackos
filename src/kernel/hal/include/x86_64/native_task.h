@@ -114,7 +114,7 @@ typedef struct {
  *      0 -> user
  *      1 -> kernel
  */
-void hal_create_native_task(native_task_t *task, uintptr_t code, uintptr_t stack, int kernel_mode);
+void hal_create_native_task(native_task_t *task, uintptr_t code, uintptr_t stack, int permission_mode, uintptr_t userdata);
 
 // assembly
 void hal_switch_task(native_task_t *task) __attribute__ ((noreturn));

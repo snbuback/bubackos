@@ -18,7 +18,7 @@ void* malloc(size_t size)
         log_fatal("-*-*-*-*-*-*-*-*-* OutOfMemory-*-*-*-*-*-*-*-*-*-*-*-*");
         return NULL;
     }
-    log_trace("*** Allocated %d bytes (0x%x) at %p. Used %d KB", size, size, ptr, total_allocated/1024);
+    // log_trace("*** Allocated %d bytes (0x%x) at %p. Used %d KB", size, size, ptr, total_allocated/1024);
     memset(ptr, 0, size);
     return ptr;
 }

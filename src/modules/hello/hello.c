@@ -1,3 +1,4 @@
+#include <stdint.h>
 // x86_64-elf-gcc -g0 -march=nehalem -std=gnu99 -ffreestanding -Wall -Werror -Wextra -DNDEBUG -mno-red-zone -c hello.c
 // x86_64-elf-readelf -aw ./a.out 
 // x86_64-elf-ld --gc-sections -T module.ld hello.o
@@ -5,25 +6,39 @@
 
 const char stack[] __attribute__ ((section (".interp"))) = "KERNEL_MODULE";
 
-void strcpy(char* dst, char* src) {
+typedef struct {
+    uint64_t num_arguments;
+    char** argument_list; // char* arguments[]
+} task_userdata_t;
+
+void strcpy(char* dst, const char* src) {
     while (*src) {
         *dst = *src;
         ++src; ++dst;
     };
 }
 
-/*int x = 4;
-char data[452];
-*/
-void module_init(int arg)
+static void print(int line, int col, const char* msg)
 {
-    char* msg = "H e l l o   W o r d";
-/*    if (data[0] == 1) {
-        data[1]++;
-        x++;
-    }*/
-    strcpy((char*) (0xb8000 + 20*80+50), msg);
-    if (arg == 3456) {
-        strcpy((char*) (0xb8000 + 30*80+50), msg);
+    char c;
+    char* base = (char*) ((uintptr_t) 0xb8000 + (line*80+col)*2);
+    while ((c = *msg)) {
+        *base = c;
+        *(base+1) = ' ';
+        msg++;
+        base += 2;
+    }
+}
+
+task_userdata_t* userdata;
+void module_init(uint64_t arg)
+{
+    userdata = (task_userdata_t*) arg;
+
+    print(0, 0, "Hello  Word");
+    print(1, 15, "Argumentos:");
+
+    for (uint64_t i=0; i<userdata->num_arguments; ++i) {
+        print(i+2, 0, userdata->argument_list[i]);
     }
 }

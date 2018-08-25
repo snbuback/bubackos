@@ -5,7 +5,6 @@
 #include <algorithms/linkedlist.h>
 #include <hal/native_pagging.h>
 
-#define MEMORY_MANAGEMENT_MAX_NUMBER_OF_REGIONS     10
 #define MEM_ALIGN(addr)			ALIGN(addr, SYSTEM_PAGE_SIZE)
 
 typedef unsigned int memory_id_t;
@@ -25,7 +24,7 @@ typedef struct {
     bool user;
     bool writable;
     bool executable;
-    linkedlist_t* pages;
+    linkedlist_t* pages; // uintptr_t (address of the physical memory)
 } memory_region_t;
 
 typedef struct {

@@ -9,7 +9,7 @@
             "command": "make iso run",
             "presentation": {
                 "reveal": "always",
-                "panel": "shared"
+                "panel": "dedicated"
             },
             "problemMatcher": [
                 "$gcc",

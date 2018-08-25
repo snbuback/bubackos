@@ -15,6 +15,7 @@ PRIVATE
     "${CMAKE_CURRENT_LIST_DIR}/src/x86_64/native_logging.c"
     "${CMAKE_CURRENT_LIST_DIR}/src/x86_64/native_pagging.c"
     "${CMAKE_CURRENT_LIST_DIR}/src/x86_64/native_task.S"
+    "${CMAKE_CURRENT_LIST_DIR}/src/x86_64/native_task.c"
     "${CMAKE_CURRENT_LIST_DIR}/src/x86_64/serial.c"
 PUBLIC
     "${CMAKE_CURRENT_LIST_DIR}/include/hal/boot.h"

@@ -4,6 +4,7 @@
 #include <stdbool.h>
 #include <hal/native_task.h>
 #include <core/memory_management.h>
+#include <hal/configuration.h>
 
 #define TASK_DEFAULT_STACK_SIZE  1024
 
@@ -19,11 +20,16 @@ typedef struct {
     char* name;
     bool kernel;
     task_priority_t priority;
-    uintptr_t stack_address; // change to use memory management
+    uintptr_t userdata;
     task_status_t status;
     native_task_t native_task;
     memory_t* memory_handler;
 } task_t;
+
+typedef struct {
+    argument_t num_arguments;
+    argument_t argument_list_ptr; // char* arguments[]
+} task_userdata_t;
 
 bool task_management_initialize(void);
 
@@ -33,7 +39,9 @@ task_id_t task_create(const char* name, memory_t* memory_handler);
 
 bool task_set_kernel_mode(task_id_t task_id);
 
-bool task_start(task_id_t task_id, uintptr_t code, uintptr_t stack);
+bool task_set_arguments(task_id_t task_id, size_t num_arguments, const char* arguments[]);
+
+bool task_start(task_id_t task_id, uintptr_t code);
 
 void task_update_current_state(native_task_t *native_task);
 

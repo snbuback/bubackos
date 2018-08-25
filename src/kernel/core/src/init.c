@@ -57,11 +57,12 @@ void initialize_modules() {
     linkedlist_iter_initialize(platform.modules, &iter);
     info_module_t* module;
     while ((module = linkedlist_iter_next(&iter))) {
-        log_info("initializing module '%s' at %p (size %d bytes)", module->param, module->region.addr_start, module->region.size);
+        const char* module_name = module->param;
+        log_info("initializing module '%s' at %p (size %d bytes)", module_name, module->region.addr_start, module->region.size);
 
         elf_t elf;
         if (elf_parser((void*) module->region.addr_start, module->region.size, &elf) != ELF_SUCCESS) {
-            log_warn("Invalid module: %s", module->param);
+            log_warn("Invalid module: %s", module_name);
             continue;
         }
         log_trace("Module entry point=%p", elf.entry_point);
@@ -82,42 +83,17 @@ void initialize_modules() {
         }
 
         if (!abort) {
-            char name[] = "hello";
-            task_id_t task = task_create(name, memory_handler);
+            task_id_t task = task_create(module_name, memory_handler);
             task_set_kernel_mode(task);
-            log_info("task=%d", task);
-            task_start(task, elf.entry_point, 0x0);
+            const char* args[] = {"primeiro", "segundo", "terceiro!!!"};
+            task_set_arguments(task, 3, args);
+            task_start(task, elf.entry_point);
         } else {
             // TODO Release memory
-            log_warn("Module %s aborted", module->param);
+            log_warn("Module %s aborted", module_name);
         }
 
-        asm volatile ("mov $1, %rdi; syscall");
-        log_info("Cannot execute");
-        // task_destroy(get_current_task());
-        for(;;);
     }
-}
-
-void finish_kernel_initialization()
-{
-    memory_t* memory_handler = memory_management_create();
-
-    // memory_region_t* region = memory_management_region_create(memory_handler, 0x0, 0, true, true, true);
-    // fill_kernel_pages(region);
-
-    uintptr_t stack_addr = (uintptr_t) malloc(8192);
-    stack_addr += 4000;
-    task_id_t task1 = task_create("user1", memory_handler);
-    task_set_kernel_mode(task1);
-    task_start(task1, (uintptr_t) &initialize_modules, stack_addr);
-    log_info("Continuing initialization on task %d", task1);
-
-    // task_id_t task2 = task_create("user2", pt);
-    // task_start(task2, (uintptr_t) &user_task2);
-
-    // task_id_t task3 = task_create("user3", pt);
-    // task_start(task3, (uintptr_t) &user_task3);*/
 }
 
 void switch_kernel_pages()
@@ -160,5 +136,5 @@ void bubackos_init() {
 
     log_info("System ready");
 
-    finish_kernel_initialization();
+    initialize_modules();
 }
