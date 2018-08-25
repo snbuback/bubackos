@@ -27,7 +27,8 @@
 			"CMakeListsModule.txt": "cmake",
 			"linkedlist.h": "c",
 			"limits": "c",
-			"type_traits": "c"
+			"type_traits": "c",
+			"util.h": "c"
 		},
 	}
 }

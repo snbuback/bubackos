@@ -29,7 +29,7 @@ inline int index_for_level(int level, uintptr_t virtual_addr)
 static void log_pagetable_entry(page_map_entry_t* entry)
 {
     log_debug("==> vaddr=%p-%p \tpaddr=%p \tsize=%d KB \t%cr%c%c", 
-        entry->virtual_addr, entry->virtual_addr + entry->size, entry->physical_addr, entry->size/1024, !PERM_IS_KERNEL_MODE(entry->permission)?'u':'-', 
+        entry->virtual_addr, entry->virtual_addr + entry->size - 1, entry->physical_addr, entry->size/1024, !PERM_IS_KERNEL_MODE(entry->permission)?'u':'-', 
         PERM_IS_WRITE(entry->permission)?'w':'-', PERM_IS_EXEC(entry->permission)?'x':'-');
 }
 
