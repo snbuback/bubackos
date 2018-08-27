@@ -8,16 +8,10 @@
 #include <core/module_loader.h>
 #include <string.h>
 
-// TODO change platform to an argument. After the kernel initialize doesn't make sense keep this value (check how to implement memory allocation first)
-extern platform_t platform;
-
 void switch_kernel_pages()
 {
     log_debug("Switching kernel pages...");
-    native_pagetable_dump(NULL);
-    memory_t* memory_handler = memory_management_create();
-    // memory_region_t* region = memory_management_region_create(memory_handler, 0x0, 0, true, true, true);
-    // fill_kernel_pages(region);
+    memory_t* memory_handler = memory_management_get_kernel();
     native_pagetable_switch(memory_handler->pt);
 }
 
@@ -27,8 +21,9 @@ void bubackos_init() {
     logging_init();
 
     log_info("Booting BubackOS...");
-    log_debug(" kernel loaded address=%p", platform.memory.kernel.addr_start);
-    log_debug(" kernel end address   =%p", platform.memory.kernel.addr_end);
+    log_debug(" kernel loaded at %p with size %d KB", platform.memory.kernel.addr_start, 
+        platform.memory.kernel.size/1024);
+    log_debug(" kernel data address starting at %p", platform.memory.kernel_data.addr_start);
 
     page_allocator_initialize(platform.memory.total_memory);
 
@@ -45,11 +40,13 @@ void bubackos_init() {
 
     memory_management_initialize();
 
+    memory_allocator_initialize();
+
     task_management_initialize();
 
-    switch_kernel_pages();
-
     module_initialize(platform);
+
+    // switch_kernel_pages();
 
     log_info("System ready");
 }

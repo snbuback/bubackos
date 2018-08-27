@@ -10,7 +10,8 @@
        __typeof__ (b) _b = (b); \
      _a < _b ? _a : _b; })
 
-#define ALIGN(addr, a)			(addr & ~(a - 1))
+#define ALIGN(addr, a)				((addr) & ~(a - 1))
+#define ALIGN_NEXT(addr, a)		ALIGN((addr + a - 1), a)
 
 #endif
 

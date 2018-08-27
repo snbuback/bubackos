@@ -7,6 +7,7 @@
 #include <core/memory.h>
 #include <core/page_allocator.h>
 #include <logging.h>
+#include <libutils/utils.h>
 
 size_t total_of_pages;
 size_t total_memory;
@@ -46,8 +47,8 @@ void page_allocator_initialize(size_t t)
     }
 
     // TODO Keeping this logic until ensure these areas are ok to use
-    // lock the first 4mb
-    for (int i=0; i<4*1024*1024 / SYSTEM_PAGE_SIZE; ++i) {
+    // lock the first 64mb
+    for (int i=0; i<64*1024*1024 / SYSTEM_PAGE_SIZE; ++i) {
         pages[i] = PAGE_TYPE_SYSTEM;
     }
 
@@ -60,9 +61,14 @@ void page_allocator_initialize(size_t t)
  */
 bool page_allocator_mark_as_system(uintptr_t addr, size_t total_in_bytes)
 {
-    uintptr_t aligned_addr = align(addr);
-    size_t aligned_total = (total_in_bytes + SYSTEM_PAGE_ALIGN - 1) & ~(SYSTEM_PAGE_ALIGN - 1);
-    pages[page_allocator_page_number(aligned_addr)] = PAGE_TYPE_SYSTEM;
+    uintptr_t aligned_addr = ALIGN(addr, SYSTEM_PAGE_SIZE);
+    size_t aligned_total = ALIGN_NEXT(total_in_bytes, SYSTEM_PAGE_SIZE);
+    size_t remaining = aligned_total;
+    while (remaining > 0) {
+        pages[page_allocator_page_number(aligned_addr)] = PAGE_TYPE_SYSTEM;
+        aligned_addr += SYSTEM_PAGE_SIZE;
+        remaining -= SYSTEM_PAGE_SIZE;
+    }
     log_debug("Marked addr %p of size %p as SYSTEM", (void*)aligned_addr, (void*)aligned_total);
     return true;
 }

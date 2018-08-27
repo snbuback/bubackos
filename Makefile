@@ -16,7 +16,7 @@ endif
 QEMU_ARGS=-m 128 -cpu Nehalem -boot order=d -cdrom $(BUILD_DIR)/bubackos.iso -no-reboot \
 	-no-shutdown -usb -device usb-tablet \
 	-serial file:/dev/tty \
-	-show-cursor -d guest_errors,unimp,page
+	-show-cursor -d guest_errors,unimp,page,cpu_reset
 
 
 .PHONY: all build run run-debug shell gdb docker-build

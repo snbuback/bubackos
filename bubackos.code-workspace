@@ -28,7 +28,14 @@
 			"linkedlist.h": "c",
 			"limits": "c",
 			"type_traits": "c",
-			"util.h": "c"
+			"util.h": "c",
+			"platform.h": "c",
+			"stdbool.h": "c",
+			"native_pagging.h": "c",
+			"stdint.h": "c",
+			"stdlib.h": "c",
+			"stdalign.h": "c",
+			"utils.h": "c"
 		},
 	}
 }

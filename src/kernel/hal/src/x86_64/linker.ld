@@ -1,6 +1,6 @@
 ENTRY(_boot)
 
-__ADDR_KERNEL_BASE = 1M;
+__ADDR_KERNEL_BASE = 8K;
 
 /* Use nm -nS ./kernel.bin to ensure the __ADDR_KERNEL_START and __ADDR_KERNEL_END points to the limits of the kernel */
 

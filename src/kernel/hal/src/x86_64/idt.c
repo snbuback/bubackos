@@ -79,13 +79,13 @@ void handle_general_page_fault(native_task_t *native_task)
     task_id_t task_id = get_current_task();
     log_fatal("PF: addr=%p cd=%p st=%p fl=%x tk=%d", memory, native_task->codeptr, native_task->stackptr, native_task->orig_rax, task_id);
 
-    native_pagetable_dump(NULL);
     if (task_id != NULL_TASK) {
         log_fatal("Page fault caused by task %d. Killing task.", task_id);
         task_destroy(task_id);
     } else {
         log_fatal("Page fault caused by kernel :,(");
     }
+    native_pagetable_dump(NULL);
     do_task_switch();
 }
 

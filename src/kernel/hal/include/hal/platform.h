@@ -10,6 +10,7 @@
 typedef struct {
     size_t total_memory;
     region_t kernel;
+    region_t kernel_data;
     linkedlist_t* reserved_segments; // region_t
 } info_memory_info_t;
 
@@ -25,5 +26,7 @@ typedef struct {
     info_memory_info_t memory;
     linkedlist_t* modules; // info_module_t
 } platform_t;
+
+extern platform_t platform;
 
 #endif

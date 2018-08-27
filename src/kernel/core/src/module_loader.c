@@ -8,6 +8,7 @@
 #include <libutils/utils.h>
 #include <hal/configuration.h>
 #include <logging.h>
+#include <hal/platform.h>
 
 static bool copy_program_header(uintptr_t virtual_address, void* src, size_t size, memory_t* memory_handler)
 {
@@ -44,7 +45,7 @@ bool allocate_program_header(elf_t* elf, elf_program_header_t* ph, memory_t* mem
     // TODO missing fill content with zeros.
 }
 
-bool module_initialize(platform_t platform)
+bool module_task_initialize()
 {
     log_info("Initializing modules...");
 
@@ -91,3 +92,19 @@ bool module_initialize(platform_t platform)
     }
     return true;
 }
+
+bool module_initialize()
+{
+    task_id_t task_id = task_create("module_initialize", memory_management_get_kernel());
+    if (!task_id) {
+        return false;
+    }
+    if (!task_set_kernel_mode(task_id)) {
+        return false;
+    }
+    if (!task_start(task_id, (uintptr_t) &module_task_initialize)) {
+        return false;
+    }
+    return true;
+}
+

@@ -4,8 +4,8 @@
 #include <stdlib.h>
 #include <algorithms/linkedlist.h>
 #include <hal/native_pagging.h>
-
-#define MEM_ALIGN(addr)			ALIGN(addr, SYSTEM_PAGE_SIZE)
+#include <libutils/utils.h>
+#include <hal/configuration.h>
 
 typedef unsigned int memory_id_t;
 typedef unsigned int region_id_t;
@@ -15,12 +15,14 @@ typedef struct {
     native_page_table_t* pt;
     linkedlist_t* regions; // list of memory_region_t
     linkedlist_t* map; // list of memory_map_t
+    uintptr_t next_start_address;
 } memory_t;
 
 typedef struct {
     memory_t* memory;
     uintptr_t start;
     size_t size;
+    size_t allocated_size;
     bool user;
     bool writable;
     bool executable;
@@ -52,6 +54,8 @@ memory_region_t* memory_management_region_create(memory_t* memory, uintptr_t sta
 
 bool memory_management_region_resize(memory_region_t* region, size_t new_size);
 
+uintptr_t memory_management_map_physical_address(memory_region_t* region, uintptr_t paddr);
+
 bool memory_management_region_current_size(memory_region_t* region, region_id_t r_id);
 
 bool memory_management_region_destroy(memory_region_t* region);
@@ -59,5 +63,7 @@ bool memory_management_region_destroy(memory_region_t* region);
 void memory_management_destroy(memory_t* memory);
 
 uintptr_t memory_management_get_physical_address(memory_t* mhandler, uintptr_t vaddr);
+
+memory_t* memory_management_get_kernel();
 
 #endif

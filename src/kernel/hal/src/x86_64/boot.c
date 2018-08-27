@@ -10,6 +10,8 @@
 #include <x86_64/idt.h>
 #include <hal/native_task.h>
 #include <hal/native_logging.h>
+#include <hal/configuration.h>
+#include <libutils/utils.h>
 
 /* defined by the linker */
 extern uintptr_t __ADDR_KERNEL_START[];
@@ -26,6 +28,12 @@ void native_boot(uint64_t magic, uintptr_t addr)
 	platform.memory.kernel.addr_start = (uintptr_t) __ADDR_KERNEL_START;
 	platform.memory.kernel.addr_end = (uintptr_t) __ADDR_KERNEL_END;
 	platform.memory.kernel.size = platform.memory.kernel.addr_end - platform.memory.kernel.addr_start;
+
+	// kernel data starts on next page after kernel code.
+	platform.memory.kernel_data.addr_start = ALIGN(platform.memory.kernel.addr_end, SYSTEM_PAGE_SIZE) + SYSTEM_PAGE_SIZE;
+	platform.memory.kernel_data.addr_end = platform.memory.kernel_data.addr_start;
+	platform.memory.kernel_data.size = 0;
+
 	platform.memory.reserved_segments = linkedlist_create();
 	platform.modules = linkedlist_create();
 

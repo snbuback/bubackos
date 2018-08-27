@@ -21,6 +21,11 @@ void native_pagetable_set(native_page_table_t* pt, page_map_entry_t entry)
     // do nothing
 }
 
+void native_page_table_flush()
+{
+    // nothing
+}
+
 // tests
 void test_create()
 {

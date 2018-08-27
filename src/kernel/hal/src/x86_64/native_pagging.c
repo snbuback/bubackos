@@ -8,11 +8,11 @@
 
 static inline int shifting_bits(int level)
 {
-    // 0 - 4096 - 12
-    // 1 - 2M  - 21
-    // 2 - 1GB - 30
-    // 3 - 512GB - 39
-    // 4 - 256T - 48
+    // 0 - 4096  - 12 - address shifting
+    // 1 - 2M    - 21 - PTE
+    // 2 - 1GB   - 30 - PDE
+    // 3 - 512GB - 39 - PDPTE
+    // 4 - 256T  - 48 - PML4E
     return (level) * 9 + 12; // 9 bits each level + 12 bits level 0
 }
 
@@ -28,9 +28,14 @@ inline int index_for_level(int level, uintptr_t virtual_addr)
 /// debugging functions ///
 static void log_pagetable_entry(page_map_entry_t* entry)
 {
-    log_debug("==> vaddr=%p-%p \tpaddr=%p \tsize=%d KB \t%cr%c%c", 
-        entry->virtual_addr, entry->virtual_addr + entry->size - 1, entry->physical_addr, entry->size/1024, !PERM_IS_KERNEL_MODE(entry->permission)?'u':'-', 
-        PERM_IS_WRITE(entry->permission)?'w':'-', PERM_IS_EXEC(entry->permission)?'x':'-');
+    log_debug("==> vaddr=%p \t - %p  \tpaddr=%p \t size=%d KB \t %cr%c%c",
+        entry->virtual_addr,
+        entry->virtual_addr + entry->size - 1,
+        entry->physical_addr, entry->size/1024,
+        !PERM_IS_KERNEL_MODE(entry->permission)?'u':'-',
+        PERM_IS_WRITE(entry->permission)?'w':'-',
+        PERM_IS_EXEC(entry->permission)?'x':'-'
+    );
 }
 
 static bool accumulate_entries(int level, page_map_entry_t* acc, page_entry_t* entry, uintptr_t vaddr)
@@ -192,6 +197,11 @@ native_page_table_t* native_pagetable_create() {
  */
 void native_pagetable_set(native_page_table_t* pt, page_map_entry_t entry)
 {
+    if (entry.virtual_addr != MEM_ALIGN(entry.virtual_addr) || entry.physical_addr != MEM_ALIGN(entry.physical_addr)) {
+        log_warn("Invalid paging definition. Memory address is not aligned: %p -> %p", entry.virtual_addr, entry.physical_addr);
+        return;
+    }
+
     page_entry_t* entries_l4 = pt->entries;
     // TODO Add Support to big pages
     for (size_t i=0; i<entry.size / PAGE_TABLE_NATIVE_SIZE_SMALL; i++) {
@@ -209,5 +219,15 @@ void native_pagetable_switch(native_page_table_t* pt)
         native_pagetable_dump(pt);
         asm volatile ("movq %0, %%cr3" : : "r" (pt->entries));
     }
+}
+
+void native_page_table_flush()
+{
+    // TODO Implement a more efficient version: https://www.felixcloutier.com/x86/INVLPG.html
+    asm volatile ("movq	%%cr3, %%rax; movq %%rax, %%cr3"
+        :
+        :
+        : "rax");
+    return;
 }
 

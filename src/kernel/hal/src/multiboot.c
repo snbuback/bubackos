@@ -78,18 +78,19 @@ bool multiboot_parser(uint64_t magic, uintptr_t addr, platform_t *platform)
             for (mmap = ((struct multiboot_tag_mmap*)tag)->entries;
                  (multiboot_uint8_t*)mmap < (multiboot_uint8_t*)tag + tag->size;
                  mmap = (multiboot_memory_map_t*)((unsigned long)mmap + ((struct multiboot_tag_mmap*)tag)->entry_size)) {
-                log_trace(
-                    " base_addr=0x%x%x,"
-                    " length=0x%x%x (%dMB), 0x%x",
-                    (unsigned)(mmap->addr >> 32), (unsigned)(mmap->addr & 0xffffffff),
-                    (unsigned)(mmap->len >> 32), (unsigned)(mmap->len & 0xffffffff),
-                    (unsigned)(mmap->len / 1024 / 1024), (unsigned)mmap->type);
                 if (mmap->type != MULTIBOOT_MEMORY_AVAILABLE) {
                     region_t* region = NEW(region_t);
                     region->addr_start = mmap->addr;
                     region->size = mmap->len;
                     region->addr_end = region->addr_start + region->size;
                     linkedlist_append(platform->memory.reserved_segments, region);
+
+                    log_trace(
+                        " reserved memory 0x%x%x,"
+                        " length=0x%x%x (%d KB), 0x%x",
+                        (unsigned)(mmap->addr >> 32), (unsigned)(mmap->addr & 0xffffffff),
+                        (unsigned)(mmap->len >> 32), (unsigned)(mmap->len & 0xffffffff),
+                        (unsigned)(mmap->len / 1024), (unsigned)mmap->type);
                 }
             }
         } break;

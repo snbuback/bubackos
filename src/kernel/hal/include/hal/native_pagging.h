@@ -2,6 +2,8 @@
 #define _HAL_PAGGING_H
 #include <core/types.h>
 
+#define MEM_ALIGN(addr)			ALIGN(addr, SYSTEM_PAGE_SIZE)
+
 typedef struct {
     uintptr_t virtual_addr;
     uintptr_t physical_addr;
@@ -27,6 +29,8 @@ void native_pagetable_set(native_page_table_t* pt, page_map_entry_t entry);
  * Switches the current cpu to the native_page_table_t
  */
 void native_pagetable_switch(native_page_table_t* pt);
+
+void native_page_table_flush();
 
 /**
  * Dump current page table
