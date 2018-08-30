@@ -14,7 +14,7 @@ RUN apt-get -qq update && \
     apt-get -qq -y upgrade && \
     apt-get -qq -y install locales bash curl wget pkg-config build-essential make automake autogen \
         tar xz-utils bzip2 gzip file rsync sed vim binutils gcc nasm grub-pc-bin xorriso python3 \
-        gdb git libtool cmake automake1.11 autoconf2.64 gawk ruby qemu-system-x86 tmux
+        gdb git libtool cmake automake1.11 autoconf2.64 gawk ruby qemu-system-x86 tmux lcov
 
 # setup default locale
 RUN echo -n "LC_ALL=${LOCALE}\n\

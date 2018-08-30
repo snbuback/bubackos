@@ -34,7 +34,7 @@ prepare-build: clean
 build:
 	@$(CONTAINER) bash -c '(cd $(BASE_DIR)/src && cmake --build build)'
 
-test:
+test: build
 	@$(CONTAINER) bash -c '(cd $(BASE_DIR)/src/build && ctest -VV)'
 
 module-clean:
@@ -80,7 +80,6 @@ debug:
 		set mouse on \; \
 		attach
 
-
 dump-symbols:
 	@$(CONTAINER) objdump -t $(KERNEL_IMAGE)  | sort -n
 
@@ -99,4 +98,4 @@ docker-build:
 	-t bubackos:latest .
 	# build sysroot (just to auto-complete in visual studio)
 	@$(CONTAINER) bash -c 'rm -rf $(SYSROOT) && \
-		mkdir -p $(SYSROOT)/gcc && cp -a /usr/local/lib/gcc/x86_64-elf/6.3.0/include $(SYSROOT)/gcc'
+		mkdir -p $(SYSROOT)/gcc && cp -a /usr/local/lib/gcc/x86_64-elf/$(GCC_VERSION)/include $(SYSROOT)/gcc'
