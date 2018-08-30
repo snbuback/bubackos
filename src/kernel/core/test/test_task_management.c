@@ -45,7 +45,7 @@ void hal_sleep(void)
     longjmp(state, 2);
 }
 
-memory_region_t* memory_management_region_create(memory_t* memory, uintptr_t start, size_t size, bool user, bool writable, bool executable)
+memory_region_t* memory_management_region_create(memory_t* memory, const char* region_name, uintptr_t start, size_t size, bool user, bool writable, bool executable)
 {
     return NULL;
 }
@@ -54,7 +54,6 @@ uintptr_t memory_management_get_physical_address(memory_t* mhandler, uintptr_t v
 {
     return vaddr + (uintptr_t) &STACK[0] - STACK_BASE_ADDR;
 }
-
 
 // Unit tests
 void setUp(void)

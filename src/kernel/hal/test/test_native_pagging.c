@@ -15,7 +15,7 @@ void test_create_entries_is_memory_aligned()
         uintptr_t addr = (uintptr_t) create_entries(pt);
         uintptr_t addr_align = ALIGN(addr, PAGE_TABLE_ENTRIES_ALIGNMENT);
         TEST_ASSERT_EQUAL_HEX(addr_align, addr);
-        malloc(i); // insert some unliagned in memory allocation
+        kalloc(i); // insert some unliagned in memory allocation
     }
 }
 

@@ -20,6 +20,7 @@ typedef struct {
 
 typedef struct {
     memory_t* memory;
+    const char* region_name;
     uintptr_t start;
     size_t size;
     size_t allocated_size;
@@ -50,13 +51,17 @@ memory_t* memory_management_create();
  * Creates a new region of memory.
  * @params start: virtual start address (memory aligned) or 0 for no preference.
  */
-memory_region_t* memory_management_region_create(memory_t* memory, uintptr_t start, size_t size, bool user, bool writable, bool executable);
+memory_region_t* memory_management_region_create(memory_t* memory, const char* region_name, uintptr_t start, size_t size, bool user, bool writable, bool executable);
+
+void memory_management_dump(memory_t* memory);
+
+void memory_management_region_dump(memory_region_t* region);
 
 bool memory_management_region_resize(memory_region_t* region, size_t new_size);
 
-uintptr_t memory_management_map_physical_address(memory_region_t* region, uintptr_t paddr);
+uintptr_t memory_management_map_physical_address(memory_region_t* region, int num_pages, uintptr_t paddrs[]);
 
-bool memory_management_region_current_size(memory_region_t* region, region_id_t r_id);
+size_t memory_management_region_current_size(memory_region_t* region);
 
 bool memory_management_region_destroy(memory_region_t* region);
 

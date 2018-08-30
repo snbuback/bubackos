@@ -7,7 +7,7 @@
 .section .text
 .code64
 
-// TODO Stop using pushq. It is make impossible use execution protection on kernel memory data (see malloc)
+// TODO Stop using pushq. It is make impossible use execution protection on kernel memory data (see kalloc)
 // void hal_switch_task(native_task_t *task)  __attribute__ ((noreturn));
 .globl hal_switch_task
 hal_switch_task:

@@ -97,18 +97,10 @@ void handle_task_switch(native_task_t *native_task)
     do_task_switch();
 }
 
-static inline void* get_stack_address()
-{
-    void* memory;
-    asm volatile( "mov %%rsp, %0"
-                   : "=r" (memory));
-    return memory;
-}
-
 void interrupt_handler(native_task_t *native_task, int interrupt)
 {
 
-    log_debug("Interruption %d (0x%x) on task %d current stack=%p", interrupt, interrupt, get_current_task(), get_stack_address());
+    log_debug("Interruption %d (0x%x) on task %d", interrupt, interrupt, get_current_task());
 
     switch (interrupt) {
     case 0x8: // timer

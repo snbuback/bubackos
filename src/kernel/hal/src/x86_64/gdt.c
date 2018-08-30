@@ -6,6 +6,7 @@
 #include <logging.h>
 #include <x86_64/gdt.h>
 #include <hal/tss.h>
+#include <libutils/utils.h>
 
 static gdt_entry gdt[GDT_MAXIMUM_SIZE] __attribute__ ((aligned));
 static tss_entry_t tss_entry __attribute__ ((aligned));
@@ -49,8 +50,8 @@ static void tss_set(tss_entry_t *tss) {
     tss->rsp0_0_31 = kernel_stack_address & 0xFFFFFFFF;
     tss->rsp0_32_63 = kernel_stack_address >> 32;
     log_trace("TSS installed at %p size 0x%x (stack at %p)", &tss, sizeof *tss, kernel_stack_address);
-    // tss->rsp1 = (uint64_t) (malloc(SYSTEM_STACKSIZE) + SYSTEM_STACKSIZE);
-    // tss->rsp2 = (uint64_t) (malloc(SYSTEM_STACKSIZE) + SYSTEM_STACKSIZE);
+    // tss->rsp1 = (uint64_t) (kalloc(SYSTEM_STACKSIZE) + SYSTEM_STACKSIZE);
+    // tss->rsp2 = (uint64_t) (kalloc(SYSTEM_STACKSIZE) + SYSTEM_STACKSIZE);
 }
 
 uintptr_t* get_kernel_stack() {
@@ -65,8 +66,8 @@ void gdt_install()
     memset(&tss_entry, 0, sizeof(tss_entry));
 
     // initialize kernel stack per cpu (currently 1)
-    kernel_stacks = (uintptr_t*) malloc(1 * sizeof(uintptr_t));
-    kernel_stacks[0] = (uintptr_t) (malloc(SYSTEM_STACKSIZE) + SYSTEM_STACKSIZE);
+    kernel_stacks = (uintptr_t*) kalloc(1 * sizeof(uintptr_t));
+    kernel_stacks[0] = ALIGN((uintptr_t) (kalloc(SYSTEM_STACKSIZE) + SYSTEM_STACKSIZE), SYSTEM_PAGE_SIZE);
     log_trace("Kernel stack at %p (pointer to pointer at %p)", kernel_stacks[0], kernel_stacks);
     log_trace("*get_kernel_stack() = %p", *get_kernel_stack());
 

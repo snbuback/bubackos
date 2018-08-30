@@ -59,7 +59,7 @@ static void task_release_resources(task_t* task)
     linkedlist_remove_element(task_list, task);
 
     if (task->name) {
-        free(task->name);
+        kfree(task->name);
     }
 
     // TODO missing release memory resources
@@ -89,7 +89,7 @@ task_id_t task_create(const char* name, memory_t* memory_handler)
 
     if (name) {
         size_t name_size = strlen(name) + 1;
-        char* new_name = (char*) malloc(name_size);
+        char* new_name = (char*) kalloc(name_size);
         strncpy(new_name, name, name_size);
         task->name = new_name;
     }
@@ -180,7 +180,7 @@ bool task_set_arguments(task_id_t task_id, size_t num_arguments, const char* arg
     }
 
     // TODO fix permissions
-    memory_region_t* region = memory_management_region_create(task->memory_handler, 0, TASK_DEFAULT_STACK_SIZE, true, true, true);
+    memory_region_t* region = memory_management_region_create(task->memory_handler, "?-arguments", 0, TASK_DEFAULT_STACK_SIZE, true, true, true);
     if (!region) {
         log_warn("Error allocating userdata for task %d", task_id);
         return false;
@@ -199,7 +199,7 @@ bool task_start(task_id_t task_id, uintptr_t code)
         return false;
     }
 
-    memory_region_t* region = memory_management_region_create(task->memory_handler, 0, TASK_DEFAULT_STACK_SIZE, true, true, true);
+    memory_region_t* region = memory_management_region_create(task->memory_handler, "?-stack", 0, TASK_DEFAULT_STACK_SIZE, true, true, true);
     if (!region) {
         log_warn("Error allocating stack address for task %d", task_id);
         return false;
@@ -269,6 +269,7 @@ void do_task_switch()
         current_task_id = task->task_id;
         if (current_task_id != last_context_switch) {
             log_trace("Switching to task %d", current_task_id);
+            log_trace("code=%p  stack=%p", task->native_task.codeptr, task->native_task.stackptr);
             last_context_switch = current_task_id;
         }
         native_pagetable_switch(task->memory_handler->pt);

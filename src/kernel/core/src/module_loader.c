@@ -32,7 +32,7 @@ bool allocate_program_header(elf_t* elf, elf_program_header_t* ph, memory_t* mem
 {
     // bool writable = ph->flags & ELF_PF_FLAGS_W;
     // bool code = ph->flags & ELF_PF_FLAGS_X;
-    memory_region_t* region = memory_management_region_create(memory_handler, ph->vaddr, ph->mem_size, true, true, true);
+    memory_region_t* region = memory_management_region_create(memory_handler, "?-loader", ph->vaddr, ph->mem_size, true, true, true);
     if (!region) {
         return false;
     }
@@ -47,7 +47,11 @@ bool allocate_program_header(elf_t* elf, elf_program_header_t* ph, memory_t* mem
 
 bool module_task_initialize()
 {
-    log_info("Initializing modules...");
+    log_info("Initializing modules...\n\n\n\n");
+
+    memory_management_dump(memory_management_get_kernel());
+
+    log_debug("\n\n\n\n\n");
 
     linkedlist_iter_t iter;
     linkedlist_iter_initialize(platform.modules, &iter);

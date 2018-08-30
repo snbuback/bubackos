@@ -35,7 +35,8 @@
 			"stdint.h": "c",
 			"stdlib.h": "c",
 			"stdalign.h": "c",
-			"utils.h": "c"
+			"utils.h": "c",
+			"fcntl.h": "c"
 		},
 	}
 }

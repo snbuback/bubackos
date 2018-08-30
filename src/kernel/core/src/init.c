@@ -47,6 +47,5 @@ void bubackos_init() {
     module_initialize(platform);
 
     // switch_kernel_pages();
-
     log_info("System ready");
 }

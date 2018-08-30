@@ -5,6 +5,9 @@
 #include <stdio.h>
 #include <string.h>
 #include <algorithms/linkedlist.h>
+#include <fcntl.h>
+#include <sys/stat.h> 
+#include <unistd.h>
 
 static char* raw_elf;
 static size_t raw_elf_size;
@@ -12,26 +15,23 @@ static const char* ELF_TEST_FILE = "../kernel/core/test/hello.elf";
 
 void setUp(void)
 {
-    FILE* f = fopen(ELF_TEST_FILE, "rb");
-    if (!f) {
-        printf("Invalid file: %s\n", ELF_TEST_FILE);
-        // probably next call will generate null pointer
-        return;
-    }
+    int fd = open(ELF_TEST_FILE, O_RDONLY);
+    TEST_ASSERT_NOT_EQUAL(-1, fd);
 
-    // size of file
-    fseek (f , 0 , SEEK_END);
-    raw_elf_size = ftell(f);
-    rewind(f);
+    // get file size
+    struct stat file_stat;
+    TEST_ASSERT_NOT_EQUAL(-1, fstat(fd, &file_stat));
+    raw_elf_size = file_stat.st_size;
 
-    raw_elf = (char*) malloc(raw_elf_size);
-    raw_elf_size = fread(raw_elf, 1, raw_elf_size, f);
-    fclose(f);
+    // copy file content into memory
+    raw_elf = (char*) kalloc(raw_elf_size);
+    TEST_ASSERT_EQUAL(raw_elf_size, read(fd, raw_elf, raw_elf_size));
+    close(fd);
 }
 
 void tearDown(void)
 {
-    free(raw_elf);
+    kfree(raw_elf);
     raw_elf = NULL;
     raw_elf_size = 0;
 }

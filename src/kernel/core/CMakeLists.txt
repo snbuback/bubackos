@@ -25,4 +25,5 @@ include_directories("${CMAKE_CURRENT_LIST_DIR}/include")
 
 target_add_test(${OS_EXEC_TARGET} test_elfparser ${CMAKE_CURRENT_LIST_DIR}/test/test_elfparser.c)
 target_add_test(${OS_EXEC_TARGET} test_memory_management ${CMAKE_CURRENT_LIST_DIR}/test/test_memory_management.c)
+target_add_test(${OS_EXEC_TARGET} test_memory ${CMAKE_CURRENT_LIST_DIR}/test/test_memory.c)
 target_add_test(${OS_EXEC_TARGET} test_task_management ${CMAKE_CURRENT_LIST_DIR}/test/test_task_management.c)

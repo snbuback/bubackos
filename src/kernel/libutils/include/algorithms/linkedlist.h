@@ -3,13 +3,19 @@
 #include <stdlib.h>
 #include <stdbool.h>
 
+// TODO this shouldn't be here
+void* kalloc(size_t);
+void kfree(void*);
+
 #ifndef MEM_ALLOC
-#define MEM_ALLOC(size)        malloc(size)
+#define MEM_ALLOC(size)        kalloc(size)
 #endif
 
 #ifndef MEM_FREE
-#define MEM_FREE(ptr)          free(ptr)
+#define MEM_FREE(ptr)          kfree(ptr)
 #endif
+
+#define WHILE_LINKEDLIST_ITER(ll, type, var)    linkedlist_iter_t iter; type var; linkedlist_iter_initialize(ll, &iter); while ((var = (type) linkedlist_iter_next(&iter)))
 
 typedef struct linkedlist_node_t {
     void *val;

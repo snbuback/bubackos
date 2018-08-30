@@ -106,7 +106,7 @@ static uintptr_t allocated_aligned_memory(native_page_table_t* pt, size_t size)
 {
     if (size > pt->mem_available_size) {
         // ignore the memory available. Since the allocation is in blocks, the remaining block is less than one unit
-        void* new_block = malloc(NATIVE_PAGETABLE_MEM_BUFFER_SIZE);
+        void* new_block = kalloc(NATIVE_PAGETABLE_MEM_BUFFER_SIZE);
         linkedlist_append(pt->allocated_memory, new_block);
 
         pt->mem_available_size = NATIVE_PAGETABLE_MEM_BUFFER_SIZE;

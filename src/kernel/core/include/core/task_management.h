@@ -6,7 +6,7 @@
 #include <core/memory_management.h>
 #include <hal/configuration.h>
 
-#define TASK_DEFAULT_STACK_SIZE  1024
+#define TASK_DEFAULT_STACK_SIZE  SYSTEM_PAGE_SIZE*10
 
 typedef unsigned int task_id_t;
 typedef unsigned int task_priority_t;
