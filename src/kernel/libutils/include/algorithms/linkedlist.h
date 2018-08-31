@@ -15,7 +15,7 @@ void kfree(void*);
 #define MEM_FREE(ptr)          kfree(ptr)
 #endif
 
-#define WHILE_LINKEDLIST_ITER(ll, type, var)    linkedlist_iter_t iter; type var; linkedlist_iter_initialize(ll, &iter); while ((var = (type) linkedlist_iter_next(&iter)))
+#define WHILE_LINKEDLIST_ITER(ll, type, var)    linkedlist_iter_t iter ## __LINE__; type var; linkedlist_iter_initialize(ll, &iter ## __LINE__); while ((var = (type) linkedlist_iter_next(&iter ## __LINE__)))
 
 typedef struct linkedlist_node_t {
     void *val;
