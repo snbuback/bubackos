@@ -12,12 +12,14 @@
 static volatile memory_id_t last_id;
 static linkedlist_t* list_of_memory; // list of memory_t
 static memory_t* kernel_mem;
+memory_region_t* kernel_code_region;
+memory_region_t* kernel_data_region;
 
-static bool create_kernel_code_region(memory_t* kernel_mem)
+static bool map_current_kernel_memory_address(memory_t* mem)
 {
-    log_info("kernel code at %p", platform.memory.kernel.addr_start);
-    memory_region_t* code_region = memory_management_region_create(
-        kernel_mem,
+    // code
+    kernel_code_region = memory_management_region_create(
+        mem,
         "kernel-code",
         platform.memory.kernel.addr_start,
         0,
@@ -26,17 +28,29 @@ static bool create_kernel_code_region(memory_t* kernel_mem)
         true
     );
 
-    uintptr_t data_addr = platform.memory.kernel.addr_start;
-    size_t num_pages_consumed = (platform.memory.kernel.size / SYSTEM_PAGE_SIZE) + 1;
-    uintptr_t paddrs[num_pages_consumed];
-    for (size_t i=0; i<num_pages_consumed; ++i) {
-        if (!page_allocator_mark_as_system(data_addr, SYSTEM_PAGE_SIZE)) {
-            return false;
-        }
-        paddrs[i] = data_addr;
-        data_addr += SYSTEM_PAGE_SIZE;
+    if (!memory_management_region_map_physical_address(kernel_code_region, platform.memory.kernel.addr_start, ALIGN_NEXT(platform.memory.kernel.size, SYSTEM_PAGE_SIZE))) {
+        return false;
     }
-    if (!memory_management_map_physical_address(code_region, num_pages_consumed, paddrs)) {
+
+    // data
+    // TODO Since hal_switch_task uses pushq it is required execution permission on kernel memory
+    uintptr_t data_addr = platform.memory.kernel_data.addr_start;
+    kernel_data_region = memory_management_region_create(
+        kernel_mem,
+        "kernel-data",
+        data_addr,
+        0,
+        false,
+        true,
+        true
+    );
+
+    // for data, always allocates more 1 page to ensure any allocation before the memory allocator module
+    // initialise still fits in the region mapped.
+    if (!memory_management_region_map_physical_address(
+        kernel_data_region, platform.memory.kernel_data.addr_start,
+        ALIGN_NEXT(platform.memory.kernel_data.size + SYSTEM_PAGE_SIZE, SYSTEM_PAGE_SIZE))
+    ) {
         return false;
     }
     return true;
@@ -44,12 +58,14 @@ static bool create_kernel_code_region(memory_t* kernel_mem)
 
 bool memory_management_initialize() {
     list_of_memory = linkedlist_create();
-    last_id = 0;
-    kernel_mem = memory_management_create();
-    if (!create_kernel_code_region(kernel_mem)) {
+    if (!list_of_memory) {
         return false;
     }
-
+    last_id = 0;
+    kernel_mem = memory_management_create();
+    if (!map_current_kernel_memory_address(kernel_mem)) {
+        return false;
+    }
     return true;
 }
 
@@ -118,27 +134,42 @@ static void flush_if_required()
     native_page_table_flush();
 }
 
-uintptr_t memory_management_map_physical_address(memory_region_t* region, int num_pages, uintptr_t paddrs[])
+uintptr_t memory_management_region_map_physical_address(memory_region_t* region, uintptr_t physical_start_addr, size_t size)
 {
+    if (!region) {
+        log_warn("Invalid memory region: %p", region);
+        return 0;
+    }
+
+    if (physical_start_addr != MEM_ALIGN(physical_start_addr) || size != MEM_ALIGN(size)) {
+        log_warn("Mapping address to region %s is unaligned: From %p and size %d", region->region_name, physical_start_addr, size);
+        return 0;
+    }
+
+    uintptr_t paddr = physical_start_addr;
+    size_t remaining = size;
     uintptr_t returning_addr = 0;
-    for (int i=0; i<num_pages; ++i) {
-        uintptr_t vaddr = region_assoc_physical_address(region, paddrs[i]);
+    while (remaining > 0) {
+        uintptr_t vaddr = region_assoc_physical_address(region, paddr);
         if (!vaddr) {
-            log_error("Failure associating physical address %p to region %s", paddrs[i], region->region_name);
+            log_error("Failure associating physical address %p to region %s", paddr, region->region_name);
             return 0;
         }
 
-        log_trace("Mapped on region %s virtual address %p to physical %p", region->region_name, vaddr, paddrs[i]);
-
         // the first allocation is returned
-        if (!returning_addr) {
+        if (paddr == physical_start_addr) {
             returning_addr = vaddr;
         }
+
+        paddr += SYSTEM_PAGE_SIZE;
+        remaining -= SYSTEM_PAGE_SIZE;
 
         // in this case size grows until the allocated area
         region->size = region->allocated_size;
     }
 
+    log_trace("Mapped on region %s virtual address %p-%p to physical %p-%p", 
+        region->region_name, returning_addr, returning_addr + size, physical_start_addr, physical_start_addr + size);
     flush_if_required();
     memory_management_region_dump(region);
     return returning_addr;

@@ -153,27 +153,44 @@ void test_resize_region_doesnt_release_allocated_pages()
     TEST_ASSERT_EQUAL(2*num_pages, linkedlist_size(r->pages));
 }
 
-void test_map_physical_address_increase_region_size()
+
+static void map_physical_address_with_initial_size(size_t initial_size)
 {
     const char* name = "test-region";
-    const uintptr_t start_address = 0x40000;
-    const intptr_t initial_size = 3*SYSTEM_PAGE_SIZE;
+    const uintptr_t physical_start = 0x100000;
+    const uintptr_t region_start_address = 0x40000;
+    const size_t num_pages = 3;
+    const intptr_t p_size = num_pages * SYSTEM_PAGE_SIZE;
     memory_t* m = memory_management_create();
 
     TEST_ASSERT_NOT_NULL(m);
     // alocates double size
-    memory_region_t* r = memory_management_region_create(m, name, start_address, initial_size, true, true, true);
+    memory_region_t* r = memory_management_region_create(m, name, region_start_address, initial_size, true, true, true);
     TEST_ASSERT_NOT_NULL(r);
 
-    uintptr_t new_pages[] = {page_allocator_allocate(), page_allocator_allocate()};
-
-    uintptr_t vaddr = memory_management_map_physical_address(r, 2, new_pages);
+    uintptr_t vaddr = memory_management_region_map_physical_address(r, physical_start, p_size);
 
     // since there was 3 pages before the begin address is start + initial_size
-    TEST_ASSERT_EQUAL(start_address + initial_size, vaddr);
-    TEST_ASSERT_EQUAL_HEX(initial_size + 2*SYSTEM_PAGE_SIZE, r->size);
-    TEST_ASSERT_EQUAL_HEX(initial_size + 2*SYSTEM_PAGE_SIZE, r->allocated_size);
-    TEST_ASSERT_EQUAL(5, linkedlist_size(r->pages));
+    TEST_ASSERT_EQUAL(region_start_address + initial_size, vaddr);
+    TEST_ASSERT_EQUAL_HEX(initial_size + p_size, r->allocated_size);
+    TEST_ASSERT_EQUAL_HEX(r->allocated_size, r->size);
+    TEST_ASSERT_EQUAL((initial_size + p_size)/SYSTEM_PAGE_SIZE, linkedlist_size(r->pages));
+    
+    // ensure pages are in the page list
+    int page_index_start = linkedlist_size(r->pages) - num_pages;
+    for (size_t i=0; i < num_pages; ++i) {
+        TEST_ASSERT_EQUAL_HEX(physical_start + i * SYSTEM_PAGE_SIZE, (uintptr_t) linkedlist_get(r->pages, page_index_start + i));
+    }
+}
+
+void test_map_physical_address_with_empty_region()
+{
+    map_physical_address_with_initial_size(0);
+}
+
+void test_map_physical_address_with_non_empty_region()
+{
+    map_physical_address_with_initial_size(5 * SYSTEM_PAGE_SIZE);
 }
 
 void test_get_physical_address()

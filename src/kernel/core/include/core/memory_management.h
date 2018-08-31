@@ -36,6 +36,9 @@ typedef struct {
     memory_region_t* region;
 } memory_map_t;
 
+extern memory_region_t* kernel_code_region;
+extern memory_region_t* kernel_data_region;
+
 /**
  * Initialize the memory management system.
  * Also creates the first map, mapping the kernel memory
@@ -53,13 +56,12 @@ memory_t* memory_management_create();
  */
 memory_region_t* memory_management_region_create(memory_t* memory, const char* region_name, uintptr_t start, size_t size, bool user, bool writable, bool executable);
 
-void memory_management_dump(memory_t* memory);
-
-void memory_management_region_dump(memory_region_t* region);
-
+/**
+ * Resizes a memory region, releasing/alocating pages as needed.
+ */
 bool memory_management_region_resize(memory_region_t* region, size_t new_size);
 
-uintptr_t memory_management_map_physical_address(memory_region_t* region, int num_pages, uintptr_t paddrs[]);
+uintptr_t memory_management_region_map_physical_address(memory_region_t* region, uintptr_t physical_start_addr, size_t size);
 
 size_t memory_management_region_current_size(memory_region_t* region);
 
@@ -70,5 +72,9 @@ void memory_management_destroy(memory_t* memory);
 uintptr_t memory_management_get_physical_address(memory_t* mhandler, uintptr_t vaddr);
 
 memory_t* memory_management_get_kernel();
+
+void memory_management_dump(memory_t* memory);
+
+void memory_management_region_dump(memory_region_t* region);
 
 #endif

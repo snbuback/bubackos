@@ -1,3 +1,4 @@
+#include <string.h>
 #include <stdbool.h>
 #include <stddef.h>
 #include <stdint.h>
@@ -50,7 +51,10 @@ bool multiboot_parser(uint64_t magic, uintptr_t addr, platform_t *platform)
 
             // new data structure
             info_module_t* module = NEW(info_module_t);
-            module->param = mb_module->cmdline;
+            size_t param_size = strlen(mb_module->cmdline);
+            module->param = (char*) kalloc(param_size + 1);
+            // copy data to kernel-data memory region
+            strncpy(module->param, mb_module->cmdline, param_size);
             module->region.addr_start = mb_module->mod_start;
             module->region.addr_end = mb_module->mod_end;
             module->region.size = mb_module->mod_end - mb_module->mod_start;
