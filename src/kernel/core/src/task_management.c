@@ -7,6 +7,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <algorithms/linkedlist.h>
+#include <core/memory_management.h>
 
 static volatile task_id_t last_id;
 static linkedlist_t* task_list;
@@ -268,8 +269,8 @@ void do_task_switch()
         ++task->priority;
         current_task_id = task->task_id;
         if (current_task_id != last_context_switch) {
-            log_trace("Switching to task %d", current_task_id);
-            log_trace("code=%p  stack=%p", task->native_task.codeptr, task->native_task.stackptr);
+            log_trace("Switching to task %d. Code at %p, stack at %p", current_task_id, task->native_task.codeptr, task->native_task.stackptr);
+            memory_management_dump(task->memory_handler);
             last_context_switch = current_task_id;
         }
         native_pagetable_switch(task->memory_handler->pt);

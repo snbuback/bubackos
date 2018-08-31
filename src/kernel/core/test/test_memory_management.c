@@ -16,6 +16,12 @@ uintptr_t page_allocator_allocate()
     return (last_page_allocated += SYSTEM_PAGE_SIZE);
 }
 
+bool page_allocator_mark_as_system(uintptr_t addr, size_t total_in_bytes)
+{
+    // nothing
+    return true;
+}
+
 void native_pagetable_set(native_page_table_t* pt, page_map_entry_t entry)
 {
     // do nothing

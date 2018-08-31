@@ -49,10 +49,6 @@ bool module_task_initialize()
 {
     log_info("Initializing modules...\n\n\n\n");
 
-    memory_management_dump(memory_management_get_kernel());
-
-    log_debug("\n\n\n\n\n");
-
     linkedlist_iter_t iter;
     linkedlist_iter_initialize(platform.modules, &iter);
     info_module_t* module;

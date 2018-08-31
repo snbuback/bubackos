@@ -40,7 +40,7 @@ typedef struct {
  * Initialize the memory management system.
  * Also creates the first map, mapping the kernel memory
  */
-void memory_management_initialize();
+bool memory_management_initialize();
 
 /**
  * Creates a new memory management area

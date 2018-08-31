@@ -4,6 +4,8 @@
 #include <libutils/utils.h>
 #include <core/page_allocator.h>
 #include <logging.h>
+#include <hal/platform.h>
+#include <stdbool.h>
 
 #define REGION_ADDRESS_INCREMENT        (1*1024*1024)   // 1GB
 
@@ -11,10 +13,44 @@ static volatile memory_id_t last_id;
 static linkedlist_t* list_of_memory; // list of memory_t
 static memory_t* kernel_mem;
 
-void memory_management_initialize() {
+static bool create_kernel_code_region(memory_t* kernel_mem)
+{
+    log_info("kernel code at %p", platform.memory.kernel.addr_start);
+    memory_region_t* code_region = memory_management_region_create(
+        kernel_mem,
+        "kernel-code",
+        platform.memory.kernel.addr_start,
+        0,
+        false,
+        true,
+        true
+    );
+
+    uintptr_t data_addr = platform.memory.kernel.addr_start;
+    size_t num_pages_consumed = (platform.memory.kernel.size / SYSTEM_PAGE_SIZE) + 1;
+    uintptr_t paddrs[num_pages_consumed];
+    for (size_t i=0; i<num_pages_consumed; ++i) {
+        if (!page_allocator_mark_as_system(data_addr, SYSTEM_PAGE_SIZE)) {
+            return false;
+        }
+        paddrs[i] = data_addr;
+        data_addr += SYSTEM_PAGE_SIZE;
+    }
+    if (!memory_management_map_physical_address(code_region, num_pages_consumed, paddrs)) {
+        return false;
+    }
+    return true;
+}
+
+bool memory_management_initialize() {
     list_of_memory = linkedlist_create();
     last_id = 0;
     kernel_mem = memory_management_create();
+    if (!create_kernel_code_region(kernel_mem)) {
+        return false;
+    }
+
+    return true;
 }
 
 memory_t* memory_management_get_kernel()
@@ -30,22 +66,6 @@ memory_t* memory_management_create()
     memory->pt = native_pagetable_create();
     memory->regions = linkedlist_create();
     memory->map = linkedlist_create();
-
-    native_page_table_t* pt = memory->pt;
-    for (uintptr_t addr = 0; addr <= 2*1024*1024; addr += SYSTEM_PAGE_SIZE) {
-        page_map_entry_t entry = {
-            .virtual_addr = addr,
-            .physical_addr = addr,
-            .size = SYSTEM_PAGE_SIZE,
-            .permission = 0,
-            .present = true,
-            };
-        PERM_SET_KERNEL_MODE(entry.permission, true);
-        PERM_SET_WRITE(entry.permission, true);
-        PERM_SET_READ(entry.permission, true);
-        PERM_SET_EXEC(entry.permission, true);
-        native_pagetable_set(pt, entry);
-    }
 
     // add to the global list
     linkedlist_append(list_of_memory, memory);

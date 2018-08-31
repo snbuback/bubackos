@@ -67,8 +67,8 @@ platform_t platform;
 
 __attribute__ ((constructor)) void boot(void)
 {
-	platform.memory.kernel.addr_start = 0x100;
-	platform.memory.kernel.addr_end = 0x200;
+	platform.memory.kernel.addr_start = 0x2000;
+	platform.memory.kernel.addr_end = 0xA000;
 	platform.memory.kernel.size = platform.memory.kernel.addr_end - platform.memory.kernel.addr_start;
 
 	// kernel data starts on next page after kernel code.
@@ -84,7 +84,7 @@ __attribute__ ((constructor)) void boot(void)
 // by default memory function just increment memory usage
 void* __attribute__((weak)) kalloc(size_t size)
 {
-    log_test("kalloc called with size %d", size);
+    // log_test("kalloc called with size %d", size);
     uintptr_t addr = platform.memory.kernel_data.addr_end;
 
     // align memory address
@@ -98,7 +98,7 @@ void* __attribute__((weak)) kalloc(size_t size)
 
 void __attribute__((weak)) kfree(void* ptr)
 {
-    log_test("kfree called with addr %p", ptr);
+    // log_test("kfree called with addr %p", ptr);
 }
 
 native_page_table_t* __attribute__((weak)) native_pagetable_create()

@@ -55,6 +55,11 @@ uintptr_t memory_management_get_physical_address(memory_t* mhandler, uintptr_t v
     return vaddr + (uintptr_t) &STACK[0] - STACK_BASE_ADDR;
 }
 
+void memory_management_dump(memory_t* memory)
+{
+    
+}
+
 // Unit tests
 void setUp(void)
 {
