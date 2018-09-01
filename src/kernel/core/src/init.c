@@ -8,11 +8,11 @@
 #include <core/module_loader.h>
 #include <string.h>
 
-void switch_kernel_pages()
+__attribute__((noreturn)) void welcome_message()
 {
-    log_debug("Switching kernel pages...");
-    memory_t* memory_handler = memory_management_get_kernel();
-    native_pagetable_switch(memory_handler->pt);
+    log_info("\n\n\n******* System ready! ********\n\n");
+    asm volatile ("movq $1, %rdi; int $50");
+    for(;;);
 }
 
 // implicit argument platform_t platform
@@ -44,8 +44,11 @@ void bubackos_init() {
 
     task_management_initialize();
 
-    module_initialize(platform);
+    // say Welcome in another thread, to ensure the context switching is working properly.
+    task_id_t welcome_task = task_create("welcome", memory_management_get_kernel());
+    task_set_kernel_mode(welcome_task);
+    task_start(welcome_task, (uintptr_t) &welcome_message);
 
-    switch_kernel_pages();
-    log_info("System ready");
+    // initialise modules
+    module_initialize(platform);
 }

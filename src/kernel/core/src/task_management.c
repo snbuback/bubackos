@@ -57,7 +57,9 @@ static void task_release_resources(task_t* task)
     task_id_t task_id = task->task_id;
 
     // remove task from the task_list
+    log_warn("total of tasks: %d", linkedlist_size(task_list));
     linkedlist_remove_element(task_list, task);
+    log_warn("total of tasks (after): %d", linkedlist_size(task_list));
 
     if (task->name) {
         kfree(task->name);
@@ -244,10 +246,10 @@ static task_t* get_next_task()
     task_priority_t min_priority = 0;
     task_t* task_to_switch = NULL_TASK;
 
-    task_id_t task_id = 0;
-    while (++task_id <= last_id) {
-        task_t* task = get_task(task_id);
-        if (task != NULL && task->status == TASK_STATUS_READY) {
+    log_trace("total of tasks (get_next_task): %d", linkedlist_size(task_list));
+    WHILE_LINKEDLIST_ITER(task_list, task_t*, task) {
+        log_debug("Checking task %s [%d] task priority=%d min priority=%d", task->name, task->task_id, task->priority, min_priority);
+        if (task->status == TASK_STATUS_READY) {
             // check the priority
             if (task->priority < min_priority || task_to_switch == NULL_TASK) {
                 min_priority = task->priority;
@@ -261,27 +263,20 @@ static task_t* get_next_task()
 /**
  * This function should NEVER ever returns!
  */
-static volatile task_id_t last_context_switch = 0;
 void do_task_switch()
 {
     task_t* task = get_next_task();
     if (task != NULL) {
         ++task->priority;
         current_task_id = task->task_id;
-        if (current_task_id != last_context_switch) {
-            log_trace("Switching to task %d. Code at %p, stack at %p", current_task_id, task->native_task.codeptr, task->native_task.stackptr);
-            memory_management_dump(task->memory_handler);
-            last_context_switch = current_task_id;
-        }
+        log_trace("Switching to task %d. Code at %p, stack at %p", current_task_id, task->native_task.codeptr, task->native_task.stackptr);
+        // memory_management_dump(task->memory_handler);
         native_pagetable_switch(task->memory_handler->pt);
         hal_switch_task(&task->native_task);
     } else {
         // halt until a new event
         current_task_id = 0;
-        if (current_task_id != last_context_switch) {
-            log_trace("Sleeping...zzz");
-            last_context_switch = 0;
-        }
+        log_trace("Sleeping...zzz");
         hal_sleep();
     }
 }

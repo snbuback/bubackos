@@ -141,8 +141,9 @@ void test_linkedlist_remove_element_first()
     linkedlist_remove_element(ll, my_data[0]);
 
     TEST_ASSERT_EQUAL(2, ll->size); // ensure size is still 0
-    TEST_ASSERT_EQUAL(my_data[1], linkedlist_get(ll, 0));
-    TEST_ASSERT_EQUAL(my_data[2], linkedlist_get(ll, 1));
+    TEST_ASSERT_EQUAL(my_data[1], ll->first->val);
+    TEST_ASSERT_EQUAL(my_data[2], ll->first->next->val);
+    TEST_ASSERT_NULL(ll->first->next->next);
     linkedlist_destroy(ll);
 }
 

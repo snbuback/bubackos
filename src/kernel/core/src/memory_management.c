@@ -83,6 +83,24 @@ memory_t* memory_management_create()
     memory->regions = linkedlist_create();
     memory->map = linkedlist_create();
 
+    // TODO While I don't have memory_region inheritance I need to ensure kernel page are allocated in each module
+    if (kernel_code_region) {
+        for (uintptr_t addr = 0; addr <= 1*1024*1024; addr += SYSTEM_PAGE_SIZE) {
+            page_map_entry_t entry = {
+                .virtual_addr = addr,
+                .physical_addr = addr,
+                .size = SYSTEM_PAGE_SIZE,
+                .permission = 0,
+                .present = true,
+                };
+            PERM_SET_KERNEL_MODE(entry.permission, true);
+            PERM_SET_WRITE(entry.permission, true);
+            PERM_SET_READ(entry.permission, true);
+            PERM_SET_EXEC(entry.permission, true);
+            native_pagetable_set(memory->pt, entry);
+        }
+    }
+
     // add to the global list
     linkedlist_append(list_of_memory, memory);
     return memory;
