@@ -62,8 +62,11 @@ iso: build module-build
 run:
 	@qemu-system-x86_64 $(QEMU_ARGS) -monitor stdio
 
-run-debug:
-	@qemu-system-x86_64 $(QEMU_ARGS) -monitor stdio -S -s
+start-debug:
+	tmux new-session -d qemu-system-x86_64 $(QEMU_ARGS) -S -s
+
+stop-debug:
+	killall qemu-system-x86_64
 
 gdb:
 	@$(CONTAINER) gdb -iex 'file $(KERNEL_IMAGE)' -iex 'target remote docker.for.mac.localhost:1234' -iex 'break intel_start'  -iex 'continue'

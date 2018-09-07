@@ -21,17 +21,49 @@
             "type": "shell",
             "command": "make run",
             "group": "none",
-            "problemMatcher": []
+            "problemMatcher": [
+                "$gcc",
+                "$jshint"
+            ]
         },
         {
             "label": "Build",
             "type": "shell",
             "command": "make",
-            "problemMatcher": [],
+            "problemMatcher": [
+                "$gcc",
+                "$jshint"
+            ],
             "group": {
                 "kind": "build",
                 "isDefault": true
             }
-        }
+        },
+        {
+            "label": "start-debug",
+            "type": "shell",
+            "command": "make iso start-debug",
+            "presentation": {
+                "reveal": "always",
+                "panel": "dedicated"
+            },
+            "problemMatcher": [
+                "$gcc",
+                "$jshint"
+            ]
+        },
+        {
+            "label": "stop-debug",
+            "type": "shell",
+            "command": "make stop-debug",
+            "presentation": {
+                "reveal": "always",
+                "panel": "dedicated"
+            },
+            "problemMatcher": [
+                "$gcc",
+                "$jshint"
+            ]
+        },
     ]
 }
