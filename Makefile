@@ -14,7 +14,7 @@ else
     CONTAINER=
 endif
 QEMU_ARGS=-m 128 -cpu Nehalem -boot order=d -cdrom $(BUILD_DIR)/bubackos.iso -no-reboot \
-	-no-shutdown -usb -device usb-tablet \
+	-no-shutdown -usb -device usb-tablet -icount auto,sleep=on \
 	-serial file:/dev/tty \
 	-show-cursor -d guest_errors,unimp,page,cpu_reset
 
