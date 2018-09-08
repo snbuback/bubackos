@@ -61,6 +61,12 @@ void* linkedlist_pop(linkedlist_t* ll);
 void* linkedlist_get(linkedlist_t* ll, size_t index);
 
 /**
+ * Returns the index of the element on the linkedlist. -1 if the element doesn't exist.
+ * Complexity: O(n)
+ */
+int linkedlist_find(linkedlist_t* ll, void* el);
+
+/**
  * Returns the size of the list
  * Complexity: O(1)
  */

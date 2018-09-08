@@ -26,7 +26,8 @@ void idt_set_gate(unsigned num, uintptr_t base, unsigned type, unsigned ring)
 
     /* Finally, set up the granularity and access flags */
     idt[num].segment = GDT_SEGMENT(GDT_ENTRY_KERNEL_CS);
-    idt[num].ist = 0; // 64 bits
+    idt[num].ist = 1; // 64 bits
+    // Important: In the TSS (GDT) we are loading the kernel stack on IST1 (improve this code)
     idt[num].type = type;
     idt[num].ring = ring;
     idt[num].present = 1;
@@ -97,10 +98,16 @@ void handle_task_switch(native_task_t *native_task)
     do_task_switch();
 }
 
+static uintptr_t get_stack_addr()
+{
+    uintptr_t addr;
+    asm volatile ("movq %%rbp, %0" : "=r"(addr));
+    return addr;
+}
+
 void interrupt_handler(native_task_t *native_task, int interrupt)
 {
-
-    log_debug("Interruption %d (0x%x) on task %d", interrupt, interrupt, get_current_task());
+    log_debug("Interruption %d (0x%x) on task %d and stack=%p", interrupt, interrupt, get_current_task(), get_stack_addr());
 
     switch (interrupt) {
     case 0x8: // timer
@@ -137,8 +144,6 @@ void interrupt_handler(native_task_t *native_task, int interrupt)
     }
 
     do_task_switch();
-    // TODO check if current task is still valid
-    // hal_switch_task(native_task);  // fast context switching to the same task
 }
 
 void idt_initialize()

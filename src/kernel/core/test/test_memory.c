@@ -29,6 +29,11 @@ bool page_allocator_mark_as_system(uintptr_t addr, size_t total_in_bytes)
     return true;
 }
 
+void native_pagetable_switch(native_page_table_t* pt)
+{
+    
+}
+
 void setUp(void)
 {
     kernel_data_region = NULL;

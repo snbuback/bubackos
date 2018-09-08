@@ -47,10 +47,12 @@ static bool map_current_kernel_memory_address(memory_t* mem)
 
     // for data, always allocates more 1 page to ensure any allocation before the memory allocator module
     // initialise still fits in the region mapped.
+    size_t new_size = ALIGN_NEXT(platform.memory.kernel_data.size + 100*SYSTEM_PAGE_SIZE, SYSTEM_PAGE_SIZE);
     if (!memory_management_region_map_physical_address(
         kernel_data_region, platform.memory.kernel_data.addr_start,
-        ALIGN_NEXT(platform.memory.kernel_data.size + SYSTEM_PAGE_SIZE, SYSTEM_PAGE_SIZE))
+        new_size)
     ) {
+        platform.memory.kernel_data.size = new_size;
         return false;
     }
     return true;
@@ -66,6 +68,9 @@ bool memory_management_initialize() {
     if (!map_current_kernel_memory_address(kernel_mem)) {
         return false;
     }
+
+    log_info("Memory management initialised. Switching to kernel pages.");
+    native_pagetable_switch(kernel_mem->pt);
     return true;
 }
 
@@ -84,26 +89,48 @@ memory_t* memory_management_create()
     memory->map = linkedlist_create();
 
     // TODO While I don't have memory_region inheritance I need to ensure kernel page are allocated in each module
-    if (kernel_code_region) {
-        for (uintptr_t addr = 0; addr <= 1*1024*1024; addr += SYSTEM_PAGE_SIZE) {
-            page_map_entry_t entry = {
-                .virtual_addr = addr,
-                .physical_addr = addr,
-                .size = SYSTEM_PAGE_SIZE,
-                .permission = 0,
-                .present = true,
-                };
-            PERM_SET_KERNEL_MODE(entry.permission, true);
-            PERM_SET_WRITE(entry.permission, true);
-            PERM_SET_READ(entry.permission, true);
-            PERM_SET_EXEC(entry.permission, true);
-            native_pagetable_set(memory->pt, entry);
-        }
+    if (kernel_code_region && kernel_data_region) {
+        memory_management_attach(memory, kernel_code_region);
+        memory_management_attach(memory, kernel_data_region);
     }
 
     // add to the global list
     linkedlist_append(list_of_memory, memory);
     return memory;
+}
+
+/**
+ * Notify a memory handler that a region of memory was updated
+ */
+static bool add_new_memory_map(memory_t* memory, memory_region_t* region, uintptr_t paddr, uintptr_t vaddr)
+{
+    memory_map_t* map = NEW(memory_map_t);
+    if (!map) {
+        return false;
+    }
+    map->physical_addr = paddr;
+    map->virtual_addr = vaddr;
+    map->region = region;
+
+    if (!linkedlist_append(memory->map, map)) {
+        return false;
+    }
+
+    // map the page in the tlb
+    page_map_entry_t entry = {
+        .virtual_addr = vaddr,
+        .physical_addr = paddr,
+        .size = SYSTEM_PAGE_SIZE,
+        .permission = 0,
+        .present = true,
+    };
+
+    PERM_SET_KERNEL_MODE(entry.permission, !map->region->user);
+    PERM_SET_WRITE(entry.permission, map->region->writable);
+    PERM_SET_EXEC(entry.permission, map->region->executable);
+    PERM_SET_READ(entry.permission, true);
+    native_pagetable_set(memory->pt, entry);
+    return true;
 }
 
 /**
@@ -123,26 +150,12 @@ static uintptr_t region_assoc_physical_address(memory_region_t* region, uintptr_
 
     // stores the page utilized in case of release
     linkedlist_append(region->pages, (void*) paddr);
-    memory_map_t* map = NEW(memory_map_t);
-    map->physical_addr = paddr;
-    map->virtual_addr = vaddr;
-    map->region = region;
-    linkedlist_append(region->memory->map, map);
 
-    // map the page in the tlb
-    page_map_entry_t entry = {
-        .virtual_addr = vaddr,
-        .physical_addr = paddr,
-        .size = SYSTEM_PAGE_SIZE,
-        .permission = 0,
-        .present = true,
-    };
-
-    PERM_SET_KERNEL_MODE(entry.permission, !region->user);
-    PERM_SET_WRITE(entry.permission, region->writable);
-    PERM_SET_EXEC(entry.permission, region->executable);
-    PERM_SET_READ(entry.permission, true);
-    native_pagetable_set(region->memory->pt, entry);
+    WHILE_LINKEDLIST_ITER(region->attached, memory_t*, memory) {
+        if (!add_new_memory_map(memory, region, paddr, vaddr)) {
+            return 0;
+        }
+    }
     return vaddr;
 }
 
@@ -189,7 +202,7 @@ uintptr_t memory_management_region_map_physical_address(memory_region_t* region,
     log_trace("Mapped on region %s virtual address %p-%p to physical %p-%p", 
         region->region_name, returning_addr, returning_addr + size, physical_start_addr, physical_start_addr + size);
     flush_if_required();
-    memory_management_region_dump(region);
+    // memory_management_region_dump(region);
     return returning_addr;
 }
 
@@ -216,9 +229,43 @@ static uintptr_t find_next_memory_address(memory_t* memory)
     */
 }
 
+bool memory_management_attach(memory_t* memory, memory_region_t* region)
+{
+    if (!memory || !region) {
+        log_error("Attaching invalid memory or region references. Mem=%p region=%p", memory, region);
+        return false;
+    }
+
+    // verify if the region already exist
+    if (linkedlist_find(memory->regions, region) != -1) {
+        log_error("Region %s is already attached on memory %p", region->region_name, memory);
+        return true;
+    }
+
+    if (linkedlist_append(memory->regions, region)) {
+        if (linkedlist_append(region->attached, memory)) {
+
+            // update the memory with all existed pages
+            uintptr_t vaddr = region->start;
+            WHILE_LINKEDLIST_ITER(region->pages, uintptr_t, paddr) {
+                if (!add_new_memory_map(memory, region, paddr, vaddr)) {
+                    goto error;
+                }
+                vaddr += SYSTEM_PAGE_SIZE;
+            }
+            return true;
+        }
+    }
+
+error:
+    log_error("Error attaching region %s on memory %p. Possible inconsistent state!", region->region_name, memory);
+    return false;
+}
+
 memory_region_t* memory_management_region_create(memory_t* memory, const char* region_name, uintptr_t start, size_t size, bool user, bool writable, bool executable)
 {
     if (!memory) {
+        log_warn("Invalid memory reference to create a region");
         return NULL;
     }
 
@@ -238,7 +285,6 @@ memory_region_t* memory_management_region_create(memory_t* memory, const char* r
     // }
 
     memory_region_t* region = NEW(memory_region_t);
-    region->memory = memory;
     region->region_name = region_name;
     region->start = start;
     region->executable = executable;
@@ -247,10 +293,15 @@ memory_region_t* memory_management_region_create(memory_t* memory, const char* r
     region->allocated_size = 0;
     region->user = user;
     region->pages = linkedlist_create();
-    linkedlist_append(memory->regions, region);
 
-    log_trace("Created region %s of size 0x%x (%d KB) starting (virtual) at %p", region_name, size, size / 1024, start);
+    region->attached = linkedlist_create();
+    if (!memory_management_attach(memory, region)) {
+        log_error("Error attaching new region %s to memory %p", region->region_name, memory);
+        return NULL;
+    }
+
     memory_management_region_resize(region, size);
+    log_trace("Created region %s of size 0x%x (%d KB) starting (virtual) at %p", region_name, size, size / 1024, start);
     return region;
 }
 
@@ -309,7 +360,7 @@ bool memory_management_region_resize(memory_region_t* region, size_t new_size)
         region->size = new_size;
     }
     flush_if_required();
-    memory_management_region_dump(region);
+    // memory_management_region_dump(region);
     return !failure;
 }
 
@@ -336,14 +387,10 @@ void memory_management_region_dump(memory_region_t* region)
         return;
     }
 
-    if (region->size == 0) {
-        return;
-    }
-
     log_trace("=========== Dump memory region ==============");
-    log_trace("Name: %s \t Metadata: %p \t Memory: %p", region->region_name, region, region->memory);
-    log_trace("Start Address: %p \t End: %p    \t Size: %d (0x%x) bytes \t Allocated: %d KB", 
-        region->start, region->start + region->size, region->size, region->size, region->allocated_size / 1024);
+    log_trace("Name: %s \t Metadata: %p \t Attached: %d", region->region_name, region, linkedlist_size(region->attached));
+    log_trace("Start Address: %p \t End (alloc): %p \t Size: %d (%d KB) bytes \t Allocated: %d KB", 
+        region->start, region->start + region->allocated_size - 1, region->size, region->size / 1024, region->allocated_size / 1024);
     log_trace("Permissions: %c%c%c%c \t Physical pages: %d \t First Page Address: %p",
         region->user?'u':'-', 'r', region->writable?'w':'-', region->executable?'x':'-',
         linkedlist_size(region->pages), linkedlist_get(region->pages, 0)

@@ -6,7 +6,7 @@
 #include <core/memory_management.h>
 #include <core/page_allocator.h>
 
-#define KERNEL_MEMORY_PAGE_RESERVE       5
+#define KERNEL_MEMORY_PAGE_RESERVE       3*SYSTEM_PAGE_SIZE
 
 static void* current_mem_ptr = NULL;
 static bool initialised = false;
@@ -36,24 +36,28 @@ static inline void* get_current_memory_ptr()
     return current_mem_ptr;
 }
 
+/**
+ * To avoid a recursion here, since requires memory to expand memory, I marked memory as expanded before.
+ */
 static bool ensure_free_memory(size_t size)
 {
-    size_t minimum_required_size = (uintptr_t) get_current_memory_ptr() + size - platform.memory.kernel_data.addr_start;
-    size_t current_size = platform.memory.kernel_data.size;
+    // since it is required memory to expand memory, I always need to ensure there is a KERNEL_MEMORY_PAGE_RESERVE size of memory
+    size_t minimum_required_size = (uintptr_t) get_current_memory_ptr() + size + KERNEL_MEMORY_PAGE_RESERVE - platform.memory.kernel_data.addr_start;
+    size_t current_size = kernel_data_region ? kernel_data_region->allocated_size : platform.memory.kernel_data.size; // take into account current_size
 
     if (minimum_required_size > current_size) {
-        // increments memory taking into account the reserved memory
-        size_t new_size = ALIGN_NEXT(current_size + size, SYSTEM_PAGE_SIZE) + KERNEL_MEMORY_PAGE_RESERVE * SYSTEM_PAGE_SIZE;
+        // increments memory 2 * KERNEL_MEMORY_PAGE_RESERVE
+        size_t new_size = ALIGN_NEXT(minimum_required_size + KERNEL_MEMORY_PAGE_RESERVE, SYSTEM_PAGE_SIZE);
+        platform.memory.kernel_data.addr_end = platform.memory.kernel_data.addr_start + new_size;
+        platform.memory.kernel_data.size = new_size;
 
         if (initialised) {
-            // log_info("Resizing kernel data memory by %d (requested %d)", new_size, size);
+            log_info("Resizing kernel data memory by +%d KB. New size is %d KB. Allocated %d KB. Current requested %d bytes.", (new_size - current_size)/1024, new_size/1024, kernel_data_region->allocated_size/1024, size);
             if (!memory_management_region_resize(kernel_data_region, new_size)) {
+                log_warn("Due to the lack of memory kernel data pointer are out-of-sync with the kernel memory.");
                 return false;
             }
         }
-
-        platform.memory.kernel_data.addr_end = platform.memory.kernel_data.addr_start + new_size;
-        platform.memory.kernel_data.size = new_size;
     }
     return true;
 }

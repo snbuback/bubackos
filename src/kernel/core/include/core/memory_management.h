@@ -19,7 +19,7 @@ typedef struct {
 } memory_t;
 
 typedef struct {
-    memory_t* memory;
+    linkedlist_t* attached; // list of memory_t*
     const char* region_name;
     uintptr_t start;
     size_t size;
@@ -65,7 +65,7 @@ uintptr_t memory_management_region_map_physical_address(memory_region_t* region,
 
 size_t memory_management_region_current_size(memory_region_t* region);
 
-bool memory_management_region_destroy(memory_region_t* region);
+bool memory_management_attach(memory_t* memory, memory_region_t* region);
 
 void memory_management_destroy(memory_t* memory);
 

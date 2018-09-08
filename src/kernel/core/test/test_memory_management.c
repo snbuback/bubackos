@@ -32,6 +32,11 @@ void native_page_table_flush()
     // nothing
 }
 
+void native_pagetable_switch(native_page_table_t* pt)
+{
+    
+}
+
 // tests
 void test_create()
 {
@@ -49,21 +54,33 @@ void test_create_region()
 {
     const char* name = "test-region";
     const intptr_t start_addr = 0x404000;
-    const intptr_t size = 10;
+    const size_t num_pages = 20;
+    const intptr_t size = 20*SYSTEM_PAGE_SIZE - 1;
+    uintptr_t initial_paddr = last_page_allocated + SYSTEM_PAGE_SIZE;
+
     memory_t* m = memory_management_create();
     TEST_ASSERT_NOT_NULL(m);
     memory_region_t* r = memory_management_region_create(m, name, start_addr, size, true, true, true);
     TEST_ASSERT_NOT_NULL(r);
-    TEST_ASSERT_EQUAL(m, r->memory);
+    TEST_ASSERT_NOT_EQUAL(-1, linkedlist_find(r->attached, m));
     TEST_ASSERT_EQUAL(name, r->region_name);
     TEST_ASSERT_EQUAL_HEX(start_addr, r->start);
     TEST_ASSERT_EQUAL_HEX(size, r->size);
-    TEST_ASSERT_EQUAL_HEX(SYSTEM_PAGE_SIZE, r->allocated_size);
+    TEST_ASSERT_EQUAL_HEX(ALIGN_NEXT(size, SYSTEM_PAGE_SIZE), r->allocated_size);
     TEST_ASSERT_EQUAL(true, r->user);
     TEST_ASSERT_EQUAL(true, r->writable);
     TEST_ASSERT_EQUAL(true, r->executable);
-    TEST_ASSERT_EQUAL(1, linkedlist_size(r->pages));
     TEST_ASSERT_EQUAL(r, linkedlist_get(m->regions, 0));
+
+    // verify if all pages are marked in the memory map
+    TEST_ASSERT_EQUAL(num_pages, linkedlist_size(r->pages));
+    for (size_t i=0; i<num_pages; ++i) {
+        memory_map_t* map = linkedlist_get(m->map, i);
+        TEST_ASSERT_NOT_NULL(map);
+        TEST_ASSERT_EQUAL(initial_paddr + i*SYSTEM_PAGE_SIZE, map->physical_addr);
+        TEST_ASSERT_EQUAL(r->start + i*SYSTEM_PAGE_SIZE, map->virtual_addr);
+        TEST_ASSERT_EQUAL(r, map->region);
+    }
 }
 
 void test_create_region_without_start_address_and_size_0()
@@ -74,7 +91,7 @@ void test_create_region_without_start_address_and_size_0()
     TEST_ASSERT_NOT_NULL(m);
     memory_region_t* r = memory_management_region_create(m, name, start_addr, 0, true, true, true);
     TEST_ASSERT_NOT_NULL(r);
-    TEST_ASSERT_EQUAL(m, r->memory);
+    TEST_ASSERT_EQUAL(m, linkedlist_get(r->attached, 0));
     TEST_ASSERT_EQUAL(name, r->region_name);
     TEST_ASSERT_EQUAL_HEX(0x100000, r->start);
     TEST_ASSERT_EQUAL_HEX(0, r->size);

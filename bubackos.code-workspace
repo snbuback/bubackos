@@ -44,7 +44,9 @@
 			"utility": "c",
 			"iterator": "c",
 			"memory": "c",
-			"typeinfo": "c"
+			"typeinfo": "c",
+			"configuration.h": "c",
+			"ratio": "c"
 		},
 		"files.exclude": {
 			"**/.git": true,

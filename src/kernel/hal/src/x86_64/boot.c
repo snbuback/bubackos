@@ -50,6 +50,6 @@ void native_boot(uint64_t magic, uintptr_t addr)
 
 	idt_install();
 
-    log_info("Intel System ready");
+    log_info("Intel System ready\n\n");
 }
 

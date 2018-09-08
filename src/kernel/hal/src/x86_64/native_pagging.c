@@ -18,7 +18,6 @@ static inline int shifting_bits(int level)
 
 inline int index_for_level(int level, uintptr_t virtual_addr)
 {
-
     int bits_min = shifting_bits(level-1);
     int bits_max = shifting_bits(level);
     int index = (virtual_addr % (1LL<<bits_max)) >> bits_min;
@@ -28,10 +27,12 @@ inline int index_for_level(int level, uintptr_t virtual_addr)
 /// debugging functions ///
 static void log_pagetable_entry(page_map_entry_t* entry)
 {
-    log_debug("==> vaddr=%p \t - %p  \tpaddr=%p \t size=%d KB \t %cr%c%c",
+    log_debug("==> vaddr=%p \t - %p  \tpaddr=%p-%p \t size=%d KB \t %cr%c%c",
         entry->virtual_addr,
         entry->virtual_addr + entry->size - 1,
-        entry->physical_addr, entry->size/1024,
+        entry->physical_addr,
+        entry->physical_addr + entry->size - 1,
+        entry->size/1024,
         !PERM_IS_KERNEL_MODE(entry->permission)?'u':'-',
         PERM_IS_WRITE(entry->permission)?'w':'-',
         PERM_IS_EXEC(entry->permission)?'x':'-'
@@ -42,8 +43,12 @@ static bool accumulate_entries(int level, page_map_entry_t* acc, page_entry_t* e
 {
     uintptr_t paddr = entry->addr_12_shifted << 12;
     // merge if next segment have equal attributes
-    if (acc->present && acc->physical_addr+acc->size == paddr && PERM_IS_EXEC(acc->permission) == !entry->executeDisable 
-        && PERM_IS_WRITE(acc->permission) == entry->writable &&  PERM_IS_KERNEL_MODE(acc->permission) == !entry->user) {
+    if (acc->present &&
+        acc->physical_addr+acc->size == paddr &&
+        acc->virtual_addr+acc->size == vaddr &&
+        PERM_IS_EXEC(acc->permission) == !entry->executeDisable &&
+        PERM_IS_WRITE(acc->permission) == entry->writable &&
+        PERM_IS_KERNEL_MODE(acc->permission) == !entry->user) {
         // merging
         acc->size += 1LL << shifting_bits(level-1);
         return true;

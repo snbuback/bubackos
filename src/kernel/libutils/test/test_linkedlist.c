@@ -193,3 +193,20 @@ void test_linkedlist_get()
     TEST_ASSERT_NULL(linkedlist_get(ll, 3));
     linkedlist_destroy(ll);
 }
+
+void test_linkedlist_find()
+{
+    char* my_data[] = { "my data1", "my-data2", "mydata3"};
+    linkedlist_t* ll = linkedlist_create();
+    linkedlist_append(ll, my_data[0]);
+    linkedlist_append(ll, my_data[1]);
+    linkedlist_append(ll, my_data[2]);
+
+    TEST_ASSERT_EQUAL(0, linkedlist_find(ll, my_data[0]));
+    TEST_ASSERT_EQUAL(1, linkedlist_find(ll, my_data[1]));
+    TEST_ASSERT_EQUAL(2, linkedlist_find(ll, my_data[2]));
+
+    // not found
+    TEST_ASSERT_EQUAL(-1, linkedlist_find(ll, (void*) 0x1));
+    linkedlist_destroy(ll);
+}

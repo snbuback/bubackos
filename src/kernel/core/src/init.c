@@ -45,7 +45,7 @@ void bubackos_init() {
     task_management_initialize();
 
     // say Welcome in another thread, to ensure the context switching is working properly.
-    task_id_t welcome_task = task_create("welcome", memory_management_get_kernel());
+    task_id_t welcome_task = task_create("welcome", memory_management_create());
     task_set_kernel_mode(welcome_task);
     task_start(welcome_task, (uintptr_t) &welcome_message);
 

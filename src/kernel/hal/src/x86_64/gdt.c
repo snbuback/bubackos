@@ -49,6 +49,8 @@ static void tss_set(tss_entry_t *tss) {
     uintptr_t kernel_stack_address = *get_kernel_stack();
     tss->rsp0_0_31 = kernel_stack_address & 0xFFFFFFFF;
     tss->rsp0_32_63 = kernel_stack_address >> 32;
+    tss->ist1_0_31 = kernel_stack_address & 0xFFFFFFFF;
+    tss->ist1_32_63 = kernel_stack_address >> 32;
     log_trace("TSS installed at %p size 0x%x (stack at %p)", &tss, sizeof *tss, kernel_stack_address);
     // tss->rsp1 = (uint64_t) (kalloc(SYSTEM_STACKSIZE) + SYSTEM_STACKSIZE);
     // tss->rsp2 = (uint64_t) (kalloc(SYSTEM_STACKSIZE) + SYSTEM_STACKSIZE);

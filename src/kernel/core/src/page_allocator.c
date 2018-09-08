@@ -13,11 +13,6 @@ size_t total_of_pages;
 size_t total_memory;
 page_type* pages;
 
-uintptr_t align(uintptr_t addr)
-{
-    return addr & ~(uintptr_t)(SYSTEM_PAGE_ALIGN - 1);
-}
-
 size_t page_allocator_page_number(uintptr_t aligned_addr)
 {
     return aligned_addr / SYSTEM_PAGE_SIZE;
@@ -25,7 +20,8 @@ size_t page_allocator_page_number(uintptr_t aligned_addr)
 
 size_t page_allocator_next_page_available()
 {
-    for (size_t p = 0; p < total_of_pages; ++p) {
+    // TODO search for page only after 64mb until ensure everything is safe
+    for (size_t p = page_allocator_page_number(64*1024*1024); p < total_of_pages; ++p) {
         if (!pages[p]) {
             return p;
         }
@@ -45,15 +41,18 @@ void page_allocator_initialize(size_t t)
     for (size_t p = 0; p < total_of_pages; ++p) {
         pages[p] = PAGE_TYPE_FREE;
     }
-
-    // TODO Keeping this logic until ensure these areas are ok to use
-    // lock the first 64mb
-    for (int i=0; i<64*1024*1024 / SYSTEM_PAGE_SIZE; ++i) {
-        pages[i] = PAGE_TYPE_SYSTEM;
-    }
-
     log_debug("Page Allocator initialized");
+}
 
+static bool mark_page(uintptr_t align_addr, page_type page_type)
+{
+    size_t page_number = page_allocator_page_number(align_addr);
+    if (pages[page_number]) {
+        log_warn("Marking page ref to address %p as %d but page is %d", align_addr, page_type, pages[page_number]);
+        return false;
+    }
+    pages[page_number] = PAGE_TYPE_USER;
+    return true;
 }
 
 /*
@@ -65,7 +64,7 @@ bool page_allocator_mark_as_system(uintptr_t addr, size_t total_in_bytes)
     size_t aligned_total = ALIGN_NEXT(total_in_bytes, SYSTEM_PAGE_SIZE);
     size_t remaining = aligned_total;
     while (remaining > 0) {
-        pages[page_allocator_page_number(aligned_addr)] = PAGE_TYPE_SYSTEM;
+        mark_page(aligned_addr, PAGE_TYPE_SYSTEM);
         aligned_addr += SYSTEM_PAGE_SIZE;
         remaining -= SYSTEM_PAGE_SIZE;
     }
@@ -83,11 +82,11 @@ uintptr_t page_allocator_allocate()
 
 bool page_allocator_mark_as_free(uintptr_t addr)
 {
-    if (align(addr) != addr) {
+    if (ALIGN(addr, SYSTEM_PAGE_SIZE) != addr) {
         log_error("Only use free memory of aligned address: %p", (void*)addr);
+        return false;
     }
-    pages[page_allocator_page_number(addr)] = PAGE_TYPE_FREE;
-    return true;
+    return mark_page(addr, PAGE_TYPE_FREE);
 }
 
 page_type page_allocator_page_status(size_t page_number)
