@@ -200,7 +200,7 @@ bool task_start(task_id_t task_id, uintptr_t code)
         return false;
     }
 
-    memory_region_t* region = memory_management_region_create(task->memory_handler, "?-stack", 0x1000000, TASK_DEFAULT_STACK_SIZE, true, true, true);
+    memory_region_t* region = memory_management_region_create(task->memory_handler, "?-stack", 0, TASK_DEFAULT_STACK_SIZE, true, true, true);
     if (!region) {
         log_warn("Error allocating stack address for task %d", task_id);
         return false;

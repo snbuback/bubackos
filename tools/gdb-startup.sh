@@ -1,6 +1,5 @@
 #!/bin/bash
 set -e
-set -x
 
 if [ ! $# -eq 2 ]; then
     echo "Missing gdb endpoint"
@@ -26,6 +25,16 @@ end
 
 set architecture i386:x86-64:intel
 file $KERNEL_IMAGE
+EOF
+
+# Add all modules
+for mod in `cat src/modules/modules.list`; do
+  module="build/bootloader/boot/${mod}.mod"
+  addr=`readelf -S ${module} | grep .text | egrep -o '([0-9]{16})'`
+  echo "add-symbol-file ${module} 0x${addr}" >> $GDB_SCRIPT_1
+done
+
+cat >> $GDB_SCRIPT_1 <<EOF
 target remote $ENDPOINT
 break native_boot
 continue
@@ -42,5 +51,12 @@ $BREAKPOINTS
 continue
 EOF
 
+echo "####### GDB_SCRIPT_1 #########"
+cat $GDB_SCRIPT_1
+
+echo "####### GDB_SCRIPT_2 #########"
+cat $GDB_SCRIPT_2
+
+echo "##############################"
 gdb --init-command=$GDB_SCRIPT_1 --command=$GDB_SCRIPT_2
 

@@ -43,6 +43,7 @@ hal_switch_task:
     REG_RESTORE(rdx, 12)
     REG_RESTORE(rsi, 13)
     REG_RESTORE(rdi, 14) // last to restore because pointer to all information
+    xchg %bx, %bx
     iretq
 
 .globl hal_sleep

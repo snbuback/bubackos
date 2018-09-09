@@ -8,12 +8,7 @@
 
 .text
 _start:
-
     xchgw %bx, %bx
-    # setup the user stack
-    movq       $_stack_area, %rbp
-    addq       $4096, %rbp
-    movq       %rbp, %rsp
 
     call       module_init
     call       _exit

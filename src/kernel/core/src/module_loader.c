@@ -13,17 +13,17 @@
 // TODO change calls to memory management thru syscall so this is no more required.
 memory_t* memory_handler;
 
-bool allocate_program_header(elf_t* elf, elf_program_header_t* ph, memory_t* memory_handler)
+bool allocate_program_header(elf_t* elf, elf_program_header_t* ph, memory_t* module_memory_handler)
 {
-    // bool writable = ph->flags & ELF_PF_FLAGS_W;
-    // bool code = ph->flags & ELF_PF_FLAGS_X;
-    memory_region_t* region = memory_management_region_create(memory_handler, "?-loader", ph->vaddr, 0, true, true, true);
+    bool writable = ph->flags & ELF_PF_FLAGS_W;
+    bool code = true; //ph->flags & ELF_PF_FLAGS_X;
+    memory_region_t* region = memory_management_region_create(module_memory_handler, "elf-loader", ph->vaddr, 0, true, writable, code);
     if (!region) {
         return false;
     }
     // map the content of file to the allocated region
     if (ph->file_size) {
-        if (!memory_management_region_map_physical_address(region, elf->base + ph->offset, ALIGN_NEXT(ph->file_size, SYSTEM_PAGE_SIZE))) {
+        if (!memory_management_region_map_physical_address(region, memory_management_get_physical_address(memory_handler, elf->base + ph->offset), ALIGN_NEXT(ph->file_size, SYSTEM_PAGE_SIZE))) {
             return false;
         }
     }
@@ -42,7 +42,7 @@ bool module_task_initialize()
 
     WHILE_LINKEDLIST_ITER(platform.modules, info_module_t*, module) {
         const char* module_name = module->param;
-        log_info("initializing module '%s' at %p (size %d bytes)", module_name, module->region.addr_start, module->region.size);
+        log_info("initializing module '%s' at %p (physical) (size %d bytes)", module_name, module->region.addr_start, module->region.size);
 
         memory_region_t* region = memory_management_region_create(memory_handler, "module-loading", 0, 0, true, true, true);
         uintptr_t vaddr = memory_management_region_map_physical_address(region, module->region.addr_start, ALIGN_NEXT(module->region.size, SYSTEM_PAGE_SIZE));
@@ -57,12 +57,18 @@ bool module_task_initialize()
         }
         log_trace("Module entry point=%p", elf.entry_point);
 
-        memory_t* memory_handler = memory_management_create();
+        memory_t* module_memory_handler = memory_management_create();
+
+        // TODO TEMP
+        {
+            memory_region_t* r = memory_management_region_create(module_memory_handler, "video", 0xb8000, 0, true, true, true);
+            memory_management_region_map_physical_address(r, 0xb8000, 16*1024);
+        }
 
         bool abort = false;
         WHILE_LINKEDLIST_ITER(elf.program_headers, elf_program_header_t*, program_header) {
             if (program_header->type == ELF_PT_LOAD) {
-                if (!allocate_program_header(&elf, program_header, memory_handler)) {
+                if (!allocate_program_header(&elf, program_header, module_memory_handler)) {
                     abort = true;
                     break;
                 }
@@ -75,8 +81,8 @@ bool module_task_initialize()
             return false;
         }
 
-        task_id_t task = task_create(module_name, memory_handler);
-        // task_set_kernel_mode(task);
+        task_id_t task = task_create(module_name, module_memory_handler);
+        task_set_kernel_mode(task);
         // const char* args[] = {"primeiro", "segundo", "terceiro!!!"};
         // task_set_arguments(task, 3, args);
         task_start(task, elf.entry_point);
@@ -88,7 +94,6 @@ bool module_task_initialize()
 static void mod_init()
 {
     module_task_initialize();
-        asm ("xchg %bx, %bx");
 
     asm volatile ("movq $1, %rdi; int $50");
     for(;;);

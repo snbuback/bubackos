@@ -22,6 +22,7 @@ static void print(int line, int col, const char* msg)
 {
     char c;
     char* base = (char*) ((uintptr_t) 0xb8000 + (line*80+col)*2);
+    asm ("xchgw %bx, %bx");
     while ((c = *msg)) {
         *base = c;
         *(base+1) = ' ';
@@ -31,14 +32,14 @@ static void print(int line, int col, const char* msg)
 }
 
 task_userdata_t* userdata;
-void module_init(uint64_t arg)
+void module_init()
 {
-    userdata = (task_userdata_t*) arg;
+    // userdata = (task_userdata_t*) arg;
 
     print(0, 0, "Hello  Word");
     print(1, 15, "Argumentos:");
 
-    for (uint64_t i=0; i<userdata->num_arguments; ++i) {
-        print(i+2, 0, userdata->argument_list[i]);
-    }
+    // for (uint64_t i=0; i<userdata->num_arguments; ++i) {
+    //     print(i+2, 0, userdata->argument_list[i]);
+    // }
 }
