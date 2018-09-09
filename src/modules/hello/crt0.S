@@ -1,6 +1,3 @@
-
-#define SYSTEM_STACKSIZE        4096
-
 .extern module_init
 .globl _start
 
@@ -8,17 +5,16 @@
 
 .text
 _start:
-    xchgw %bx, %bx
-
     call       module_init
     call       _exit
+
+// rdi should have the interruption number
+_syscall:
+    int $50
 
 # exit the current process
 _exit:
     movq $1, %rdi
-    int $50
+    call _syscall
     jmp _exit      // this should never happens... but in case...
-
-.bss
-.lcomm _stack_area, 4096
 

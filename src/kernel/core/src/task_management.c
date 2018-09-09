@@ -188,7 +188,12 @@ bool task_set_arguments(task_id_t task_id, size_t num_arguments, const char* arg
     }
     log_debug("Task data allocated at %p with size %d", region->start, region->size);
 
+    // attach the argument region to the kernel
+    if (!memory_management_attach(memory_management_get_kernel(), region)) {
+        return false;
+    }
     task->userdata = copy_arguments_to_task(task, region->start, region->size, num_arguments, arguments);
+    // TODO Detach argument region
     return true;
 }
 

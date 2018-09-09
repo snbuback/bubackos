@@ -2,7 +2,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <stdint.h>
-#include <hal/console.h>
+#include "console.h"
 
 static uint16_t* const console_buffer = (uint16_t*) 0xB8000;
 static size_t terminal_row;

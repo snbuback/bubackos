@@ -91,20 +91,16 @@ bool module_task_initialize()
 
 }
 
-static void mod_init()
-{
-    module_task_initialize();
-
-    asm volatile ("movq $1, %rdi; int $50");
-    for(;;);
-}
-
 bool module_initialize()
 {
-    memory_handler = memory_management_create();
-    task_id_t task = task_create("module_init", memory_handler);
-    task_set_kernel_mode(task);
-    task_start(task, (uintptr_t) &mod_init);
+    memory_handler = memory_management_get_kernel();
+    module_task_initialize();
     return true;
+    // TODO TO revert the use of kernel pages is necessary allow task_set_arguments runs with the same handler as this task
+    // memory_handler = memory_management_create();
+    // task_id_t task = task_create("module_init", memory_handler);
+    // task_set_kernel_mode(task);
+    // task_start(task, (uintptr_t) &mod_init);
+    // return true;
 }
 

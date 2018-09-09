@@ -31,6 +31,16 @@ void native_pagetable_switch(native_page_table_t* pt)
     
 }
 
+memory_t* memory_management_get_kernel()
+{
+
+}
+
+bool memory_management_attach(memory_t* memory, memory_region_t* region)
+{
+
+}
+
 void hal_switch_task(native_task_t *task)
 {
     TEST_ASSERT_NULL(task_switch_called);
