@@ -77,7 +77,9 @@ void handle_task_switch(native_task_t *native_task)
 {
     // ack int (PIC_MASTER_CMD, PIC_CMD_EOI)
     outb(0x20, 0x20);
-    task_update_current_state(native_task);
+    if (get_current_task()) {
+        task_update_current_state(native_task);
+    }
     do_task_switch();
 }
 
@@ -139,7 +141,7 @@ void idt_initialize()
     idt_fill_table();
 }
 
-void pre_syscall(native_task_t* native_task)
+__attribute((noreturn)) void pre_syscall(native_task_t* native_task)
 {
     native_task->rax = do_syscall(
         native_task->rdi,
@@ -148,6 +150,7 @@ void pre_syscall(native_task_t* native_task)
         native_task->rcx,
         native_task->r8
         );
+    hal_switch_task(native_task);
 }
 
 /**

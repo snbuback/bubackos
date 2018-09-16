@@ -61,10 +61,7 @@ syscall_jumper:
     pushq   %r11    // r11 (contains rflags after sysenter)
     pushq   $(GDT_SEGMENT(GDT_ENTRY_USER_CS)+GDT_RING_USER) // cs --- overriden by task_update_current_state
     pushq   %rcx    // user's next instruction
-    pushq   %rbp    // NOTE: here should be the orig-rax value. I used rbp to make the return easier
-
-    // only now I can save the task %rbp register
-    movq    %rsp, %rbp
+    pushq   $0
 
     // first the registers are save into the stack. In the task_update_current_state
     // the registers are copied to the native_task associate to the task
@@ -83,11 +80,6 @@ syscall_jumper:
 
     call    pre_syscall
 
-    // Instructions: SYSRET loads CS from STAR 63:48. It loads EIP from RCX and SS from STAR 63:48 + 8.
-
-    // fast way to restore the relevant task state
-    movq    -3*8(%rbp), %r11  // rflags
-    movq    -5*8(%rbp), %rcx  // user next instruction
-    movq    -6*8(%rbp), %rbp
-    sti
-    sysret
+    // IMPORTANT: sysret returns to a fixed cs/ss. Since drivers run in kernel mode, I'm using iret to return from system calls
+    // this function should not return
+    call    hal_sleep

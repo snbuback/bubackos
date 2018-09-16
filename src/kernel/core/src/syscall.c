@@ -35,5 +35,5 @@ long do_syscall(long syscall_number, long arg2, long arg3, long arg4, long arg5)
             return syscall_log(arg2, (char*) arg3);
     }
     log_error("Invalid system call %d called from %d", syscall_number, get_current_task());
-    return 0;
+    return -1;
 }

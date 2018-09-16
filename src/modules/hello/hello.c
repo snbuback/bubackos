@@ -53,7 +53,8 @@ void module_init(uintptr_t arg)
 
     print(0, strlen("1234567890"), "Hello  Word");
 
-    syscall(0x1000, 0x2000, 0x3000, 0x4000, 0x5000);
+    long r = syscall(0x1000, 0x2000, 0x3000, 0x4000, 0x5000);
+    print(r, 0, "retorno syscall");
     
     syscall(0x1001, 0x2001, 0x3001, 0x4001, 0x5001);
 
