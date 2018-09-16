@@ -90,6 +90,19 @@ static uintptr_t get_stack_addr()
     return addr;
 }
 
+__attribute((noreturn)) void pre_syscall(native_task_t* native_task)
+{
+    native_task->rax = do_syscall(
+        native_task->rdi,
+        native_task->rsi,
+        native_task->rdx,
+        native_task->r10,
+        native_task->r8,
+        native_task->r9
+        );
+    hal_switch_task(native_task);
+}
+
 void interrupt_handler(native_task_t *native_task, int interrupt)
 {
     log_debug("Interruption %d (0x%x) on task %d and stack=%p", interrupt, interrupt, get_current_task(), get_stack_addr());
@@ -117,14 +130,7 @@ void interrupt_handler(native_task_t *native_task, int interrupt)
         break;
 
     case INT_SYSTEM_CALL:
-        native_task->rax = do_syscall(
-            native_task->rdi,
-            native_task->rsi,
-            native_task->rdx,
-            native_task->rcx,
-            native_task->r8);
-        // TODO There is two calls to 'task_update_current_state' during the syscall
-        task_update_current_state(native_task);
+        pre_syscall(native_task);
         break;
 
     default:
@@ -139,18 +145,6 @@ void interrupt_handler(native_task_t *native_task, int interrupt)
 void idt_initialize()
 {
     idt_fill_table();
-}
-
-__attribute((noreturn)) void pre_syscall(native_task_t* native_task)
-{
-    native_task->rax = do_syscall(
-        native_task->rdi,
-        native_task->rsi,
-        native_task->rdx,
-        native_task->rcx,
-        native_task->r8
-        );
-    hal_switch_task(native_task);
 }
 
 /**

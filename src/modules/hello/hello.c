@@ -7,27 +7,12 @@
 
 const char stack[] __attribute__ ((section (".interp"))) = "KERNEL_MODULE";
 
-long syscall(long arg1, long arg2, long arg3, long arg4, long arg5)
-{
-    //asm volatile ("movq %0, %%cr3" : : "r" (pt->entries));
-    long result;
-    asm ("\
-        mov %1, %%rdi; \
-        mov %2, %%rsi; \
-        mov %3, %%rdx; \
-        mov %4, %%rcx; \
-        mov %5, %%r8; \
-        syscall; \
-        movq %%rax, %0"
-    : "=r"(result)
-    : "m"(arg1), "m"(arg2), "m"(arg3), "m"(arg4), "m"(arg5));
-    return result;
-}
-
-long syscall3(long arg1, long arg2, long arg3)
-{
-    return syscall(arg1, arg2, arg3, 0, 0);
-}
+extern long _syscall0(long syscall_number);
+extern long _syscall1(long syscall_number, long arg1);
+extern long _syscall2(long syscall_number, long arg1, long arg2);
+extern long _syscall3(long syscall_number, long arg1, long arg2, long arg3);
+extern long _syscall4(long syscall_number, long arg1, long arg2, long arg3, long arg4);
+extern long _syscall(long syscall_number, long arg1, long arg2, long arg3, long arg4, long arg5);
 
 typedef struct {
     uint64_t num_arguments;
@@ -53,12 +38,19 @@ void module_init(uintptr_t arg)
 
     print(0, strlen("1234567890"), "Hello  Word");
 
-    long r = syscall(0x1000, 0x2000, 0x3000, 0x4000, 0x5000);
-    print(r, 0, "retorno syscall");
-    
-    syscall(0x1001, 0x2001, 0x3001, 0x4001, 0x5001);
+    _syscall(0x1005, 0x2005, 0x3005, 0x4005, 0x5005, 0x6005);
 
-    syscall3(2/*logging*/, 2 /*INFO*/, (long) "logging from application");
+    _syscall4(0x1004, 0x2004, 0x3004, 0x4004, 0x5004);
+
+    _syscall3(0x1003, 0x2003, 0x3003, 0x4003);
+
+    _syscall2(0x1002, 0x2002, 0x3002);
+
+    _syscall1(0x1001, 0x2001);
+
+    _syscall0(0x1000);
+
+    _syscall2(2/*logging*/, 2 /*INFO*/, (long) "logging from application");
 
     if (!userdata) {
         print(1, 0, "NO Arguments!!!");

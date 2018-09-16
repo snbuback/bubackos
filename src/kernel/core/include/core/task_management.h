@@ -53,4 +53,11 @@ bool task_destroy(task_id_t task_id);
 
 void do_task_switch() __attribute__ ((noreturn));
 
+task_t* get_task(task_id_t task_id);
+
+static inline const char* task_get_name(task_t* task)
+{
+    return task ? task->name : NULL;
+}
+
 #endif

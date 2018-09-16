@@ -26,7 +26,7 @@ bool task_management_initialize(void)
     return true;
 }
 
-static inline task_t* get_task(task_id_t task_id)
+task_t* get_task(task_id_t task_id)
 {
     linkedlist_iter_t iter;
     linkedlist_iter_initialize(task_list, &iter);

@@ -47,7 +47,8 @@
 			"typeinfo": "c",
 			"configuration.h": "c",
 			"ratio": "c",
-			"exception": "cpp"
+			"exception": "cpp",
+			"task_management.h": "c"
 		},
 		"files.exclude": {
 			"**/.git": true,
