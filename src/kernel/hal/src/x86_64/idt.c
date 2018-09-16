@@ -6,6 +6,7 @@
 #include <core/task_management.h>
 #include <core/syscall.h>
 #include <hal/native_pagging.h>
+#include <x86_64/intel.h>
 
 /** Declare an IDT of 256 entries.  Although we will only use the
  * first 32 entries in this tutorial, the rest exists as a bit
@@ -31,24 +32,6 @@ void idt_set_gate(unsigned num, uintptr_t base, unsigned type, unsigned ring)
     idt[num].type = type;
     idt[num].ring = ring;
     idt[num].present = 1;
-}
-
-static inline uint8_t inb(uint16_t port)
-{
-    uint8_t ret;
-    asm volatile ( "inb %1, %0"
-                   : "=a"(ret)
-                   : "Nd"(port) );
-    return ret;
-}
-
-static inline void outb(uint16_t port, uint8_t val)
-{
-    asm volatile ( "outb %0, %1" : : "a"(val), "Nd"(port) );
-    /* There's an outb %al, $imm8  encoding, for compile-time constant port numbers that fit in 8b.  (N constraint).
-     * Wider immediate constants would be truncated at assemble-time (e.g. "i" constraint).
-     * The  outb  %al, %dx  encoding is the only option for all other cases.
-     * %1 expands to %dx because  port  is a uint16_t.  %w1 could be used if we had the port number a wider C type */
 }
 
 void handle_keyboard() {
@@ -132,7 +115,12 @@ void interrupt_handler(native_task_t *native_task, int interrupt)
         break;
 
     case INT_SYSTEM_CALL:
-        native_task->rax = do_syscall(native_task, native_task->rdi);
+        native_task->rax = do_syscall(
+            native_task->rdi,
+            native_task->rsi,
+            native_task->rdx,
+            native_task->rcx,
+            native_task->r8);
         // TODO There is two calls to 'task_update_current_state' during the syscall
         task_update_current_state(native_task);
         break;
@@ -151,6 +139,43 @@ void idt_initialize()
     idt_fill_table();
 }
 
+void pre_syscall(native_task_t* native_task)
+{
+    native_task->rax = do_syscall(
+        native_task->rdi,
+        native_task->rsi,
+        native_task->rdx,
+        native_task->rcx,
+        native_task->r8
+        );
+}
+
+/**
+ * Intel manual Vol. 3A 5-23
+ */
+void syscall_install()
+{
+    // store entry pointer
+    wrmsr(MSR_LSTAR, (uint64_t) &syscall_jumper);
+
+    // store cs for user/kernel mode
+    uint64_t user_cs = GDT_SEGMENT(GDT_ENTRY_USER_CS);
+    uint64_t kernel_cs = GDT_SEGMENT(GDT_ENTRY_KERNEL_CS);
+    uint64_t msr_star = ((user_cs << 16) | kernel_cs) << 32;
+    wrmsr(MSR_STAR, msr_star);
+
+    // flags to clear on syscall
+    wrmsr(MSR_SYSCALL_MASK, X86_EFLAGS_TF|X86_EFLAGS_DF|X86_EFLAGS_IF|
+	       X86_EFLAGS_IOPL|X86_EFLAGS_AC|X86_EFLAGS_NT);
+
+    // kernel stack pointer
+    wrmsr(MSR_KERNEL_GS_BASE, (uintptr_t) get_kernel_stack());
+
+    // enable syscall/sysret
+    uint64_t msr_efer = rdmsr(MSR_EFER);
+    wrmsr(MSR_EFER, msr_efer | EFER_SCE);
+}
+
 /* Installs the IDT */
 void idt_install()
 {
@@ -158,3 +183,4 @@ void idt_install()
     idt_flush((uintptr_t) &idt, sizeof(idt) - 1);
     syscall_install(get_kernel_stack());
 }
+

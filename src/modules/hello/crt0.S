@@ -8,13 +8,9 @@ _start:
     call       module_init
     call       _exit
 
-// rdi should have the interruption number
-_syscall:
-    int $50
-
 # exit the current process
 _exit:
     movq $1, %rdi
-    call _syscall
+    call syscall
     jmp _exit      // this should never happens... but in case...
 

@@ -67,7 +67,7 @@ bool multiboot_parser(uint64_t magic, uintptr_t addr, platform_t *platform)
             log_trace("mem_lower = %dKB, mem_upper = %dKB",
                 meminfo->mem_lower,
                 meminfo->mem_upper);
-            platform->memory.total_memory = (meminfo->mem_upper + meminfo->mem_lower) * 1024;
+            platform->memory.total_memory = (meminfo->mem_upper + 1024 /*as total memory lower*/) * 1024;
             break;
         }
         case MULTIBOOT_TAG_TYPE_BOOTDEV:

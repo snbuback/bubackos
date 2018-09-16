@@ -47,8 +47,12 @@ void page_allocator_initialize(size_t t)
 static bool mark_page(uintptr_t align_addr, page_type page_type)
 {
     size_t page_number = page_allocator_page_number(align_addr);
+    if (page_number >= total_of_pages) {
+        log_error("Invalid memory reference at %p", align_addr);
+        return false;
+    }
     if (pages[page_number]) {
-        log_warn("Marking page ref to address %p as %d but page is %d", align_addr, page_type, pages[page_number]);
+        log_error("Marking page ref to address %p as %d but page is %d", align_addr, page_type, pages[page_number]);
         return false;
     }
     pages[page_number] = PAGE_TYPE_USER;

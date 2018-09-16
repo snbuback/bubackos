@@ -45,79 +45,49 @@ idt_flush:
     leave
     ret
 
-
-/**
- * Intel manual Vol. 3A 5-23
- */
-.globl syscall_install
-syscall_install:
-    // rdi pointer to the stack address
-    pushq   %rbp
-    movq    %rsp, %rbp
-
-    // stores the target address
-    // wrmsrl(IA32_LSTAR=0xC0000082, system_call);
-    // pointer address split between rdx:rax
-    movq    $.syscall_jumper, %rax      // high order bits are ignored
-    movq    $.syscall_jumper, %rdx
-    shr     $32, %rdx
-    mov     $0xC0000082, %rcx
-    wrmsr
-
-    // stores the cs segment from kernel and user space
-    // wrmsrl(IA32_STAR=0xC0000082, system_call);
-    // rdx contains the kernel and user segment selector
-    movq    $0, %rax
-    movq    $(GDT_SEGMENT(GDT_ENTRY_USER_CS)), %rdx
-    shl     $16, %rdx
-    orq     $(GDT_SEGMENT(GDT_ENTRY_KERNEL_CS)), %rdx
-    mov     $0xC0000081, %rcx
-    wrmsr
-
-    // IA32_FMASK: kernel rflags mask
-    movq    $0, %rax // kernel flags mask (will zero current flags register on set bits)
-    movq    $0, %rdx
-    mov     $0xC0000084, %rcx
-    wrmsr
-
-    // IA32_KERNEL_GS_BASE: kernel stack pointer
-    movq    %rdi, %rax      // high order bits are ignored
-    movq    %rdi, %rdx
-    shr     $32,  %rdx
-    mov     $0xC0000102, %rcx
-    wrmsr
-
-    // IA32_EFER: enable syscall
-    mov   $0xC0000080, %rcx
-    rdmsr /* takes ecx as argument, deposits contents of MSR into eax */
-    or    $0b000000001, %rax
-    wrmsr /* exactly the reverse of rdmsr */
-
-    leave
-    ret
-    
-
-.syscall_jumper:
+.globl syscall_jumper
+syscall_jumper:
+    // SYSCALL loads CS from STAR 47:32. It masks EFLAGS with SFMASK.
+    // Instructions: Next it stores EIP in ECX. It then loads EIP from STAR 32:0 and SS from STAR 47:32 + 8. It then executes.
     cli
     swapgs
     /* save user stack pointer. Since rax is the return of syscall there is no problem in change it's value */
     movq    %rsp, %rax
     movq    %gs:0, %rsp
+    swapgs  // to ensure the value of IA32_KERNEL_GS_BASE remaining the same even without a return from here.
 
-    pushq   $(GDT_SEGMENT(GDT_ENTRY_USER_DS)+GDT_RING_USER) // ss
+    pushq   $(GDT_SEGMENT(GDT_ENTRY_USER_DS)+GDT_RING_USER) // ss --- overriden by task_update_current_state
     pushq   %rax    // user's rsp
     pushq   %r11    // r11 (contains rflags after sysenter)
-    pushq   $(GDT_SEGMENT(GDT_ENTRY_USER_CS)+GDT_RING_USER) // cs
+    pushq   $(GDT_SEGMENT(GDT_ENTRY_USER_CS)+GDT_RING_USER) // cs --- overriden by task_update_current_state
     pushq   %rcx    // user's next instruction
-    pushq   $0
+    pushq   %rbp    // NOTE: here should be the orig-rax value. I used rbp to make the return easier
 
+    // only now I can save the task %rbp register
+    movq    %rsp, %rbp
+
+    // first the registers are save into the stack. In the task_update_current_state
+    // the registers are copied to the native_task associate to the task
     hal_save_task_state()
+    // TODO clear rbp, rax, because contains kernel memory addresses
 
-    // apart from exit syscall, all other requires the save state
+    // the native_task* pointer is the argument
     movq    %rsp, %rdi
+    // returns the pointer to the kernel native_task. This is the return of this function
     call    task_update_current_state
 
-    movq    14*8(%rdi), %rsi
-    call    do_syscall
-    call    do_task_switch
-    // this call never returns
+    // rax contains the pointer to task native_task
+    movq    %rax, %rdi
+
+    // TODO is necessary fix some incorrect registers, because were overriden by kernel (like rax with kernel stack address)
+
+    call    pre_syscall
+
+    // Instructions: SYSRET loads CS from STAR 63:48. It loads EIP from RCX and SS from STAR 63:48 + 8.
+
+    // fast way to restore the relevant task state
+    movq    -3*8(%rbp), %r11  // rflags
+    movq    -5*8(%rbp), %rcx  // user next instruction
+    movq    -6*8(%rbp), %rbp
+    sti
+    sysret

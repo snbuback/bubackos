@@ -25,6 +25,17 @@ void bubackos_init() {
         platform.memory.kernel.size/1024);
     log_debug(" kernel data address starting at %p", platform.memory.kernel_data.addr_start);
 
+    log_info("Platform data model (bytes): short=%d int=%d long=%d longlong=%d float=%d double=%d size_t=%d pointers=%d",
+        sizeof(short),
+        sizeof(int),
+        sizeof(long),
+        sizeof(long long),
+        sizeof(float),
+        sizeof(double),
+        sizeof(size_t),
+        sizeof(void*)
+    );
+
     page_allocator_initialize(platform.memory.total_memory);
 
     // mark page of system segments

@@ -43,7 +43,7 @@ bool task_set_arguments(task_id_t task_id, size_t num_arguments, const char* arg
 
 bool task_start(task_id_t task_id, uintptr_t code);
 
-void task_update_current_state(native_task_t *native_task);
+native_task_t* task_update_current_state(native_task_t *native_task_on_stack);
 
 // task_t* task_allocate(size_t code_size, size_t data_size, size_t stack_size);
 

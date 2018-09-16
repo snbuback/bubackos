@@ -74,12 +74,15 @@ gdb:
 debug:
 	@$(CONTAINER) tmux \
 		new-session -d \
-			qemu-system-x86_64 $(QEMU_ARGS) -S -s -display none -monitor /dev/pts/3 -d guest_errors,unimp,page,in_asm,int -D /dev/pts/3 \; \
+			qemu-system-x86_64 $(QEMU_ARGS) -S -s -display none -monitor /dev/pts/3 -d guest_errors,unimp,page,in_asm,int,pcall -D /dev/pts/3 \; \
 		split-window -d \
 			./tools/gdb-startup.sh $(KERNEL_IMAGE) localhost:1234 \; \
 		split-window -h -d \
 			bash -c 'sleep 1; tail --pid=`pgrep qemu-system` -f /dev/null' \; \
 		select-pane -D \; \
+		split-window -h -d \
+			bash -c 'make dump-asm | less' \; \
+		resize-pane -D 20 \; \
 		set mouse on \; \
 		attach
 
@@ -87,7 +90,8 @@ dump-symbols:
 	@$(CONTAINER) objdump -t $(KERNEL_IMAGE)  | sort -n
 
 dump-asm:
-	@$(CONTAINER) objdump -xd $(KERNEL_IMAGE)
+	@# add -l to print file name
+	@$(CONTAINER) bash -c 'objdump -d --section=.text build/bootloader/boot/*.{elf,mod}'
 
 shell:
 	@$(CONTAINER) bash

@@ -229,16 +229,23 @@ bool task_destroy(task_id_t task_id)
     return true;
 }
 
-void task_update_current_state(native_task_t *native_task)
+// move this code to native task
+native_task_t* task_update_current_state(native_task_t *native_task_on_stack)
 {
     task_t* task = get_task(get_current_task());
     if (task == NULL) {
         // no status to update
-        return;
+        log_warn("Invalid task_update_current_state called");
+        return NULL;
     }
 
+    // sysenter requires I update the segment registers
+    native_task_on_stack->cs = task->native_task.cs;
+    native_task_on_stack->ss = task->native_task.ss;
+
     // copy content from native_task
-    task->native_task = *native_task;
+    task->native_task = *native_task_on_stack;
+    return &task->native_task;
 }
 
 /**

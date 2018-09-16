@@ -39,7 +39,8 @@ typedef struct
 
 void idt_initialize();
 void idt_install();
-void syscall_install(uintptr_t* stack);
+void syscall_install();
+void syscall_jumper();
 void idt_set_gate(unsigned num, uintptr_t base, unsigned type, unsigned ring);
 void interrupt_handler(native_task_t *native_task, int interrupt) __attribute__ ((noreturn)); // called by assembly functions
 

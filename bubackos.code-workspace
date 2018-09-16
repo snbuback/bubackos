@@ -46,7 +46,8 @@
 			"memory": "c",
 			"typeinfo": "c",
 			"configuration.h": "c",
-			"ratio": "c"
+			"ratio": "c",
+			"exception": "cpp"
 		},
 		"files.exclude": {
 			"**/.git": true,
