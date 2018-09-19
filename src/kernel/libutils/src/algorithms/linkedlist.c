@@ -199,3 +199,35 @@ void* linkedlist_pop(linkedlist_t* ll)
     return data;
 }
 
+void* linkedlist_iter_with_action(linkedlist_t* ll, linkedlist_iter_action_func iter_func, void* data_to_func)
+{
+    void *val;
+    linkedlist_iter_t iter;
+    linkedlist_iter_initialize(ll, &iter);
+    linkedlist_node_t* next = NULL;
+    linkedlist_node_t* previous = NULL;
+    while ((next = linkedlist_iter_next_node(&iter))) {
+        switch (iter_func(data_to_func, next->val)) {
+            case ITER_STOP_AND_RETURN:
+                return next->val;
+
+            case ITER_GO_NEXT:
+                break;
+
+            case ITER_REMOVE_AND_NEXT:
+                linkedlist_remove_node(ll, previous, next);
+                break;
+
+            case ITER_REMOVE_AND_RETURN:
+                val = next->val;
+                linkedlist_remove_node(ll, previous, next);
+                return val;
+
+            default:
+                // invalid action. Abort!
+                return NULL;
+        }
+        previous = next;
+    }
+    return NULL;
+}

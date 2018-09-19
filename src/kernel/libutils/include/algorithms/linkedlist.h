@@ -89,4 +89,13 @@ void* linkedlist_iter_next(linkedlist_iter_t* iter);
  */
 bool linkedlist_remove_element(linkedlist_t* ll, const void* addr);
 
+enum iter_action_enum { ITER_GO_NEXT, ITER_STOP_AND_RETURN, ITER_REMOVE_AND_RETURN, ITER_REMOVE_AND_NEXT };
+typedef int (*linkedlist_iter_action_func)(void* data, void* node_value);
+
+/**
+ * Iterates over the list calling a function for each element and ask which action to execute.
+ */
+void* linkedlist_iter_with_action(linkedlist_t* ll, linkedlist_iter_action_func iter_func, void* data_to_func);
+
+
 #endif
