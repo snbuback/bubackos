@@ -14,7 +14,7 @@
        __typeof__ (b) _b = (b); \
      _a < _b ? _a : _b; })
 
-static const char* NULL_PTR = "(nil)";
+static const char* NULL_PTR = "(null)";
 static const char representation[] = "0123456789ABCDEF";
 static int convert(unsigned long num, int base, char* dst, size_t size)
 {

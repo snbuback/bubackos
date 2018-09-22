@@ -1,5 +1,7 @@
-// source: src/task_management.c
+// source: src/task/services.c
+// source: src/scheduler/services.c
 // source: ../libutils/src/algorithms/linkedlist.c
+// source: ../libutils/src/libutils/id_mapper.c
 #include <string.h>
 #include <kernel_test.h>
 #include <core/task_management.h>
@@ -12,8 +14,8 @@
 #define EFLAGS_TEST             0x123456
 static native_task_t* task_switch_called = NULL;
 
-// do_task_switch is a non-return function. To have the "same" behaviour I'm using longjmp to return to the test function
-#define DO_TASK_SWITCH()         if (!setjmp(state)) { do_task_switch(); }
+// schedule_task_switch is a non-return function. To have the "same" behaviour I'm using longjmp to return to the test function
+#define DO_TASK_SWITCH()         if (!setjmp(state)) { scheduler_switch_task(); }
 static jmp_buf state;
 
 // test test_copy_arguments_to_task
@@ -33,12 +35,12 @@ void native_pagetable_switch(native_page_table_t* pt)
 
 memory_t* memory_management_get_kernel()
 {
-
+    return NULL;
 }
 
 bool memory_management_attach(memory_t* memory, memory_region_t* region)
 {
-
+    return true;
 }
 
 void hal_switch_task(native_task_t *task)
@@ -70,36 +72,18 @@ void memory_management_dump(memory_t* memory)
     
 }
 
-// Unit tests
-void setUp(void)
-{
-    setvbuf(stdout, NULL, _IONBF, 0); // no printf buffer
-    task_switch_called = NULL;
-    task_management_initialize(); // clear the task list
-}
-
-void test_new_task_are_not_ready_to_execute(void)
-{
-    task_id_t id = task_create("test1", NULL);
-    TEST_ASSERT_GREATER_OR_EQUAL(1, id);
-    DO_TASK_SWITCH();    
-    TEST_ASSERT_EQUAL(TASK_SWITCH_SLEEP, task_switch_called);
-}
-
-uintptr_t copy_arguments_to_task(task_t* task, uintptr_t stack, size_t stack_size, size_t num_arguments, const char* arguments[]);
-
-static char printch(char c)
-{
-    if (c>=32 && c<128) {
-        return c;
-    }
-    return '#';
-}
+uintptr_t copy_arguments_to_task(task_t* task, uintptr_t stack, size_t stack_size, size_t num_arguments, const size_t* sizes, const char* arguments[]);
 
 void test_copy_arguments_to_task()
 {
     const char* TEST_ARGUMENTS[] = {"first", "second", "third", "", "fifth", "with\nnew\nline"};
     const int TEST_NUM_ARGUMENTS = 6;
+    size_t TEST_SIZES[TEST_NUM_ARGUMENTS];
+
+    // fill TEST_SIZES
+    for (int i=0; i<TEST_NUM_ARGUMENTS; i++) {
+        TEST_SIZES[i] = strlen(TEST_ARGUMENTS[i]) + 1;
+    }
 
     memset(STACK, '\0', STACK_SIZE);
 
@@ -108,7 +92,7 @@ void test_copy_arguments_to_task()
 
     // simulating stack virtual addr
     uintptr_t stack_virtual_addr = STACK_BASE_ADDR;
-    uintptr_t userdata_vaddr = copy_arguments_to_task(&task, stack_virtual_addr, STACK_SIZE, TEST_NUM_ARGUMENTS, TEST_ARGUMENTS);
+    uintptr_t userdata_vaddr = copy_arguments_to_task(&task, stack_virtual_addr, STACK_SIZE, TEST_NUM_ARGUMENTS, TEST_SIZES, TEST_ARGUMENTS);
     task_userdata_t* userdata = (task_userdata_t*) memory_management_get_physical_address(task.memory_handler, userdata_vaddr);
 
     TEST_ASSERT_TRUE((uintptr_t) userdata > (uintptr_t) STACK && ((uintptr_t) userdata + sizeof(task_userdata_t)) < ((uintptr_t) STACK + STACK_SIZE))

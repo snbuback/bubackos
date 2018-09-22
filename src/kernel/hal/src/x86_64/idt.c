@@ -4,9 +4,11 @@
 #include <x86_64/idt.h>
 #include <logging.h>
 #include <core/task_management.h>
+#include <core/scheduler/services.h>
 #include <core/syscall.h>
 #include <hal/native_pagging.h>
 #include <x86_64/intel.h>
+#include <core/scheduler/services.h>
 
 /** Declare an IDT of 256 entries.  Although we will only use the
  * first 32 entries in this tutorial, the rest exists as a bit
@@ -42,15 +44,15 @@ void handle_keyboard() {
 
 void handle_general_protection(native_task_t *native_task)
 {
-    task_id_t task_id = get_current_task();
-    log_fatal("GP: code=%p stack=%p task=%d", native_task->codeptr, native_task->stackptr, task_id);
-    if (task_id != NULL_TASK) {
-        log_fatal("General protection caused by task %d. Killing task.", task_id);
-        task_destroy(task_id);
+    task_t* task = scheduler_current_task();
+    log_fatal("GP: code=%p stack=%p task=%s", native_task->codeptr, native_task->stackptr, task_display_name(task));
+    if (task) {
+        log_fatal("General protection caused by task %s. Killing task.", task_display_name(task));
+        task_destroy(task);
     } else {
         log_fatal("General protection caused by kernel :,(");
     }
-    do_task_switch();
+    scheduler_switch_task();
 }
 
 // TODO move CR2 interpreter to native method
@@ -60,27 +62,27 @@ void handle_general_page_fault(native_task_t *native_task)
     asm volatile( "mov %%cr2, %0"
                    : "=r" (memory));
 
-    task_id_t task_id = get_current_task();
-    log_fatal("PF: addr=%p cd=%p st=%p fl=%x tk=%d", memory, native_task->codeptr, native_task->stackptr, native_task->orig_rax, task_id);
+    task_t* task = scheduler_current_task();
+    log_fatal("PF: addr=%p cd=%p st=%p fl=%x tk=%s", memory, native_task->codeptr, native_task->stackptr, native_task->orig_rax, task_display_name(task));
 
-    if (task_id != NULL_TASK) {
-        log_fatal("Page fault caused by task %d. Killing task.", task_id);
-        task_destroy(task_id);
+    if (task) {
+        log_fatal("Page fault caused by task %s. Killing task.", task_display_name(task));
+        task_destroy(task);
     } else {
         log_fatal("Page fault caused by kernel :,(");
     }
     native_pagetable_dump(NULL);
-    do_task_switch();
+    scheduler_switch_task();
 }
 
 void handle_task_switch(native_task_t *native_task)
 {
     // ack int (PIC_MASTER_CMD, PIC_CMD_EOI)
     outb(0x20, 0x20);
-    if (get_current_task()) {
+    if (scheduler_current_task()) {
         task_update_current_state(native_task);
     }
-    do_task_switch();
+    scheduler_switch_task();
 }
 
 static uintptr_t get_stack_addr()
@@ -105,7 +107,7 @@ __attribute((noreturn)) void pre_syscall(native_task_t* native_task)
 
 void interrupt_handler(native_task_t *native_task, int interrupt)
 {
-    log_debug("Interruption %d (0x%x) on task %d and stack=%p", interrupt, interrupt, get_current_task(), get_stack_addr());
+    log_debug("Interruption %d (0x%x) on task %s and stack=%p", interrupt, interrupt, task_display_name(scheduler_current_task()), get_stack_addr());
 
     switch (interrupt) {
     case 0x8: // timer
@@ -139,7 +141,7 @@ void interrupt_handler(native_task_t *native_task, int interrupt)
         break;
     }
 
-    do_task_switch();
+    scheduler_switch_task();
 }
 
 void idt_initialize()

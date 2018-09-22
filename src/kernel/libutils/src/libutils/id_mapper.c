@@ -5,7 +5,7 @@
 id_mapper_t* id_mapper_create(id_mapper_t* id_mapper)
 {
     if (!id_mapper) {
-        id_mapper = (id_mapper_t*) malloc(sizeof(id_mapper_t));
+        id_mapper = (id_mapper_t*) MEM_ALLOC(sizeof(id_mapper_t));
     }
     id_mapper->list = linkedlist_create();
     id_mapper->next = ATOMIC_VAR_INIT(1);
@@ -43,10 +43,16 @@ id_handler_t id_mapper_add(id_mapper_t* id_mapper, void* val)
         return 0;
     }
 
-    id_mapper_entry_t* entry = (id_mapper_entry_t*) malloc(sizeof(id_mapper_entry_t));
+    id_mapper_entry_t* entry = (id_mapper_entry_t*) MEM_ALLOC(sizeof(id_mapper_entry_t));
+    if (!entry) {
+        return 0;
+    }
     entry->id = id_mapper_next_id(id_mapper);
     entry->val = val;
-    linkedlist_append(id_mapper->list, entry);
+    if (!linkedlist_append(id_mapper->list, entry)) {
+        MEM_FREE(entry);
+        return 0;
+    }
     return entry->id;
 }
 

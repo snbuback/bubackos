@@ -176,27 +176,33 @@ bool linkedlist_remove_element(linkedlist_t* ll, const void* addr)
     return false;
 }
 
+int linkedlist_iter_remove_element(void* remaining, __attribute__((unused)) void* value)
+{
+    if (*(size_t*) remaining == 0) {
+        return ITER_REMOVE_AND_RETURN;
+    }
+    --*(size_t*) remaining;
+    return ITER_GO_NEXT;
+}
+
+void* linkedlist_remove(linkedlist_t* ll, size_t index)
+{
+    if (!ll || index >= ll->size) {
+        // no list allocated or out of bounds
+        return NULL;
+    }
+
+    void* val = linkedlist_iter_with_action(ll, linkedlist_iter_remove_element, &index);
+    return val;
+}
+
 void* linkedlist_pop(linkedlist_t* ll)
 {
     if (!ll || !ll->first) {
         // no list allocated
         return NULL;
     }
-
-    // iterate until the last element. Size the last have at least 1 element, last != NULL
-    linkedlist_iter_t iter;
-    linkedlist_iter_initialize(ll, &iter);
-    linkedlist_node_t* previous = NULL; // before the last element
-    linkedlist_node_t* last = NULL;
-    linkedlist_node_t* next = NULL;
-    while ((next = linkedlist_iter_next_node(&iter))) {
-        previous = last;
-        last = next;
-    }
-
-    void* data = last->val;
-    linkedlist_remove_node(ll, previous, last);
-    return data;
+    return linkedlist_remove(ll, linkedlist_size(ll) - 1);
 }
 
 void* linkedlist_iter_with_action(linkedlist_t* ll, linkedlist_iter_action_func iter_func, void* data_to_func)

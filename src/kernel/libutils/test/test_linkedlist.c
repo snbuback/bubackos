@@ -194,6 +194,29 @@ void test_linkedlist_get()
     linkedlist_destroy(ll);
 }
 
+void test_linkedlist_remove()
+{
+    char* my_data[] = { "my data1", "my-data2", "mydata3"};
+    linkedlist_t* ll = linkedlist_create();
+    linkedlist_append(ll, my_data[0]);
+    linkedlist_append(ll, my_data[1]);
+    linkedlist_append(ll, my_data[2]);
+
+    // removing middle
+    TEST_ASSERT_EQUAL(my_data[1], linkedlist_remove(ll, 1));
+    TEST_ASSERT_EQUAL(2, linkedlist_size(ll));
+
+    // removing last
+    TEST_ASSERT_EQUAL(my_data[2], linkedlist_remove(ll, 1));
+    TEST_ASSERT_EQUAL(1, linkedlist_size(ll));
+
+    // removing first (and also last)
+    TEST_ASSERT_EQUAL(my_data[0], linkedlist_remove(ll, 0));
+    TEST_ASSERT_EQUAL(0, linkedlist_size(ll));
+
+    linkedlist_destroy(ll);
+}
+
 void test_linkedlist_find()
 {
     char* my_data[] = { "my data1", "my-data2", "mydata3"};

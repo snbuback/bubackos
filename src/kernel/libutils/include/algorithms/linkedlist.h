@@ -67,6 +67,12 @@ void* linkedlist_get(linkedlist_t* ll, size_t index);
 int linkedlist_find(linkedlist_t* ll, void* el);
 
 /**
+ * Remove the i-index element.
+ * Complexity: O(index)
+ */
+void* linkedlist_remove(linkedlist_t* ll, size_t index);
+
+/**
  * Returns the size of the list
  * Complexity: O(1)
  */

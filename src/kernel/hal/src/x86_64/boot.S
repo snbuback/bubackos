@@ -138,8 +138,8 @@ k_64bits:
   call  enable_sse
   call  native_boot
   
-  // do_task_switch should never returns... but just to ensure the return address is 1234
-  jmp   do_task_switch
+  // scheduler_switch_task should never returns... but just to ensure the return address is 1234
+  jmp   scheduler_switch_task
 
 
 .data

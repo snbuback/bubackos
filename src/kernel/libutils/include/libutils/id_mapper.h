@@ -30,12 +30,32 @@ id_mapper_t* id_mapper_create(id_mapper_t* id_mapper);
  */
 id_handler_t id_mapper_next_id(id_mapper_t* id_mapper);
 
+/**
+ * Adds a new entry in the id_mapper. Returns the id of the entry.
+ */
 id_handler_t id_mapper_add(id_mapper_t* id_mapper, void* val);
 
+/**
+ * Returns the object associate to a given id.
+ */
 void* id_mapper_get(id_mapper_t* id_mapper, id_handler_t id);
 
+/**
+ * Removes one id entry
+ */
 bool id_mapper_del(id_mapper_t* id_mapper, id_handler_t id);
 
+/**
+ * Iterates over all elements.
+ * TODO Change to use a more generic approach.
+ */
 linkedlist_iter_t id_mapper_iter(id_mapper_t* id_mapper);
+
+/**
+ * Release all the memory allocated by the id_mapper.
+ * Only used when id_mapper is dinamically allocated.
+ * TODO Create a is_dinamically field in the struct to mark if this call is required or not.
+ */
+void id_mapper_destroy(id_mapper_t* id_mapper);
 
 #endif

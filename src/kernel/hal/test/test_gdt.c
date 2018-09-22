@@ -56,12 +56,11 @@ void setUp(void)
     tss_flush_called = false;
 }
 
-
 // no format
 void test_gdt_install(void)
 {
     gdt_install();
-    uintptr_t* kstack = get_kernel_stack();
+    /*uintptr_t* kstack = */get_kernel_stack();
     TEST_ASSERT_TRUE(tss_flush_called);
     TEST_ASSERT_TRUE(gdt_flush_called);
 }

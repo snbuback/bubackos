@@ -5,6 +5,8 @@
 #define SYSTEM_LIMIT_OF_MEMORY_HANDLER   10
 #define SYSTEM_DEBUG
 #define SYSTEM_STACKSIZE    32768
+#define TASK_DEFAULT_STACK_SIZE  SYSTEM_PAGE_SIZE*10
+
 
 #ifndef __ASSEMBLER__
 #include <stdint.h>

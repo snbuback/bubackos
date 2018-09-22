@@ -6,6 +6,7 @@
 #include <core/elf.h>
 #include <core/memory.h>
 #include <core/module_loader.h>
+#include <core/scheduler/services.h>
 #include <string.h>
 
 __attribute__((noreturn)) void welcome_message()
@@ -53,12 +54,14 @@ void bubackos_init() {
 
     memory_allocator_initialize();
 
-    task_management_initialize();
+    scheduler_initialise();
+
+    task_service_initialize();
 
     // say Welcome in another thread, to ensure the context switching is working properly.
-    task_id_t welcome_task = task_create("welcome", memory_management_create());
+    task_t* welcome_task = task_create("welcome", memory_management_create());
     task_set_kernel_mode(welcome_task);
-    task_start(welcome_task, (uintptr_t) &welcome_message);
+    task_run(welcome_task, (uintptr_t) &welcome_message);
 
     // initialise modules
     module_initialize(platform);

@@ -21,7 +21,7 @@ func:
 
 .extern interrupt_handler
 .extern do_syscall
-.extern do_task_switch
+.extern scheduler_switch_task
 .extern task_update_current_state
 .text
 .code64

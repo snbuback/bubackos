@@ -81,11 +81,11 @@ bool module_task_initialize()
             return false;
         }
 
-        task_id_t task = task_create(module_name, module_memory_handler);
+        task_t* task = task_create(module_name, module_memory_handler);
         task_set_kernel_mode(task);
         // const char* args[] = {"primeiro", "segundo", "terceiro!!!"};
         // task_set_arguments(task, 3, args);
-        task_start(task, elf.entry_point);
+        task_run(task, elf.entry_point);
     }
     return true;
 
