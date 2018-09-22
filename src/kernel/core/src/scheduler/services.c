@@ -58,8 +58,7 @@ bool scheduler_task_ready(task_t* task)
  */
 static inline task_t* get_next_task()
 {
-    task_t* next_task = linkedlist_remove(scheduled_tasks, 0);
-    return next_task;
+    return linkedlist_remove(scheduled_tasks, 0);
 }
 
 __attribute((noreturn)) void scheduler_switch_task()

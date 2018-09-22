@@ -31,27 +31,42 @@ function(generate_test test_name test_file)
     # since cmake doesn't work well with absolute path as dependency I need to use relative.
     file(RELATIVE_PATH TEST_EXEC_REL_PATH ${CMAKE_CURRENT_BINARY_DIR} ${TEST_EXEC_PATH})
 
-    add_custom_command(OUTPUT ${TEST_EXEC_REL_PATH}
-        COMMENT "Building test case ${test_name}"
-        COMMAND ruby ${UNITY_ROOT}/auto/generate_test_runner.rb ${test_file} ${TEST_GEN_SOURCE}
-        COMMAND mkdir -p ${TEST_EXEC_DIR} && /usr/bin/gcc 
+    # work-around for the issue: https://gitlab.kitware.com/cmake/cmake/issues/18062
+    set(included_files_as_string "")
+    foreach(inc_file ${included_files})
+        string(APPEND included_files_as_string "${inc_file} ")
+    endforeach(inc_file)
+    
+    set(test_compile_cmd "mkdir -p ${TEST_EXEC_DIR} && /usr/bin/gcc
             ${compiler_args}
-            -O0 -g 
+            ${CMAKE_C_FLAGS}
+            -O0
+            -g
             --coverage
-            -fno-sanitize-recover=all -fsanitize=undefined
-            $(CMAKE_C_FLAGS) -fno-sanitize=alignment
-            -I"${UNITY_ROOT}/src" -I"${UNITY_ROOT}/../" -I${CMAKE_CURRENT_SOURCE_DIR}/../tests
+            -fno-sanitize-recover=all
+            -fsanitize=undefined
+            -fno-sanitize=alignment
+            -I${UNITY_ROOT}/src
+            -I${UNITY_ROOT}/../
+            -I${CMAKE_CURRENT_SOURCE_DIR}/../tests
             -I${CMAKE_SOURCE_DIR}/kernel/libc/include
             -I${CMAKE_SOURCE_DIR}/kernel/libutils/include
             -I${CMAKE_SOURCE_DIR}/kernel/core/include
             -I${CMAKE_SOURCE_DIR}/kernel/hal/include
-            -Wno-unused-variable -o ${TEST_EXEC_PATH}
-            "${test_file}"
-            "${TEST_GEN_SOURCE}"
-            ${included_files}
-            "${UNITY_ROOT}/src/unity.c"
-            "${UNITY_ROOT}/../kernel_mocks.c"
-            "-Wl,-lrt"
+            -Wunused-variable -o ${TEST_EXEC_PATH}
+            ${test_file}
+            ${TEST_GEN_SOURCE}
+            ${included_files_as_string}
+            ${UNITY_ROOT}/src/unity.c
+            ${UNITY_ROOT}/../kernel_mocks.c
+            -Wl,-lrt")
+    string(REPLACE "\n" " " test_compile_cmd2 ${test_compile_cmd})
+    
+    add_custom_command(OUTPUT ${TEST_EXEC_REL_PATH}
+        COMMENT "Building test case ${test_name}"
+        COMMAND ruby ${UNITY_ROOT}/auto/generate_test_runner.rb ${test_file} ${TEST_GEN_SOURCE}
+        COMMAND sh -c ${test_compile_cmd2}
+        VERBATIM
         DEPENDS 
             ${test_file}
             ${included_files}
@@ -61,13 +76,14 @@ function(generate_test test_name test_file)
 
     # the "touch" in the run command to avoid the Make delete the test file after a failure running the tests
     add_custom_command(OUTPUT ${test_name}.touch
-        COMMENT "Running test case ${test_name}:\nExecutable: ${TEST_EXEC_REL_PATH}\nReport: file://${TEST_EXEC_DIR}/coverage-report/${test_name}/index.html"
-        COMMAND ${CMAKE_CTEST_COMMAND} --output-on-failure -R "${test_name}" ${test_name} -VVV && 
-            touch ${CMAKE_BINARY_DIR}/${test_name}.touch &&
+        COMMENT "Running test case ${test_name} / Executable: ${TEST_EXEC_REL_PATH} / Report: file://${TEST_EXEC_DIR}/coverage-report/${test_name}/index.html"
+        COMMAND ${CMAKE_CTEST_COMMAND} --output-on-failure -R "^${test_name}$$" ${test_name} -VVV && 
+            touch ${CMAKE_BINARY_DIR}/${test_name}.touch #&&
         # generates coverage report. To avoid mix results between tests, data from report are delete immediately after the test
-            lcov -q -t ${test_name} --capture --directory ${TEST_EXEC_DIR} --output-file ${TEST_EXEC_DIR}/${test_name}.info &&
-            genhtml -q ${TEST_EXEC_DIR}/${test_name}.info --output-directory ${TEST_EXEC_DIR}/coverage-report/${test_name} &&
-            find ${TEST_EXEC_DIR} -name \\*.gcda -or -name \\*.gcno -or -name \\*.info -delete
+        # TODO After change to jinja as the build are in parallel the coverage report are mixin between tests
+            # lcov -q -t ${test_name} --capture --directory ${TEST_EXEC_DIR} --output-file ${TEST_EXEC_DIR}/${test_name}.info &&
+            # genhtml -q ${TEST_EXEC_DIR}/${test_name}.info --output-directory ${TEST_EXEC_DIR}/coverage-report/${test_name} &&
+            # find ${TEST_EXEC_DIR} -name \\*.gcda -or -name \\*.gcno -or -name \\*.info -delete
         DEPENDS ${TEST_EXEC_REL_PATH}
     )
 

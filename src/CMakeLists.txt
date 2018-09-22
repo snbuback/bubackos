@@ -5,16 +5,16 @@ project (metaOS-core
 )
 
 enable_language(C ASM)
-set(CMAKE_VERBOSE_MAKEFILE off)
+set(CMAKE_VERBOSE_MAKEFILE ON CACHE BOOL "ON")
 set(CMAKE_CROSSCOMPILING on)
 
 set(CMAKE_C_STANDARD 11)
 # string(APPEND CMAKE_C_FLAGS "${FLAGS_COMMON_ARCH} -g -ffreestanding -Wall -Werror -Wextra -DNDEBUG -include hal/debugger.h")
-string(APPEND CMAKE_C_FLAGS "${FLAGS_COMMON_ARCH} -fPIC -g -ffreestanding -Wall -Werror -Wextra")
+set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} ${FLAGS_COMMON_ARCH} -fPIC -g -O0 -ffreestanding -Wall -Werror -Wextra -fdiagnostics-color=always")
 
 # TODO Move append of "-include", "hal/debugger.h" to Debug profile
-string(APPEND CMAKE_ASM_FLAGS "${FLAGS_COMMON_ARCH} -Wall -Werror -Wextra -DNDEBUG")
-set(UNITY_ROOT ${CMAKE_SOURCE_DIR}/kernel/tests/unity)
+set(CMAKE_ASM_FLAGS "${CMAKE_ASM_FLAGS} ${FLAGS_COMMON_ARCH} -g -O0 -Wall -Werror -Wextra -DNDEBUG -fdiagnostics-color=always")
+set(UNITY_ROOT "${CMAKE_SOURCE_DIR}/kernel/tests/unity")
 
 include(CMakeListsUtils.txt)
 

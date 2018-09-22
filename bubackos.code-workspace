@@ -48,7 +48,17 @@
 			"configuration.h": "c",
 			"ratio": "c",
 			"exception": "cpp",
-			"task_management.h": "c"
+			"task_management.h": "c",
+			"native_task.h": "c",
+			"__locale": "c",
+			"locale": "c",
+			"atomic": "c",
+			"id_mapper.h": "c",
+			"__bit_reference": "c",
+			"__split_buffer": "c",
+			"vector": "c",
+			"ostream": "c",
+			"services.h": "c"
 		},
 		"files.exclude": {
 			"**/.git": true,

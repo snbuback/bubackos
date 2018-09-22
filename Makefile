@@ -29,12 +29,17 @@ clean:
 	@rm -rf build src/build
 
 prepare-build: clean
-	@$(CONTAINER) bash -c 'cd src ; cmake -DCMAKE_TOOLCHAIN_FILE=$(BASE_DIR)/src/intel-x86_64.cmake -H. -Bbuild -G "Unix Makefiles"'
+	@$(CONTAINER) bash -c 'cd src ; cmake -DCMAKE_TOOLCHAIN_FILE=$(BASE_DIR)/src/intel-x86_64.cmake -H. -Bbuild -G "Ninja"'
 
 build:
 	@$(CONTAINER) bash -c '(cd $(BASE_DIR)/src && cmake --build build)'
 
-test: build
+lint:
+	@$(CONTAINER) bash -c '(cd $(BASE_DIR)/src && cmake -DCMAKE_EXPORT_COMPILE_COMMANDS=ON -H. build && \
+		cd $(BASE_DIR) && oclint-json-compilation-database -p $(BASE_DIR)/src/build)'
+		# find $(BASE_DIR)/src -name \*.c -exec oclint -p=$(BASE_DIR)/src/build {} +)'
+
+test: build lint
 	@$(CONTAINER) bash -c '(cd $(BASE_DIR)/src/build && ctest -VV)'
 
 module-clean:
@@ -42,7 +47,7 @@ module-clean:
 
 module-prepare-build: module-clean
 	@$(CONTAINER) bash -c 'cd src/modules ; for module in `cat modules.list`; do \
-		echo "Building $$module"; cd $$module && cmake -DCMAKE_TOOLCHAIN_FILE=$(BASE_DIR)/src/intel-x86_64.cmake -H. -Bbuild -G "Unix Makefiles" ; \
+		echo "Building $$module"; cd $$module && cmake -DCMAKE_TOOLCHAIN_FILE=$(BASE_DIR)/src/intel-x86_64.cmake -H. -Bbuild -G "Ninja" ; \
 	done'
 
 module-build:
