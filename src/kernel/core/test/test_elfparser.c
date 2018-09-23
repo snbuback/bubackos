@@ -1,7 +1,7 @@
-// source: src/elfparser.c
+// source: src/loader/elfparser.c
 // source: ../libutils/src/algorithms/linkedlist.c
 #include <kernel_test.h>
-#include <core/elf.h>
+#include <core/loader/elf.h>
 #include <stdio.h>
 #include <string.h>
 #include <algorithms/linkedlist.h>

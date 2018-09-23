@@ -2,9 +2,8 @@
 #include <logging.h>
 #include <core/page_allocator.h>
 #include <core/hal/platform.h>
-#include <core/elf.h>
 #include <core/memory.h>
-#include <core/module_loader.h>
+#include <core/loader/module_loader.h>
 #include <core/scheduler/services.h>
 #include <string.h>
 

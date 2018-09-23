@@ -1,5 +1,5 @@
-#ifndef _ELF_H
-#define _ELF_H
+#ifndef _CORE_LOADER_ELF_H_
+#define _CORE_LOADER_ELF_H_
 #include <stdint.h>
 #include <stdlib.h>
 #include <algorithms/linkedlist.h>

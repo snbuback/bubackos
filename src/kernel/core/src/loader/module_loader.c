@@ -2,10 +2,10 @@
 #include <string.h>
 #include <logging.h>
 #include <algorithms/linkedlist.h>
-#include <core/module_loader.h>
+#include <core/loader/module_loader.h>
 #include <core/vmem/services.h>
 #include <core/task/services.h>
-#include <core/elf.h>
+#include <core/loader/elf.h>
 #include <libutils/utils.h>
 #include <core/hal/platform.h>
 
