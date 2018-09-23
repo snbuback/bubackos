@@ -2,7 +2,7 @@
 #define _CORE_TASK_SERVICES_H_
 #include <stdint.h>
 #include <libutils/id_mapper.h>
-#include <core/memory_management.h>
+#include <core/vmem/services.h>
 #include <hal/native_task.h>
 
 typedef id_handler_t task_id_t;
@@ -18,7 +18,7 @@ typedef struct {
     uintptr_t userdata;
     task_status_t status;
     native_task_t native_task;
-    void* memory_handler;
+    vmem_t* memory_handler;
 } task_t;
 
 typedef struct {
@@ -54,7 +54,7 @@ static inline const char* task_display_name(task_t* task)
 /**
  * Creates a new task.
  */
-task_t* task_create(const char* name, memory_t* memory_handler);
+task_t* task_create(const char* name, vmem_t* memory_handler);
 
 /**
  * Set the task to run in kernel mode.

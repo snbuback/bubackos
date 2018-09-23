@@ -93,6 +93,9 @@ int linkedlist_find(linkedlist_t* ll, void* el)
 
 void linkedlist_destroy(linkedlist_t* ll)
 {
+    if (!ll) {
+        return;
+    }
     // walk over the list releasing all node
     linkedlist_iter_t iter;
     linkedlist_iter_initialize(ll, &iter);

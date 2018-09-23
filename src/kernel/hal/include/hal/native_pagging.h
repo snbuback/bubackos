@@ -1,6 +1,7 @@
 #ifndef _HAL_PAGGING_H
 #define _HAL_PAGGING_H
 #include <core/types.h>
+#include <stdbool.h>
 
 #define MEM_ALIGN(addr)			ALIGN(addr, SYSTEM_PAGE_SIZE)
 

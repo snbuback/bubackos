@@ -50,7 +50,9 @@ void bubackos_init() {
     // mark pages of the kernel
     page_allocator_mark_as_system(platform.memory.kernel.addr_start, platform.memory.kernel.size);
 
-    memory_management_initialize();
+    vmem_initialize();
+
+    vmem_region_initialize();
 
     memory_allocator_initialize();
 
@@ -59,7 +61,7 @@ void bubackos_init() {
     task_service_initialize();
 
     // say Welcome in another thread, to ensure the context switching is working properly.
-    task_t* welcome_task = task_create("welcome", memory_management_create());
+    task_t* welcome_task = task_create("welcome", vmem_create());
     task_set_kernel_mode(welcome_task);
     task_run(welcome_task, (uintptr_t) &welcome_message);
 

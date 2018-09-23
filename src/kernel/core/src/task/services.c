@@ -6,7 +6,7 @@
 #include <hal/configuration.h>
 #include <hal/native_task.h>
 #include <core/memory.h>
-#include <core/memory_management.h>
+#include <core/vmem/services.h>
 #include <core/scheduler/services.h>
 #include <core/task/services.h>
 
@@ -43,7 +43,7 @@ static void task_release_resources(task_t* task)
     id_mapper_del(&task_id_mapper, task->task_id);
 }
 
-task_t* task_create(const char* name, memory_t* memory_handler)
+task_t* task_create(const char* name, vmem_t* vmem)
 {
     task_t* task = NEW(task_t);
     if (!task) {
@@ -56,7 +56,7 @@ task_t* task_create(const char* name, memory_t* memory_handler)
         .priority = 1,
         .status = TASK_STATUS_CREATED,
         .userdata = 0,
-        .memory_handler = memory_handler,
+        .memory_handler = vmem,
         .name = name
     };
 
@@ -97,9 +97,10 @@ bool task_set_kernel_mode(task_t* task)
  */
 uintptr_t copy_arguments_to_task(task_t* task, uintptr_t stack, size_t stack_size, size_t num_arguments, const size_t* sizes, const char* arguments[])
 {
+    // TODO Change to a simple serialization without pointers
     // first element is the vector with all arguments position on the stack
     uintptr_t arguments_ptr = stack;
-    argument_t* arguments_ptr_phys = (argument_t*) memory_management_get_physical_address(task->memory_handler, arguments_ptr);
+    argument_t* arguments_ptr_phys = (argument_t*) vmem_get_physical_address(task->memory_handler, arguments_ptr);
     if (!arguments_ptr_phys) {
         log_error("Error finding the physical memory address of %p", arguments_ptr_phys);
         return 0;
@@ -107,7 +108,7 @@ uintptr_t copy_arguments_to_task(task_t* task, uintptr_t stack, size_t stack_siz
 
     // arguments data pointer
     uintptr_t arguments_data = stack + sizeof(argument_t) * (num_arguments + 1); // ends with NULL
-    void* arguments_data_phys = (void*) memory_management_get_physical_address(task->memory_handler, arguments_data);
+    void* arguments_data_phys = (void*) vmem_get_physical_address(task->memory_handler, arguments_data);
     if (!arguments_data_phys) {
         log_error("Error finding the physical memory address of %p", arguments_data);
         return 0;
@@ -146,18 +147,18 @@ bool task_set_arguments(task_t* task, size_t num_arguments, const size_t* sizes,
     }
 
     // TODO fix permissions
-    memory_region_t* region = memory_management_region_create(task->memory_handler, "task-argument", 0, TASK_DEFAULT_STACK_SIZE, true, true, true);
-    if (!region) {
+    vmem_region_t* vmem_region = vmem_region_create(task->memory_handler, "task-argument", 0, TASK_DEFAULT_STACK_SIZE, true, true, true);
+    if (!vmem_region) {
         log_warn("Error allocating userdata for task %d", task->task_id);
         return false;
     }
-    log_debug("Task data allocated at %p with size %d", region->start, region->size);
+    log_debug("Task data allocated at %p with size %d", vmem_region->start, vmem_region->size);
 
     // attach the argument region to the kernel
-    if (!memory_management_attach(memory_management_get_kernel(), region)) {
+    if (!vmem_attach(vmem_get_kernel(), vmem_region)) {
         return false;
     }
-    task->userdata = copy_arguments_to_task(task, region->start, region->size, num_arguments, sizes, arguments);
+    task->userdata = copy_arguments_to_task(task, vmem_region->start, vmem_region->size, num_arguments, sizes, arguments);
     // TODO Detach argument region
     return true;
 }
@@ -169,14 +170,14 @@ bool task_run(task_t* task, uintptr_t code)
         return false;
     }
 
-    memory_region_t* region = memory_management_region_create(task->memory_handler, "?-stack", 0, TASK_DEFAULT_STACK_SIZE, true, true, true);
-    if (!region) {
+    vmem_region_t* vmem_region = vmem_region_create(task->memory_handler, "?-stack", 0, TASK_DEFAULT_STACK_SIZE, true, true, true);
+    if (!vmem_region) {
         log_warn("Error allocating stack address for task %d", task->task_id);
         return false;
     }
 
     // missing add the userdata parameter
-    hal_create_native_task(&task->native_task, code, region->start + region->size - 8, task->kernel, task->userdata);
+    hal_create_native_task(&task->native_task, code, vmem_region->start + vmem_region->size - 8, task->kernel, task->userdata);
     scheduler_task_ready(task);
     return true;
 }

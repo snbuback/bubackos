@@ -1,7 +1,7 @@
 #include <logging.h>
 #include <algorithms/linkedlist.h>
 #include <core/scheduler/services.h>
-#include <core/memory_management.h>
+#include <core/vmem/services.h>
 
 static volatile task_t* current_task;
 
@@ -75,8 +75,8 @@ __attribute((noreturn)) void scheduler_switch_task()
             next_task->task_id,
             next_task->native_task.codeptr,
             next_task->native_task.stackptr);
-        // memory_management_dump(task->memory_handler);
-        native_pagetable_switch(((memory_t*) next_task->memory_handler)->pt);
+        // vmem_dump(task->memory_handler);
+        native_pagetable_switch(next_task->memory_handler->pt);
         hal_switch_task(&next_task->native_task);
     } else {
         // halt until a new event

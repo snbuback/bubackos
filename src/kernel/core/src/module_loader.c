@@ -2,8 +2,8 @@
 #include <string.h>
 #include <algorithms/linkedlist.h>
 #include <core/module_loader.h>
-#include <core/memory_management.h>
-#include <core/task_management.h>
+#include <core/vmem/services.h>
+#include <core/task/services.h>
 #include <core/elf.h>
 #include <libutils/utils.h>
 #include <hal/configuration.h>
@@ -11,25 +11,25 @@
 #include <hal/platform.h>
 
 // TODO change calls to memory management thru syscall so this is no more required.
-memory_t* memory_handler;
+vmem_t* memory_handler;
 
-bool allocate_program_header(elf_t* elf, elf_program_header_t* ph, memory_t* module_memory_handler)
+bool allocate_program_header(elf_t* elf, elf_program_header_t* ph, vmem_t* module_memory_handler)
 {
     bool writable = ph->flags & ELF_PF_FLAGS_W;
     bool code = true; //ph->flags & ELF_PF_FLAGS_X;
-    memory_region_t* region = memory_management_region_create(module_memory_handler, "elf-loader", ph->vaddr, 0, true, writable, code);
+    vmem_region_t* region = vmem_region_create(module_memory_handler, "elf-loader", ph->vaddr, 0, true, writable, code);
     if (!region) {
         return false;
     }
     // map the content of file to the allocated region
     if (ph->file_size) {
-        if (!memory_management_region_map_physical_address(region, memory_management_get_physical_address(memory_handler, elf->base + ph->offset), ALIGN_NEXT(ph->file_size, SYSTEM_PAGE_SIZE))) {
+        if (!vmem_region_map_physical_address(region, vmem_get_physical_address(memory_handler, elf->base + ph->offset), ALIGN_NEXT(ph->file_size, SYSTEM_PAGE_SIZE))) {
             return false;
         }
     }
 
     // resize region to fits mem_size
-    if (!memory_management_region_resize(region, ph->mem_size)) {
+    if (!vmem_region_resize(region, ph->mem_size)) {
         return false;
     }
     // TODO missing fill content with zeros.
@@ -44,8 +44,8 @@ bool module_task_initialize()
         const char* module_name = module->param;
         log_info("initializing module '%s' at %p (physical) (size %d bytes)", module_name, module->region.addr_start, module->region.size);
 
-        memory_region_t* region = memory_management_region_create(memory_handler, "module-loading", 0, 0, true, true, true);
-        uintptr_t vaddr = memory_management_region_map_physical_address(region, module->region.addr_start, ALIGN_NEXT(module->region.size, SYSTEM_PAGE_SIZE));
+        vmem_region_t* region = vmem_region_create(memory_handler, "module-loading", 0, 0, true, true, true);
+        uintptr_t vaddr = vmem_region_map_physical_address(region, module->region.addr_start, ALIGN_NEXT(module->region.size, SYSTEM_PAGE_SIZE));
         if (!vaddr) {
             return false;
         }
@@ -57,12 +57,12 @@ bool module_task_initialize()
         }
         log_trace("Module entry point=%p", elf.entry_point);
 
-        memory_t* module_memory_handler = memory_management_create();
+        vmem_t* module_memory_handler = vmem_create();
 
         // TODO TEMP
         {
-            memory_region_t* r = memory_management_region_create(module_memory_handler, "video", 0xb8000, 0, true, true, true);
-            memory_management_region_map_physical_address(r, 0xb8000, 16*1024);
+            vmem_region_t* r = vmem_region_create(module_memory_handler, "video", 0xb8000, 0, true, true, true);
+            vmem_region_map_physical_address(r, 0xb8000, 16*1024);
         }
 
         bool abort = false;
@@ -93,11 +93,11 @@ bool module_task_initialize()
 
 bool module_initialize()
 {
-    memory_handler = memory_management_get_kernel();
+    memory_handler = vmem_get_kernel();
     module_task_initialize();
     return true;
     // TODO TO revert the use of kernel pages is necessary allow task_set_arguments runs with the same handler as this task
-    // memory_handler = memory_management_create();
+    // memory_handler = vmem_create();
     // task_id_t task = task_create("module_init", memory_handler);
     // task_set_kernel_mode(task);
     // task_start(task, (uintptr_t) &mod_init);

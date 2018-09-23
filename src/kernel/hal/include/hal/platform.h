@@ -4,6 +4,9 @@
 #include <core/types.h>
 #include <algorithms/linkedlist.h>
 
+// TODO add the configuration here and a method to obtain the platform_t object
+// This should be the only include from the core
+
 /**
  * Hardware Memory info
  */

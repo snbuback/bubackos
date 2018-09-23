@@ -59,6 +59,7 @@ Requires parameter ```magic_break: enabled=1```
     cmake -DCMAKE_TOOLCHAIN_FILE=/Users/snbuback/Projects/bubackos/intel-x86_64.cmake -H. -Bbuild -G "Unix Makefiles"
 
 ## TODO
+* Create a new kernel_mocks, mocking the entire kernel (maybe including mocking from all services)
 * Hal library (done)
 * Core library (done)
 * Create hal function defines in core, so core knows it and the hal implements it exactly as expected by the core
