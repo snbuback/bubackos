@@ -4,7 +4,7 @@
 #include <logging.h>
 #include <core/hal/platform.h>
 #include <core/init.h>
-#include <core/page_allocator.h>
+#include <core/pmem/services.h>
 #include <hal/boot.h>
 #include <x86_64/gdt.h>
 #include <x86_64/idt.h>

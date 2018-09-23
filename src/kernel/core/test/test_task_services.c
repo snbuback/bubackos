@@ -2,7 +2,7 @@
 // source: src/scheduler/services.c
 // source: src/vmem/services.c
 // source: src/vmem/region_services.c
-// source: src/page_allocator.c
+// source: src/pmem/services.c
 // source: ../libutils/src/algorithms/linkedlist.c
 // source: ../libutils/src/libutils/id_mapper.c
 #include <string.h>

@@ -1,6 +1,6 @@
 #include <core/init.h>
 #include <logging.h>
-#include <core/page_allocator.h>
+#include <core/pmem/services.h>
 #include <core/hal/platform.h>
 #include <core/memory.h>
 #include <core/loader/module_loader.h>
@@ -37,18 +37,18 @@ void bubackos_init() {
         sizeof(void*)
     );
 
-    page_allocator_initialize(platform->memory.total_memory);
+    pmem_initialize(platform->memory.total_memory);
 
     // mark page of system segments
     linkedlist_iter_t iter;
     linkedlist_iter_initialize(platform->memory.reserved_segments, &iter);
     region_t* region;
     while ((region = (region_t*) linkedlist_iter_next(&iter))) {
-        page_allocator_mark_as_system(region->addr_start, region->size);
+        pmem_set_as_system(region->addr_start, region->size);
     }
 
     // mark pages of the kernel
-    page_allocator_mark_as_system(platform->memory.kernel.addr_start, platform->memory.kernel.size);
+    pmem_set_as_system(platform->memory.kernel.addr_start, platform->memory.kernel.size);
 
     vmem_initialize();
 

@@ -3,7 +3,7 @@
 #include <stdlib.h>
 #include <stdbool.h>
 #include <core/hal/platform.h>
-#include <core/page_allocator.h>
+#include <core/pmem/services.h>
 #include <core/hal/native_vmem.h>
 #include <core/vmem/services.h>
 #include <core/hal/platform.h>

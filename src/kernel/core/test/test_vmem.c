@@ -9,7 +9,7 @@
 
 // mocks
 static uintptr_t last_page_allocated = SYSTEM_PAGE_SIZE * 1000;
-uintptr_t page_allocator_allocate()
+uintptr_t pmem_allocate()
 {
     return (last_page_allocated += SYSTEM_PAGE_SIZE);
 }

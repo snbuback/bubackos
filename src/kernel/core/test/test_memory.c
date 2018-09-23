@@ -15,14 +15,14 @@ extern vmem_region_t* kernel_data_vmem_region;
 
 // simulates the page allocation using the memory mapped
 static uintptr_t last_page_allocated = -1;
-uintptr_t page_allocator_allocate()
+uintptr_t pmem_allocate()
 {
     last_page_allocated += SYSTEM_PAGE_SIZE;
     log_debug("Allocated page at %p", last_page_allocated);
     return last_page_allocated;
 }
 
-bool page_allocator_mark_as_system(uintptr_t addr, size_t total_in_bytes)
+bool pmem_set_as_system(uintptr_t addr, size_t total_in_bytes)
 {
     log_debug("Requested mark page %p as allocated. Current ptr=%p", addr, last_page_allocated);
     TEST_ASSERT_EQUAL_MESSAGE(ALIGN(addr, SYSTEM_PAGE_SIZE), addr, "page request should be aligned");

@@ -3,7 +3,7 @@
 #include <core/hal/native_vmem.h>
 #include <core/vmem/services.h>
 #include <core/memory.h>
-#include <core/page_allocator.h>
+#include <core/pmem/services.h>
 
 static id_mapper_t vmem_region_mapper;
 
@@ -192,7 +192,7 @@ bool vmem_region_resize(vmem_region_t* vmem_region, size_t new_size)
         // alocate all necessary pages
         size_t remain_space = new_allocated_size - vmem_region->allocated_size;
         while (remain_space > 0) {
-            uintptr_t paddr = page_allocator_allocate();
+            uintptr_t paddr = pmem_allocate();
             if (!paddr) {
                 log_warn("No more memory for region %s", vmem_region->name);
                 failure = true;
