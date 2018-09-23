@@ -4,7 +4,7 @@
 // source: ../libutils/src/libutils/id_mapper.c
 #include <kernel_test.h>
 #include <core/vmem/services.h>
-#include <hal/configuration.h>
+#include <core/hal/platform.h>
 #include <libutils/utils.h>
 
 // mocks

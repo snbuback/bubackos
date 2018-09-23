@@ -3,7 +3,7 @@
 #include <logging.h>
 #include <libutils/id_mapper.h>
 #include <algorithms/linkedlist.h>
-#include <hal/configuration.h>
+#include <core/hal/platform.h>
 #include <core/hal/native_task.h>
 #include <core/memory.h>
 #include <core/vmem/services.h>
@@ -89,7 +89,7 @@ bool task_set_kernel_mode(task_t* task)
  * In case there is no enough memory, NULL is returned (but the memory is partially filled)
  * 
  * Structure:
- *      array(char*, num_arguments) -> pointer to each argument. size = sizeof(argument_t) * num_arguments)
+ *      array(char*, num_arguments) -> pointer to each argument. size = sizeof(long) * num_arguments)
  *      NULL
  *      argument[0] (ending with \0)
  *      argument[1] (ending with \0)
@@ -102,14 +102,14 @@ uintptr_t copy_arguments_to_task(task_t* task, uintptr_t stack, size_t stack_siz
     // TODO Change to a simple serialization without pointers
     // first element is the vector with all arguments position on the stack
     uintptr_t arguments_ptr = stack;
-    argument_t* arguments_ptr_phys = (argument_t*) vmem_get_physical_address(task->memory_handler, arguments_ptr);
+    long* arguments_ptr_phys = (long*) vmem_get_physical_address(task->memory_handler, arguments_ptr);
     if (!arguments_ptr_phys) {
         log_error("Error finding the physical memory address of %p", arguments_ptr_phys);
         return 0;
     }
 
     // arguments data pointer
-    uintptr_t arguments_data = stack + sizeof(argument_t) * (num_arguments + 1); // ends with NULL
+    uintptr_t arguments_data = stack + sizeof(long) * (num_arguments + 1); // ends with NULL
     void* arguments_data_phys = (void*) vmem_get_physical_address(task->memory_handler, arguments_data);
     if (!arguments_data_phys) {
         log_error("Error finding the physical memory address of %p", arguments_data);

@@ -1,7 +1,7 @@
 #include <logging.h>
 #include <libutils/id_mapper.h>
-#include <hal/platform.h>
-#include <hal/configuration.h>
+#include <core/hal/platform.h>
+#include <core/hal/platform.h>
 #include <core/memory.h>
 #include <core/vmem/services.h>
 #include <core/hal/native_vmem.h>

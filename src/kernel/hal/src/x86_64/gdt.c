@@ -1,7 +1,7 @@
 #include <stdbool.h>
 #include <string.h>
 #include <stdlib.h>
-#include <hal/configuration.h>
+#include <core/hal/platform.h>
 #include <core/memory.h>
 #include <logging.h>
 #include <x86_64/gdt.h>

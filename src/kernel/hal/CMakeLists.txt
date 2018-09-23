@@ -20,12 +20,10 @@ PRIVATE
     "${CMAKE_CURRENT_LIST_DIR}/src/x86_64/linker.ld"
 PUBLIC
     "${CMAKE_CURRENT_LIST_DIR}/include/hal/boot.h"
-    "${CMAKE_CURRENT_LIST_DIR}/include/hal/configuration.h"
     "${CMAKE_CURRENT_LIST_DIR}/include/hal/debugger.h"
     "${CMAKE_CURRENT_LIST_DIR}/include/hal/multiboot2_spec.h"
     "${CMAKE_CURRENT_LIST_DIR}/include/hal/native_logging.h"
     "${CMAKE_CURRENT_LIST_DIR}/include/hal/native_task.h"
-    "${CMAKE_CURRENT_LIST_DIR}/include/hal/platform.h"
     "${CMAKE_CURRENT_LIST_DIR}/include/hal/tss.h"
 
     "${CMAKE_CURRENT_LIST_DIR}/include/x86_64/gdt.h"

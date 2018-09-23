@@ -1,14 +1,13 @@
 #include <stdbool.h>
 #include <string.h>
+#include <logging.h>
 #include <algorithms/linkedlist.h>
 #include <core/module_loader.h>
 #include <core/vmem/services.h>
 #include <core/task/services.h>
 #include <core/elf.h>
 #include <libutils/utils.h>
-#include <hal/configuration.h>
-#include <logging.h>
-#include <hal/platform.h>
+#include <core/hal/platform.h>
 
 // TODO change calls to memory management thru syscall so this is no more required.
 vmem_t* memory_handler;
@@ -39,8 +38,9 @@ bool allocate_program_header(elf_t* elf, elf_program_header_t* ph, vmem_t* modul
 bool module_task_initialize()
 {
     log_info("Initializing modules...\n\n\n\n");
+    platform_t* platform = get_platform_config();
 
-    WHILE_LINKEDLIST_ITER(platform.modules, info_module_t*, module) {
+    WHILE_LINKEDLIST_ITER(platform->modules, info_module_t*, module) {
         const char* module_name = module->param;
         log_info("initializing module '%s' at %p (physical) (size %d bytes)", module_name, module->region.addr_start, module->region.size);
 

@@ -4,11 +4,10 @@
 #include <algorithms/linkedlist.h>
 #include <libutils/id_mapper.h>
 #include <libutils/utils.h>
-#include <hal/configuration.h>
+#include <core/hal/platform.h>
 
 typedef id_handler_t vmem_id_t;
 
-#define REGION_ADDRESS_INCREMENT        (1*1024*1024)   // 1GB
 #define MEM_ALIGN(addr)			        ALIGN(addr, SYSTEM_PAGE_SIZE)
 
 typedef struct {

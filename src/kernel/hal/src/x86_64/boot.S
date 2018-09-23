@@ -1,4 +1,4 @@
-#include <hal/configuration.h>
+#include <core/hal/platform.h>
 
 .globl _boot
 

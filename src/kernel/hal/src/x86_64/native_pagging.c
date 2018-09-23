@@ -5,7 +5,7 @@
 #include <core/vmem/services.h>
 #include <core/hal/native_vmem.h>
 #include <core/memory.h>
-#include <hal/configuration.h>
+#include <core/hal/platform.h>
 #include <core/types.h>
 
 typedef void (*entry_visited_func)(page_map_entry_t* entry);

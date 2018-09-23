@@ -1,7 +1,7 @@
 // mock implementations
 #include <kernel_test.h>
 #include <stdarg.h>
-#include <hal/platform.h>
+#include <core/hal/platform.h>
 #include <core/hal/native_task.h>
 #include <core/hal/native_vmem.h>
 
@@ -80,6 +80,11 @@ __attribute__ ((constructor)) void boot(void)
     // these are initialised with empty linkedlist, but for test they are initialised with empty
 	platform.memory.reserved_segments = NULL;
 	platform.modules = NULL;
+}
+
+platform_t* get_platform_config()
+{
+    return &platform;
 }
 
 /*********** memory allocator ***************/

@@ -4,7 +4,7 @@
 #include <kernel_test.h>
 #include <core/hal/native_vmem.h>
 #include <string.h>
-#include <hal/configuration.h>
+#include <core/hal/platform.h>
 #include <x86_64/native_pagging.h>
 
 // tests

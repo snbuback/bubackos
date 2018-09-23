@@ -10,7 +10,7 @@
 #include <core/task/services.h>
 #include <hal/native_task.h>
 #include <algorithms/linkedlist.h>
-#include <hal/configuration.h>
+#include <core/hal/platform.h>
 
 // pointer to 0x1 means native_task_sleep called
 #define TASK_SWITCH_SLEEP       ((native_task_t*) 0x1)
@@ -61,7 +61,7 @@ void xxtest_copy_arguments_to_task()
     TEST_ASSERT_EQUAL_HEX64(TEST_NUM_ARGUMENTS, userdata->num_arguments);
     uintptr_t* userdata_argument_list_ptr = (uintptr_t*) vmem_get_physical_address(task.memory_handler, userdata->argument_list_ptr);
     for (int i=0; i<TEST_NUM_ARGUMENTS; i++) {
-        argument_t val = (argument_t) userdata_argument_list_ptr[i];
+        long val = (long) userdata_argument_list_ptr[i];
         char* param = (char*) vmem_get_physical_address(task.memory_handler, userdata_argument_list_ptr[i]);
         TEST_ASSERT_EQUAL_STRING(TEST_ARGUMENTS[i], param);
     }

@@ -2,7 +2,7 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <logging.h>
-#include <hal/platform.h>
+#include <core/hal/platform.h>
 #include <core/init.h>
 #include <core/page_allocator.h>
 #include <hal/boot.h>
@@ -10,7 +10,7 @@
 #include <x86_64/idt.h>
 #include <hal/native_task.h>
 #include <hal/native_logging.h>
-#include <hal/configuration.h>
+#include <core/hal/platform.h>
 #include <libutils/utils.h>
 
 /* defined by the linker */
@@ -18,7 +18,7 @@ extern uintptr_t __ADDR_KERNEL_START[];
 extern uintptr_t __ADDR_KERNEL_END[];
 
 // this reference should be allocate in the data section, to be available after this routine returns
-platform_t platform;
+static platform_t platform;
 
 void native_boot(uint64_t magic, uintptr_t addr)
 {
@@ -53,3 +53,7 @@ void native_boot(uint64_t magic, uintptr_t addr)
     log_info("Intel System ready\n\n");
 }
 
+platform_t* get_platform_config()
+{
+	return &platform;
+}

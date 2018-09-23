@@ -2,7 +2,7 @@
 #include <stdbool.h>
 #include <stddef.h>
 #include <stdint.h>
-#include <hal/platform.h>
+#include <core/hal/platform.h>
 #include <hal/boot.h>
 #include <hal/multiboot2_spec.h>
 #include <logging.h>

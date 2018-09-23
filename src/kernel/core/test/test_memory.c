@@ -8,8 +8,7 @@
 #include <stdbool.h>
 #include <core/vmem/services.h>
 #include <core/memory.h>
-#include <hal/platform.h>
-#include <hal/configuration.h>
+#include <core/hal/platform.h>
 #include <libutils/utils.h>
 
 extern vmem_region_t* kernel_data_vmem_region;
@@ -36,7 +35,8 @@ bool page_allocator_mark_as_system(uintptr_t addr, size_t total_in_bytes)
 void setUp(void)
 {
     kernel_data_vmem_region = NULL;
-    last_page_allocated = ALIGN_NEXT(platform.memory.kernel_data.addr_end, SYSTEM_PAGE_SIZE);
+    platform_t* platform = get_platform_config();
+    last_page_allocated = ALIGN_NEXT(platform->memory.kernel_data.addr_end, SYSTEM_PAGE_SIZE);
     vmem_initialize();
     vmem_region_initialize();
     memory_allocator_initialize();
@@ -60,8 +60,9 @@ void test_memory_allocator_creates_a_new_memory_region()
     }
 
     TEST_ASSERT_NOT_NULL(region);
-    TEST_ASSERT_EQUAL_HEX(platform.memory.kernel_data.addr_start, region->start);
-    TEST_ASSERT_EQUAL_HEX(platform.memory.kernel_data.addr_end, region->start + platform.memory.kernel_data.size);
+    platform_t* platform = get_platform_config();
+    TEST_ASSERT_EQUAL_HEX(platform->memory.kernel_data.addr_start, region->start);
+    TEST_ASSERT_EQUAL_HEX(platform->memory.kernel_data.addr_end, region->start + platform->memory.kernel_data.size);
 }
 
 void test_memory_allocator_allocates_memory_in_sequence()

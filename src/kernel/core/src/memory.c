@@ -2,11 +2,11 @@
 #include <logging.h>
 #include <stdlib.h>
 #include <stdbool.h>
-#include <hal/platform.h>
+#include <core/hal/platform.h>
 #include <core/page_allocator.h>
 #include <core/hal/native_vmem.h>
 #include <core/vmem/services.h>
-#include <hal/configuration.h>
+#include <core/hal/platform.h>
 #include <libutils/utils.h>
 
 #define KERNEL_MEMORY_PAGE_RESERVE       3*SYSTEM_PAGE_SIZE
@@ -19,11 +19,12 @@ vmem_region_t* kernel_data_vmem_region;
 
 static bool vmem_map_current_kernel_memory_address()
 {
+    platform_t* platform = get_platform_config();
     // code
     kernel_code_vmem_region = vmem_region_create(
         vmem_get_kernel(),
         "kernel-code",
-        platform.memory.kernel.addr_start,
+        platform->memory.kernel.addr_start,
         0,
         false,
         true,
@@ -32,14 +33,14 @@ static bool vmem_map_current_kernel_memory_address()
 
     if (!vmem_region_map_physical_address(
         kernel_code_vmem_region,
-        platform.memory.kernel.addr_start,
-        ALIGN_NEXT(platform.memory.kernel.size, SYSTEM_PAGE_SIZE))) {
+        platform->memory.kernel.addr_start,
+        ALIGN_NEXT(platform->memory.kernel.size, SYSTEM_PAGE_SIZE))) {
         return false;
     }
 
     // data
     // TODO Since intel_switch_task uses pushq it is required execution permission on kernel memory
-    uintptr_t data_addr = platform.memory.kernel_data.addr_start;
+    uintptr_t data_addr = platform->memory.kernel_data.addr_start;
     kernel_data_vmem_region = vmem_region_create(
         vmem_get_kernel(),
         "kernel-data",
@@ -52,13 +53,13 @@ static bool vmem_map_current_kernel_memory_address()
 
     // for data, always allocates more 1 page to ensure any allocation before the memory allocator module
     // initialise still fits in the region mapped.
-    size_t new_size = ALIGN_NEXT(platform.memory.kernel_data.size + 100*SYSTEM_PAGE_SIZE, SYSTEM_PAGE_SIZE);
+    size_t new_size = ALIGN_NEXT(platform->memory.kernel_data.size + 100*SYSTEM_PAGE_SIZE, SYSTEM_PAGE_SIZE);
     if (!vmem_region_map_physical_address(
         kernel_data_vmem_region,
-        platform.memory.kernel_data.addr_start,
+        platform->memory.kernel_data.addr_start,
         new_size)
     ) {
-        platform.memory.kernel_data.size = new_size;
+        platform->memory.kernel_data.size = new_size;
         return false;
     }
     return true;
@@ -66,14 +67,15 @@ static bool vmem_map_current_kernel_memory_address()
 
 bool memory_allocator_initialize()
 {
+    platform_t* platform = get_platform_config();
     if (!vmem_map_current_kernel_memory_address()) {
         return false;
     }
 
     // if during the memory allocation the kernel data memory grows more than allocated, there is an error
     size_t allocated_size = vmem_region_current_size(kernel_data_vmem_region);
-    if (platform.memory.kernel_data.size > allocated_size) {
-        log_warn("Memory grows more than the allocated: total %d > allocated %d", platform.memory.kernel_data.size, allocated_size);
+    if (platform->memory.kernel_data.size > allocated_size) {
+        log_warn("Memory grows more than the allocated: total %d > allocated %d", platform->memory.kernel_data.size, allocated_size);
         return false;
     }
     mem_allocator_initialised = true;
@@ -85,8 +87,9 @@ bool memory_allocator_initialize()
 
 static inline void* get_current_memory_ptr()
 {
+    platform_t* platform = get_platform_config();
     if (!current_mem_ptr) {
-        current_mem_ptr = (void*) platform.memory.kernel_data.addr_end;
+        current_mem_ptr = (void*) platform->memory.kernel_data.addr_end;
     }
     return current_mem_ptr;
 }
@@ -96,15 +99,16 @@ static inline void* get_current_memory_ptr()
  */
 static bool ensure_free_memory(size_t size)
 {
+    platform_t* platform = get_platform_config();
     // since it is required memory to expand memory, I always need to ensure there is a KERNEL_MEMORY_PAGE_RESERVE size of memory
-    size_t minimum_required_size = (uintptr_t) get_current_memory_ptr() + size + KERNEL_MEMORY_PAGE_RESERVE - platform.memory.kernel_data.addr_start;
-    size_t current_size = kernel_data_vmem_region ? kernel_data_vmem_region->allocated_size : platform.memory.kernel_data.size; // take into account current_size
+    size_t minimum_required_size = (uintptr_t) get_current_memory_ptr() + size + KERNEL_MEMORY_PAGE_RESERVE - platform->memory.kernel_data.addr_start;
+    size_t current_size = kernel_data_vmem_region ? kernel_data_vmem_region->allocated_size : platform->memory.kernel_data.size; // take into account current_size
 
     if (minimum_required_size > current_size) {
         // increments memory 2 * KERNEL_MEMORY_PAGE_RESERVE
         size_t new_size = ALIGN_NEXT(minimum_required_size + KERNEL_MEMORY_PAGE_RESERVE, SYSTEM_PAGE_SIZE);
-        platform.memory.kernel_data.addr_end = platform.memory.kernel_data.addr_start + new_size;
-        platform.memory.kernel_data.size = new_size;
+        platform->memory.kernel_data.addr_end = platform->memory.kernel_data.addr_start + new_size;
+        platform->memory.kernel_data.size = new_size;
 
         if (mem_allocator_initialised) {
             log_info("Resizing kernel data memory by +%d KB. New size is %d KB. Allocated %d KB. Current requested %d bytes.",
