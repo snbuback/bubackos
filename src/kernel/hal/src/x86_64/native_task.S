@@ -46,8 +46,8 @@ hal_switch_task:
     xchg %bx, %bx
     iretq
 
-.globl hal_sleep
-hal_sleep:
+.globl native_task_sleep
+native_task_sleep:
     # adjust kernel stack to the begin
     mov     $cpu0_kernel_stack, %rbp
     addq    $SYSTEM_STACKSIZE, %rbp
@@ -55,4 +55,4 @@ hal_sleep:
 
     sti
     hlt
-    jmp hal_sleep
+    jmp native_task_sleep

@@ -18,6 +18,7 @@ The communication between Loader and the Core (there is no direct access to HAL)
 void _boot(); // entry point
 void native_boot(); // hardware startup. Call kernel_init(platform_t)
 void logging_write(); // provides logging in the boot process
+platform_t* get_platform();
 
 // pagging
 native_page_table_t* native_pagetable_create()

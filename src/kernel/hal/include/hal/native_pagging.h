@@ -2,16 +2,7 @@
 #define _HAL_PAGGING_H
 #include <core/types.h>
 #include <stdbool.h>
-
-#define MEM_ALIGN(addr)			ALIGN(addr, SYSTEM_PAGE_SIZE)
-
-typedef struct {
-    uintptr_t virtual_addr;
-    uintptr_t physical_addr;
-    size_t size;
-    permission_t permission;
-    bool present;
-} page_map_entry_t;
+#include <core/hal/native_vmem.h>
 
 typedef void (*entry_visited_func)(page_map_entry_t* entry);
 

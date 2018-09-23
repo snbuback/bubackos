@@ -2,8 +2,8 @@
 #include <kernel_test.h>
 #include <stdarg.h>
 #include <hal/platform.h>
-#include <hal/native_pagging.h>
-#include <hal/native_task.h>
+#include <core/hal/native_task.h>
+#include <core/hal/native_vmem.h>
 
 // for memory mapping
 #include <stdio.h>
@@ -82,6 +82,7 @@ __attribute__ ((constructor)) void boot(void)
 	platform.modules = NULL;
 }
 
+/*********** memory allocator ***************/
 // by default memory function just increment memory usage
 void* __attribute__((weak)) kalloc(size_t size)
 {
@@ -102,47 +103,53 @@ void __attribute__((weak)) kfree(void* ptr)
     // log_test("kfree called with addr %p", ptr);
 }
 
-native_page_table_t* __attribute__((weak)) native_pagetable_create()
+/*********** Native vmem mock implementations ***************/
+__attribute__((weak)) bool native_vmem_create(vmem_t* vmem)
 {
-    log_test("native_pagetable_create called");
-    native_page_table_t* pt = kalloc(sizeof(native_page_table_t));
-    TEST_ASSERT_NOT_NULL(pt);
-    return pt;
+    log_test("native_vmem_create called");
+    vmem->native_vmem = (void*) 0x27;
+    return true;
 }
 
-void __attribute__((weak)) native_pagetable_set(native_page_table_t* pt, page_map_entry_t entry)
+__attribute__((weak)) bool native_vmem_set(vmem_t* vmem, page_map_entry_t entry)
 {
-    // log_test("native_pagetable_set called");
-    TEST_ASSERT_NOT_NULL(pt);
+    // log_test("native_vmem_set called");
+    TEST_ASSERT_NOT_NULL(vmem);
+    return true;
 }
 
-void __attribute__((weak)) native_page_table_flush()
+__attribute__((weak)) void native_vmem_switch(vmem_t* vmem)
 {
-    log_test("native_page_table_flush called");
+    TEST_ASSERT_NOT_NULL(vmem);
+    log_test("native_vmem_switch called");
 }
 
-void __attribute__((weak)) native_pagetable_switch(native_page_table_t* pt)
+__attribute__((weak)) void native_vmem_flush()
 {
-    log_test("native_pagetable_switch called");
+    log_test("native_vmem_flush called");
 }
 
-void __attribute__((weak)) hal_switch_task(native_task_t *task)
+/*********** Native task mock implementations ***************/
+__attribute__((weak)) bool native_task_create(task_t* task, uintptr_t code, uintptr_t stack, int permission_mode, uintptr_t userdata)
 {
-    log_test("hal_switch_task called");
+    task->native_task = (void*) 0x23;
+    log_test("native_task_create called");
+    return true;
+}
+
+__attribute__((weak, noreturn)) void native_task_switch(task_t *task)
+{
+    log_test("native_task_switch called");
     for (;;) {
         log_test("No-return!!!!");
     }
 }
 
-void __attribute__((weak)) hal_sleep(void)
+__attribute__((weak, noreturn)) void native_task_sleep(void)
 {
-    log_test("hal_sleep called");
+    log_test("native_task_sleep called");
     for (;;) {
         log_test("No-return!!!!");
     }
 }
 
-void __attribute__((weak)) hal_create_native_task(native_task_t *task, uintptr_t code, uintptr_t stack, int permission_mode, uintptr_t userdata)
-{
-    log_test("hal_create_native_task called");
-}

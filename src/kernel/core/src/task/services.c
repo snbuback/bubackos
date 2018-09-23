@@ -4,7 +4,7 @@
 #include <libutils/id_mapper.h>
 #include <algorithms/linkedlist.h>
 #include <hal/configuration.h>
-#include <hal/native_task.h>
+#include <core/hal/native_task.h>
 #include <core/memory.h>
 #include <core/vmem/services.h>
 #include <core/scheduler/services.h>
@@ -62,14 +62,16 @@ task_t* task_create(const char* name, vmem_t* vmem)
 
     // append task to the list
     task->task_id = id_mapper_add(&task_id_mapper, task);
-
     if (!task->task_id) {
-        log_error("Unable to allocate memory for insert a new task");
-        FREE(task);
-        return NULL;
+        goto error;
     }
     log_trace("Created task %d with name %s", task->task_id, task->name);
     return task;
+
+error:
+    log_error("Unable to allocate memory for insert a new task");
+    FREE(task);
+    return NULL;
 }
 
 bool task_set_kernel_mode(task_t* task)
@@ -177,7 +179,9 @@ bool task_run(task_t* task, uintptr_t code)
     }
 
     // missing add the userdata parameter
-    hal_create_native_task(&task->native_task, code, vmem_region->start + vmem_region->size - 8, task->kernel, task->userdata);
+    if (!native_task_create(task, code, vmem_region->start + vmem_region->size - 8, task->kernel, task->userdata)) {
+        return false;
+    }
     scheduler_task_ready(task);
     return true;
 }
@@ -191,23 +195,4 @@ bool task_destroy(task_t* task)
     log_debug("Destroying task %d", task->task_id);
     task_release_resources(task);
     return true;
-}
-
-// move this code to native task
-native_task_t* task_update_current_state(native_task_t *native_task_on_stack)
-{
-    task_t* task = scheduler_current_task();
-    if (task == NULL) {
-        // no status to update
-        log_warn("Invalid task_update_current_state called");
-        return NULL;
-    }
-
-    // sysenter requires I update the segment registers
-    native_task_on_stack->cs = task->native_task.cs;
-    native_task_on_stack->ss = task->native_task.ss;
-
-    // copy content from native_task
-    task->native_task = *native_task_on_stack;
-    return &task->native_task;
 }

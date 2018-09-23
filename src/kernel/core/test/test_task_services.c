@@ -12,7 +12,7 @@
 #include <algorithms/linkedlist.h>
 #include <hal/configuration.h>
 
-// pointer to 0x1 means hal_sleep called
+// pointer to 0x1 means native_task_sleep called
 #define TASK_SWITCH_SLEEP       ((native_task_t*) 0x1)
 #define EFLAGS_TEST             0x123456
 static native_task_t* task_switch_called = NULL;

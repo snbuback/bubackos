@@ -68,6 +68,8 @@
 
 #ifndef __ASSEMBLER__
 #include <stdint.h>
+#include <core/task/services.h>
+
 // native_task_t is hardware dependent
 // IMPORTANT: Never changes the layout of native_task_t without change it in native_task.S
 
@@ -114,11 +116,13 @@ typedef struct {
  *      0 -> user
  *      1 -> kernel
  */
-void hal_create_native_task(native_task_t *task, uintptr_t code, uintptr_t stack, int permission_mode, uintptr_t userdata);
+native_task_t* hal_create_native_task(uintptr_t code, uintptr_t stack, int permission_mode, uintptr_t userdata);
+
+native_task_t* hal_update_current_state(native_task_t *native_task_on_stack);
 
 // assembly
 void hal_switch_task(native_task_t *task) __attribute__ ((noreturn));
-void hal_sleep(void) __attribute__ ((noreturn));
+void native_task_sleep(void) __attribute__ ((noreturn));
 
 #endif // __ASSEMBLER__
 

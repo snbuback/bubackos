@@ -3,13 +3,16 @@
 #include <stdbool.h>
 #include <kernel_test.h>
 #include <hal/native_pagging.h>
+#include <core/hal/native_vmem.h>
 #include <string.h>
 #include <hal/configuration.h>
 
 // tests
 void test_create_entries_is_memory_aligned()
 {
-    native_page_table_t* pt = native_pagetable_create();
+    vmem_t vmem;
+    TEST_ASSERT_TRUE(native_vmem_create(&vmem));
+    native_page_table_t* pt = (native_page_table_t*) vmem.native_vmem;
     // creates some allocation and ensure all of them are memory align
     for (int i=0; i<10; i++) {
         uintptr_t addr = (uintptr_t) create_entries(pt);
@@ -82,14 +85,19 @@ void test_get_entry_value()
     TEST_ASSERT_PAGE_TABLE(0x525224245005, &entry);
 }
 
-void test_native_pagetable_create_returns_non_null()
+void test_native_pagetable_create_returns_true()
 {
-    TEST_ASSERT_NOT_NULL(native_pagetable_create());
+
+    vmem_t vmem;
+    TEST_ASSERT_TRUE(native_vmem_create(&vmem));
+    TEST_ASSERT_NOT_NULL(vmem.native_vmem);
 }
 
 void test_hal_page_table_add_mapping()
 {
-    native_page_table_t* hal_mmap = native_pagetable_create();
+    vmem_t vmem;
+    TEST_ASSERT_TRUE(native_vmem_create(&vmem));
+    native_page_table_t* hal_mmap = (native_page_table_t*) vmem.native_vmem;
 //  typedef struct {
 //     uintptr_t virtual_addr;
 //     uintptr_t physical_addr;
@@ -101,25 +109,28 @@ void test_hal_page_table_add_mapping()
     page_map_entry_t entry = { .virtual_addr = 0x120000, .physical_addr = 0x320000, .size = SYSTEM_PAGE_SIZE, .present = true };
     PERM_SET_READ(entry.permission, true);
     PERM_SET_WRITE(entry.permission, true);
-    native_pagetable_set(hal_mmap, entry);
+    native_vmem_set(&vmem, entry);
 }
 
 void test_print_memory_map()
 {
-    native_page_table_t* hal_mmap = native_pagetable_create();
+    vmem_t vmem;
+    TEST_ASSERT_TRUE(native_vmem_create(&vmem));
+    native_page_table_t* hal_mmap = (native_page_table_t*) vmem.native_vmem;
+
     page_map_entry_t entry = { .virtual_addr = 0x120000, .physical_addr = 0x320000, .size = SYSTEM_PAGE_SIZE, .present = true };
     PERM_SET_READ(entry.permission, true);
     PERM_SET_WRITE(entry.permission, true);
 
-    native_pagetable_set(hal_mmap, entry);
+    native_vmem_set(&vmem, entry);
     entry.virtual_addr = 0x3000; entry.physical_addr = 0x123000;
-    native_pagetable_set(hal_mmap, entry);
+    native_vmem_set(&vmem, entry);
     for (int i=0; i<9; i++) {
         entry.virtual_addr = 0x100000 + i*SYSTEM_PAGE_SIZE; entry.physical_addr = 0x40000 + i*SYSTEM_PAGE_SIZE;
-        native_pagetable_set(hal_mmap, entry);
+        native_vmem_set(&vmem, entry);
     }
     entry.virtual_addr = 0xb8000; entry.physical_addr = 0xb8000;
-    native_pagetable_set(hal_mmap, entry);
+    native_vmem_set(&vmem, entry);
     
     native_pagetable_dump(hal_mmap);
 }

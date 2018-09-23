@@ -75,12 +75,12 @@ void handle_general_page_fault(native_task_t *native_task)
     scheduler_switch_task();
 }
 
-void handle_task_switch(native_task_t *native_task)
+__attribute((noreturn)) void handle_task_switch(native_task_t *native_task)
 {
     // ack int (PIC_MASTER_CMD, PIC_CMD_EOI)
     outb(0x20, 0x20);
     if (scheduler_current_task()) {
-        task_update_current_state(native_task);
+        hal_update_current_state(native_task);
     }
     scheduler_switch_task();
 }
@@ -102,7 +102,7 @@ __attribute((noreturn)) void pre_syscall(native_task_t* native_task)
         native_task->r8,
         native_task->r9
         );
-    hal_switch_task(native_task);
+    handle_task_switch(native_task);
 }
 
 void interrupt_handler(native_task_t *native_task, int interrupt)
@@ -136,7 +136,7 @@ void interrupt_handler(native_task_t *native_task, int interrupt)
         break;
 
     default:
-        task_update_current_state(native_task);
+        hal_update_current_state(native_task);
         log_info("Unmapped interruption %d (0x%x) with param %d called", interrupt, interrupt, native_task->orig_rax);
         break;
     }

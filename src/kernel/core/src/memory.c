@@ -4,8 +4,10 @@
 #include <stdbool.h>
 #include <hal/platform.h>
 #include <core/page_allocator.h>
+#include <core/hal/native_vmem.h>
 #include <core/vmem/services.h>
 #include <hal/configuration.h>
+#include <libutils/utils.h>
 
 #define KERNEL_MEMORY_PAGE_RESERVE       3*SYSTEM_PAGE_SIZE
 
@@ -77,7 +79,7 @@ bool memory_allocator_initialize()
     mem_allocator_initialised = true;
 
     log_info("Virtual Memory initialised. Switching to kernel pages.");
-    native_pagetable_switch(vmem_get_kernel()->pt);
+    native_vmem_switch(vmem_get_kernel());
     return true;
 }
 

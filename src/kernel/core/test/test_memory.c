@@ -10,6 +10,7 @@
 #include <core/memory.h>
 #include <hal/platform.h>
 #include <hal/configuration.h>
+#include <libutils/utils.h>
 
 extern vmem_region_t* kernel_data_vmem_region;
 
@@ -25,7 +26,7 @@ uintptr_t page_allocator_allocate()
 bool page_allocator_mark_as_system(uintptr_t addr, size_t total_in_bytes)
 {
     log_debug("Requested mark page %p as allocated. Current ptr=%p", addr, last_page_allocated);
-    TEST_ASSERT_EQUAL_MESSAGE(MEM_ALIGN(addr), addr, "page request should be aligned");
+    TEST_ASSERT_EQUAL_MESSAGE(ALIGN(addr, SYSTEM_PAGE_SIZE), addr, "page request should be aligned");
     if (last_page_allocated < addr) {
         last_page_allocated = addr;
     }

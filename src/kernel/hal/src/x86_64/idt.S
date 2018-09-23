@@ -22,7 +22,7 @@ func:
 .extern interrupt_handler
 .extern do_syscall
 .extern scheduler_switch_task
-.extern task_update_current_state
+.extern hal_update_current_state
 .text
 .code64
 
@@ -56,14 +56,14 @@ syscall_jumper:
     movq    %gs:0, %rsp
     swapgs  // to ensure the value of IA32_KERNEL_GS_BASE remaining the same even without a return from here.
 
-    pushq   $(GDT_SEGMENT(GDT_ENTRY_USER_DS)+GDT_RING_USER) // ss --- overriden by task_update_current_state
+    pushq   $(GDT_SEGMENT(GDT_ENTRY_USER_DS)+GDT_RING_USER) // ss --- overriden by hal_update_current_state
     pushq   %rax    // user's rsp
     pushq   %r11    // r11 (contains rflags after sysenter)
-    pushq   $(GDT_SEGMENT(GDT_ENTRY_USER_CS)+GDT_RING_USER) // cs --- overriden by task_update_current_state
+    pushq   $(GDT_SEGMENT(GDT_ENTRY_USER_CS)+GDT_RING_USER) // cs --- overriden by hal_update_current_state
     pushq   %rcx    // user's next instruction
     pushq   $0
 
-    // first the registers are save into the stack. In the task_update_current_state
+    // first the registers are save into the stack. In the hal_update_current_state
     // the registers are copied to the native_task associate to the task
     hal_save_task_state()
     // TODO clear rbp, rax, because contains kernel memory addresses
@@ -71,7 +71,7 @@ syscall_jumper:
     // the native_task* pointer is the argument
     movq    %rsp, %rdi
     // returns the pointer to the kernel native_task. This is the return of this function
-    call    task_update_current_state
+    call    hal_update_current_state
 
     // rax contains the pointer to task native_task
     movq    %rax, %rdi
@@ -82,4 +82,4 @@ syscall_jumper:
 
     // IMPORTANT: sysret returns to a fixed cs/ss. Since drivers run in kernel mode, I'm using iret to return from system calls
     // this function should not return
-    call    hal_sleep
+    call    native_task_sleep

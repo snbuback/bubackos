@@ -1,7 +1,9 @@
 #include <logging.h>
 #include <algorithms/linkedlist.h>
-#include <core/scheduler/services.h>
 #include <core/vmem/services.h>
+#include <core/hal/native_task.h>
+#include <core/hal/native_vmem.h>
+#include <core/scheduler/services.h>
 
 static volatile task_t* current_task;
 
@@ -68,21 +70,18 @@ __attribute((noreturn)) void scheduler_switch_task()
         if (next_task != scheduler_current_task()) {
             // move last task to the list of ready to execute
             scheduler_clear_current_task();
+
+            // switch page tables since it is a new different task
+            // vmem_dump(task->memory_handler);
+            native_vmem_switch(next_task->memory_handler);
         }
         current_task = next_task;
-        log_trace("Switching to task %s [%d]. Code at %p, stack at %p",
-            task_display_name(next_task),
-            next_task->task_id,
-            next_task->native_task.codeptr,
-            next_task->native_task.stackptr);
-        // vmem_dump(task->memory_handler);
-        native_pagetable_switch(next_task->memory_handler->pt);
-        hal_switch_task(&next_task->native_task);
+        native_task_switch(next_task);
     } else {
         // halt until a new event
         scheduler_clear_current_task();
         // log_trace("Sleeping...zzz");
-        hal_sleep();
+        native_task_sleep();
     }
 }
 

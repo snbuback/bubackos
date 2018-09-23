@@ -2,6 +2,8 @@
 #include <stdbool.h>
 #include <hal/native_pagging.h>
 #include <logging.h>
+#include <core/vmem/services.h>
+#include <core/hal/native_vmem.h>
 #include <core/memory.h>
 #include <hal/configuration.h>
 #include <core/types.h>
@@ -187,24 +189,34 @@ void native_pagetable_dump(native_page_table_t* pt)
 }
 
 // alocate memory to the native page structure
-native_page_table_t* native_pagetable_create() {
+bool native_vmem_create(vmem_t* vmem) {
 
     native_page_table_t* pt = NEW(native_page_table_t);
+    if (!pt) {
+        return false;
+    }
     pt->allocated_memory = linkedlist_create();
+    if (!pt->allocated_memory) {
+        FREE(pt);
+        return false;
+    }
     pt->mem_available_addr = 0;
     pt->mem_available_size = 0;
     pt->entries = create_entries(pt);
-    return pt;
+
+    vmem->native_vmem = pt;
+    return true;
 }
 
 /**
  * Add a new memory mapping to the native page structure.
  */
-void native_pagetable_set(native_page_table_t* pt, page_map_entry_t entry)
+bool native_vmem_set(vmem_t* vmem, page_map_entry_t entry)
 {
+    native_page_table_t* pt = (native_page_table_t*) vmem->native_vmem;
     if (entry.virtual_addr != MEM_ALIGN(entry.virtual_addr) || entry.physical_addr != MEM_ALIGN(entry.physical_addr)) {
         log_warn("Invalid paging definition. Memory address is not aligned: %p -> %p", entry.virtual_addr, entry.physical_addr);
-        return;
+        return false;
     }
 
     page_entry_t* entries_l4 = pt->entries;
@@ -213,20 +225,19 @@ void native_pagetable_set(native_page_table_t* pt, page_map_entry_t entry)
         set_entry(pt, 4, entries_l4, entry.virtual_addr, entry.physical_addr, !PERM_IS_KERNEL_MODE(entry.permission), 
             PERM_IS_EXEC(entry.permission), PERM_IS_WRITE(entry.permission));
     }
+    return true;
 }
 
-/**
- * Switch the current processor to the page tables.
- */
-void native_pagetable_switch(native_page_table_t* pt)
+void native_vmem_switch(vmem_t* vmem)
 {
+    native_page_table_t* pt = (native_page_table_t*) vmem->native_vmem;
     if ((uintptr_t) get_current_page_entries() != (uintptr_t) pt->entries) {
         // native_pagetable_dump(pt);
         asm volatile ("movq %0, %%cr3" : : "r" (pt->entries));
     }
 }
 
-void native_page_table_flush()
+void native_vmem_flush()
 {
     // TODO Implement a more efficient version: https://www.felixcloutier.com/x86/INVLPG.html
     asm volatile ("movq	%%cr3, %%rax; movq %%rax, %%cr3"

@@ -1,6 +1,6 @@
 #include <logging.h>
 #include <hal/configuration.h>
-#include <hal/native_pagging.h>
+#include <core/hal/native_vmem.h>
 #include <core/vmem/services.h>
 #include <core/memory.h>
 #include <core/page_allocator.h>
@@ -45,7 +45,7 @@ static uintptr_t vmem_region_assoc_physical_address(vmem_region_t* vmem_region, 
 static void flush_if_required()
 {
     // TODO flush only if required
-    native_page_table_flush();
+    native_vmem_flush();
 }
 
 uintptr_t vmem_region_map_physical_address(vmem_region_t* vmem_region, uintptr_t physical_start_addr, size_t size)

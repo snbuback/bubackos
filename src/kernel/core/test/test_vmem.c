@@ -5,14 +5,9 @@
 #include <kernel_test.h>
 #include <core/vmem/services.h>
 #include <hal/configuration.h>
+#include <libutils/utils.h>
 
 // mocks
-#define CALLED_HAL_PAGE_TABLE     0x1034343
-native_page_table_t* native_pagetable_create()
-{
-    return (void*) CALLED_HAL_PAGE_TABLE;
-}
-
 static uintptr_t last_page_allocated = SYSTEM_PAGE_SIZE * 1000;
 uintptr_t page_allocator_allocate()
 {
@@ -30,7 +25,6 @@ void test_create()
     vmem_t* m = vmem_create();
     TEST_ASSERT_NOT_NULL(m);
     TEST_ASSERT_GREATER_OR_EQUAL(1, m->vmem_id);
-    TEST_ASSERT_EQUAL(CALLED_HAL_PAGE_TABLE, m->pt);
     TEST_ASSERT_NOT_NULL(m->regions);
     TEST_ASSERT_EQUAL(0, linkedlist_size(m->regions));
     TEST_ASSERT_NOT_NULL(m->map);

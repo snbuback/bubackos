@@ -72,7 +72,7 @@ Requires parameter ```magic_break: enabled=1```
 * Possibility of run individual tests
 * Module loader library (but this should be linked with the kernel)
 * Move kernel to high memory address
-* Fix stack address of the hal_sleep / check if switch task saves the kernel stack so is necessary reset the kernel stack before
+* Fix stack address of the native_task_sleep / check if switch task saves the kernel stack so is necessary reset the kernel stack before
 * When create new region of memory, verify if there is no overlap
 * reuse kernel pages during paging. Also, change the kernel to use big pages (maybe grow small after)
 * Syscall is broken. Only int $50 is working

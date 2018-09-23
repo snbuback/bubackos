@@ -3,7 +3,6 @@
 #include <stdint.h>
 #include <libutils/id_mapper.h>
 #include <core/vmem/services.h>
-#include <hal/native_task.h>
 
 typedef id_handler_t task_id_t;
 typedef unsigned int task_priority_t;
@@ -17,7 +16,7 @@ typedef struct {
     task_priority_t priority;
     uintptr_t userdata;
     task_status_t status;
-    native_task_t native_task;
+    void* native_task;
     vmem_t* memory_handler;
 } task_t;
 

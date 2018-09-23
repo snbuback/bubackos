@@ -1,16 +1,19 @@
 #ifndef _CORE_VMEM_SERVICES_H_
 #define _CORE_VMEM_SERVICES_H_
+#include <stdalign.h>
 #include <algorithms/linkedlist.h>
 #include <libutils/id_mapper.h>
-#include <hal/native_pagging.h>
+#include <libutils/utils.h>
+#include <hal/configuration.h>
 
 typedef id_handler_t vmem_id_t;
 
 #define REGION_ADDRESS_INCREMENT        (1*1024*1024)   // 1GB
+#define MEM_ALIGN(addr)			        ALIGN(addr, SYSTEM_PAGE_SIZE)
 
 typedef struct {
     vmem_id_t vmem_id;
-    native_page_table_t* pt;
+    void* native_vmem;
     linkedlist_t* regions; // list of memory_region_t
     // TODO move the map of memory to regions
     linkedlist_t* map; // list of memory_map_t

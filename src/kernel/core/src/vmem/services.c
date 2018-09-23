@@ -4,6 +4,8 @@
 #include <hal/configuration.h>
 #include <core/memory.h>
 #include <core/vmem/services.h>
+#include <core/hal/native_vmem.h>
+#include <libutils/utils.h>
 
 static id_mapper_t vmem_id_mapper;
 static vmem_t* kernel_vmem;
@@ -32,9 +34,11 @@ vmem_t* vmem_create()
         return NULL;
     }
     vmem->next_start_address = REGION_ADDRESS_INCREMENT;
-    vmem->pt = native_pagetable_create();
     vmem->regions = linkedlist_create();
     vmem->map = linkedlist_create();
+    if (!native_vmem_create(vmem)) {
+        goto error;
+    }
 
     // kernel pages are always attached to any virtual memory.
     if (kernel_vmem) {
@@ -104,7 +108,7 @@ bool vmem_notify_change(vmem_t* vmem, vmem_region_t* region, uintptr_t paddr, ui
     PERM_SET_WRITE(entry.permission, map->region->writable);
     PERM_SET_EXEC(entry.permission, map->region->executable);
     PERM_SET_READ(entry.permission, true);
-    native_pagetable_set(vmem->pt, entry);
+    native_vmem_set(vmem, entry);
     return true;
 }
 
