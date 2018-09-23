@@ -1,12 +1,14 @@
 #include <stdint.h>
 #include <stdbool.h>
-#include <hal/native_pagging.h>
+#include <x86_64/native_pagging.h>
 #include <logging.h>
 #include <core/vmem/services.h>
 #include <core/hal/native_vmem.h>
 #include <core/memory.h>
 #include <hal/configuration.h>
 #include <core/types.h>
+
+typedef void (*entry_visited_func)(page_map_entry_t* entry);
 
 static inline int shifting_bits(int level)
 {
@@ -174,13 +176,14 @@ static void set_entry(native_page_table_t* pt, int level, page_entry_t* entries,
     }
 }
 
-void native_pagetable_dump(native_page_table_t* pt)
+void native_vmem_dump(vmem_t* vmem)
 {
     // if pt is NULL use current ones.
     page_entry_t* entries;
-    if (!pt) {
+    if (!vmem) {
         entries = get_current_page_entries();
     } else {
+        native_page_table_t* pt = (native_page_table_t*) vmem->native_vmem;
         entries = pt->entries;
     }
     log_debug("=============== Dump page table begin ===============");
@@ -232,7 +235,6 @@ void native_vmem_switch(vmem_t* vmem)
 {
     native_page_table_t* pt = (native_page_table_t*) vmem->native_vmem;
     if ((uintptr_t) get_current_page_entries() != (uintptr_t) pt->entries) {
-        // native_pagetable_dump(pt);
         asm volatile ("movq %0, %%cr3" : : "r" (pt->entries));
     }
 }

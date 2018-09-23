@@ -32,6 +32,8 @@ bool native_task_create(task_t* task, uintptr_t code, uintptr_t stack, int permi
     return true;
 }
 
+void intel_switch_task(native_task_t *task) __attribute__ ((noreturn));
+
 __attribute__ ((noreturn)) void native_task_switch(task_t* task)
 {
     if (task) {
@@ -42,7 +44,7 @@ __attribute__ ((noreturn)) void native_task_switch(task_t* task)
             ntask->codeptr,
             ntask->stackptr);
 
-        hal_switch_task(ntask);
+        intel_switch_task(ntask);
     } else {
         native_task_sleep();
     }

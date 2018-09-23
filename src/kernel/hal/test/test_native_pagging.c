@@ -2,10 +2,10 @@
 // source: ../libutils/src/algorithms/linkedlist.c
 #include <stdbool.h>
 #include <kernel_test.h>
-#include <hal/native_pagging.h>
 #include <core/hal/native_vmem.h>
 #include <string.h>
 #include <hal/configuration.h>
+#include <x86_64/native_pagging.h>
 
 // tests
 void test_create_entries_is_memory_aligned()
@@ -132,5 +132,5 @@ void test_print_memory_map()
     entry.virtual_addr = 0xb8000; entry.physical_addr = 0xb8000;
     native_vmem_set(&vmem, entry);
     
-    native_pagetable_dump(hal_mmap);
+    native_vmem_dump(&vmem);
 }

@@ -3,12 +3,11 @@
 #include <x86_64/gdt.h>
 #include <x86_64/idt.h>
 #include <logging.h>
-#include <core/task_management.h>
 #include <core/scheduler/services.h>
 #include <core/syscall.h>
-#include <hal/native_pagging.h>
 #include <x86_64/intel.h>
 #include <core/scheduler/services.h>
+#include <core/hal/native_vmem.h>
 
 /** Declare an IDT of 256 entries.  Although we will only use the
  * first 32 entries in this tutorial, the rest exists as a bit
@@ -71,7 +70,7 @@ void handle_general_page_fault(native_task_t *native_task)
     } else {
         log_fatal("Page fault caused by kernel :,(");
     }
-    native_pagetable_dump(NULL);
+    native_vmem_dump(NULL);
     scheduler_switch_task();
 }
 

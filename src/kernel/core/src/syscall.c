@@ -1,6 +1,5 @@
 #include <logging.h>
 #include <core/syscall.h>
-#include <core/task_management.h>
 #include <core/scheduler/services.h>
 
 long syscall_log(int level, char* msg)

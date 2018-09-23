@@ -1,7 +1,6 @@
 #include <core/init.h>
 #include <logging.h>
 #include <core/page_allocator.h>
-#include <core/task_management.h>
 #include <hal/configuration.h>
 #include <core/elf.h>
 #include <core/memory.h>

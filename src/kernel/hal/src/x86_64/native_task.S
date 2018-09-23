@@ -8,9 +8,9 @@
 .code64
 
 // TODO Stop using pushq. It is make impossible use execution protection on kernel memory data (see kalloc)
-// void hal_switch_task(native_task_t *task)  __attribute__ ((noreturn));
-.globl hal_switch_task
-hal_switch_task:
+// void intel_switch_task(native_task_t *task)  __attribute__ ((noreturn));
+.globl intel_switch_task
+intel_switch_task:
     // first, prepare the stack to iret, so we don't need to worry about the register values
     pushq   REG_ENTRY(20)
     pushq   REG_ENTRY(19)

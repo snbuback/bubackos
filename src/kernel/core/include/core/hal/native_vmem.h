@@ -32,4 +32,11 @@ void native_vmem_switch(vmem_t* vmem);
  */
 void native_vmem_flush();
 
+/**
+ * Dumps the native paging mapping into the logging.
+ * param @vmem: virtual memory to dump pages for. If this value is null, the current page tables are dumped.
+ */
+void native_vmem_dump(vmem_t* vmem);
+
+
 #endif

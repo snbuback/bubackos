@@ -59,7 +59,8 @@
 			"vector": "c",
 			"ostream": "c",
 			"services.h": "c",
-			"native_vmem.h": "c"
+			"native_vmem.h": "c",
+			"ios": "c"
 		},
 		"files.exclude": {
 			"**/.git": true,

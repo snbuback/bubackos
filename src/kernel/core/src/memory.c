@@ -38,7 +38,7 @@ static bool vmem_map_current_kernel_memory_address()
     }
 
     // data
-    // TODO Since hal_switch_task uses pushq it is required execution permission on kernel memory
+    // TODO Since intel_switch_task uses pushq it is required execution permission on kernel memory
     uintptr_t data_addr = platform.memory.kernel_data.addr_start;
     kernel_data_vmem_region = vmem_region_create(
         vmem_get_kernel(),
