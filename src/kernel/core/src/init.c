@@ -2,7 +2,7 @@
 #include <logging.h>
 #include <core/pmem/services.h>
 #include <core/hal/platform.h>
-#include <core/memory.h>
+#include <core/alloc.h>
 #include <core/loader/module_loader.h>
 #include <core/scheduler/services.h>
 #include <string.h>

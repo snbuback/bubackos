@@ -4,7 +4,7 @@
 #include <logging.h>
 #include <core/vmem/services.h>
 #include <core/hal/native_vmem.h>
-#include <core/memory.h>
+#include <core/alloc.h>
 #include <core/hal/platform.h>
 #include <core/types.h>
 

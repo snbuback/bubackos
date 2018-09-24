@@ -31,7 +31,7 @@ build-tools: gcc and binutils to build the kernel
 
 To start a qemu in debug mode
 
-    make run-debug
+    make debug
 
 To start the gdb inside the docker
 
@@ -54,25 +54,7 @@ Requires parameter ```magic_break: enabled=1```
 * https://wiki.osdev.org/Main_Page
 * https://github.com/torvalds/linux
 
-## CMake command line
-
-    cmake -DCMAKE_TOOLCHAIN_FILE=/Users/snbuback/Projects/bubackos/intel-x86_64.cmake -H. -Bbuild -G "Unix Makefiles"
-
 ## TODO
 * Create a new kernel_mocks, mocking the entire kernel (maybe including mocking from all services)
-* Hal library (done)
-* Core library (done)
-* Create hal function defines in core, so core knows it and the hal implements it exactly as expected by the core
-
-* Create utils
-* Create new generic types and define functions
-    * permission_t - rwx
-    * id_t
-    * arraylist (java style) - growing exponential
-* Possibility of run individual tests
-* Module loader library (but this should be linked with the kernel)
-* Move kernel to high memory address
-* Fix stack address of the native_task_sleep / check if switch task saves the kernel stack so is necessary reset the kernel stack before
 * When create new region of memory, verify if there is no overlap
-* reuse kernel pages during paging. Also, change the kernel to use big pages (maybe grow small after)
-* Syscall is broken. Only int $50 is working
+* Creates the DEBUGGER keyboard with pre-defined breakpoints in debug mode.

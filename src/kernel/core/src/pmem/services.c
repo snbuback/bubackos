@@ -4,7 +4,7 @@
 #include <string.h>
 #include <stdlib.h>
 #include <core/hal/platform.h>
-#include <core/memory.h>
+#include <core/alloc.h>
 #include <core/pmem/services.h>
 #include <logging.h>
 #include <libutils/utils.h>

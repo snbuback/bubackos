@@ -1,4 +1,4 @@
-// source: src/memory.c
+// source: src/alloc.c
 // source: src/vmem/services.c
 // source: src/vmem/region_services.c
 // source: ../libutils/src/libutils/id_mapper.c
@@ -7,7 +7,7 @@
 #include <string.h>
 #include <stdbool.h>
 #include <core/vmem/services.h>
-#include <core/memory.h>
+#include <core/alloc.h>
 #include <core/hal/platform.h>
 #include <libutils/utils.h>
 

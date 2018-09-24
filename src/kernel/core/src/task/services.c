@@ -5,7 +5,7 @@
 #include <algorithms/linkedlist.h>
 #include <core/hal/platform.h>
 #include <core/hal/native_task.h>
-#include <core/memory.h>
+#include <core/alloc.h>
 #include <core/vmem/services.h>
 #include <core/scheduler/services.h>
 #include <core/task/services.h>

@@ -6,7 +6,7 @@
 #include <hal/boot.h>
 #include <hal/multiboot2_spec.h>
 #include <logging.h>
-#include <core/memory.h>
+#include <core/alloc.h>
 
 /*  Check if MAGIC is valid and print the Multiboot information structure
   pointed by ADDR. */
