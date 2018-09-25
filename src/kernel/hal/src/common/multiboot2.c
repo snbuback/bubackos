@@ -3,14 +3,13 @@
 #include <stddef.h>
 #include <stdint.h>
 #include <core/hal/platform.h>
-#include <hal/boot.h>
-#include <hal/multiboot2_spec.h>
+#include <common/multiboot2.h>
 #include <logging.h>
 #include <core/alloc.h>
 
 /*  Check if MAGIC is valid and print the Multiboot information structure
   pointed by ADDR. */
-bool multiboot_parser(uint64_t magic, uintptr_t addr, platform_t *platform)
+bool multiboot2_parser(uint64_t magic, uintptr_t addr)
 {
     struct multiboot_tag* tag;
 
@@ -27,6 +26,8 @@ bool multiboot_parser(uint64_t magic, uintptr_t addr, platform_t *platform)
         log_error("Unaligned mbi: %p", (void*) addr);
         return false;
     }
+
+    platform_t *platform = get_platform_config();
 
     log_trace("Announced mbi size 0x%x", *(unsigned*) addr);
     for (tag = (struct multiboot_tag*)(addr + 8);

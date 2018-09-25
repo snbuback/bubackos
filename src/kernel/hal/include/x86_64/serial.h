@@ -1,12 +1,13 @@
 #ifndef _HAL_SERIAL_H_
 #define _HAL_SERIAL_H_
 #include <stdlib.h>
-#include <stdbool.h>
+
+#define SERIAL_COM1         0x3F8
+#define SERIAL_COM2         0x2F8
+#define SERIAL_COM3         0x3E8
+#define SERIAL_COM4         0x2E8
 
 void serial_init();
-bool serial_received();
-char serial_read();
-void serial_write_char(char a);
 void serial_write(const char* bytes, size_t size);
 
 #endif

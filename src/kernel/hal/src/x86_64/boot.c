@@ -5,13 +5,13 @@
 #include <core/hal/platform.h>
 #include <core/init.h>
 #include <core/pmem/services.h>
-#include <hal/boot.h>
 #include <x86_64/gdt.h>
 #include <x86_64/idt.h>
 #include <hal/native_task.h>
 #include <hal/native_logging.h>
 #include <core/hal/platform.h>
 #include <libutils/utils.h>
+#include <common/multiboot2.h>
 
 /* defined by the linker */
 extern uintptr_t __ADDR_KERNEL_START[];
@@ -42,7 +42,7 @@ void native_boot(uint64_t magic, uintptr_t addr)
 	platform.modules = linkedlist_create();
 
 	// multiboot_parser fills memory information
-	if (!multiboot_parser(magic, addr, &platform)) {
+	if (!multiboot2_parser(magic, addr)) {
 		log_error("Try to use a bootloader with multiboot2 support");
 		return;
 	}

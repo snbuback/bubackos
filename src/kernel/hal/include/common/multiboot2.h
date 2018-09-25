@@ -413,6 +413,8 @@ struct multiboot_tag_load_base_addr
  multiboot_uint32_t load_base_addr;
 };
 
+bool multiboot2_parser(uint64_t magic, uintptr_t addr);
+
 #endif /*  ! __ASSEMBLER__ */
 
 #endif /*  ! MULTIBOOT_HEADER */

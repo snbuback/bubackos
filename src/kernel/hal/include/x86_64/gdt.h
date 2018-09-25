@@ -72,7 +72,7 @@ typedef struct {
     unsigned base_24_31 : 8;
     unsigned base_32_63 : 32;
     unsigned : 32;
-} __attribute__((packed)) gdt_entry_t; // TODO append _t to type
+} __attribute__((packed)) gdt_entry_t;
 
 typedef struct tss_entry {
     uint32_t _reserved0;

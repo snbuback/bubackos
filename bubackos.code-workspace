@@ -63,7 +63,10 @@
 			"ios": "c",
 			"algorithm": "c",
 			"system_error": "c",
-			"gdt.h": "c"
+			"gdt.h": "c",
+			"x86intrin.h": "c",
+			"immintrin.h": "c",
+			"ia32intrin.h": "c"
 		},
 		"files.exclude": {
 			"**/.git": true,
