@@ -5,10 +5,9 @@
 #include <core/alloc.h>
 #include <logging.h>
 #include <x86_64/gdt.h>
-#include <hal/tss.h>
 #include <libutils/utils.h>
 
-static gdt_entry gdt[GDT_MAXIMUM_SIZE] __attribute__ ((aligned));
+static gdt_entry_t gdt[GDT_MAXIMUM_SIZE] __attribute__ ((aligned));
 static tss_entry_t tss_entry __attribute__ ((aligned));
 static uintptr_t* kernel_stacks __attribute__ ((aligned)); // per cpu
 
@@ -19,7 +18,7 @@ uint16_t gdt_set_gate(uint16_t num, uint64_t base, uint32_t limit, uint8_t type,
     // this code only works for 64 bits GDT. Also granulatiry if always 1, that means limit are multiples of 4kb
     limit = limit >> 12;
 
-    gdt_entry new_entry;
+    gdt_entry_t new_entry;
 
     new_entry.base_0_15 = (base & 0xFFFF);
     new_entry.base_16_23 = (base >> 16) & 0xFF;
@@ -81,10 +80,25 @@ void gdt_install()
     tss_set(&tss_entry);
 
     /* Flush our the old GDT / TSS and install the new changes! */
-    uint16_t gdt_limit = (sizeof(gdt_entry) * GDT_MAXIMUM_SIZE) - 1;
+    uint16_t gdt_limit = (sizeof(gdt_entry_t) * GDT_MAXIMUM_SIZE) - 1;
     log_trace("Flushing GDT table at %p, size of %x", &gdt, gdt_limit);
     gdt_flush((uintptr_t) &gdt, gdt_limit);
 
     log_trace("Flushing TSS table using entry %d (%x)", GDT_ENTRY_TSS, GDT_SEGMENT(GDT_ENTRY_TSS));
     tss_flush(GDT_SEGMENT(GDT_ENTRY_TSS));
+}
+
+__attribute((weak)) void gdt_flush(uintptr_t base, uint16_t limit)
+{
+    gdt_ref_t table_ref = {
+        .base = base,
+        .limit = limit
+    };
+
+    asm volatile ("lgdt (%0)" : : "r" (&table_ref));
+}
+
+__attribute((weak)) void tss_flush(uint16_t gdt_entry_number)
+{
+    asm volatile ("ltr %0": : "r"(gdt_entry_number));
 }

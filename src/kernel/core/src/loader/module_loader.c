@@ -37,7 +37,7 @@ bool allocate_program_header(elf_t* elf, elf_program_header_t* ph, vmem_t* modul
 
 bool module_task_initialize()
 {
-    log_info("Initializing modules...\n\n\n\n");
+    log_info("Initializing modules");
     platform_t* platform = get_platform_config();
 
     WHILE_LINKEDLIST_ITER(platform->modules, info_module_t*, module) {

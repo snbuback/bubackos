@@ -1,7 +1,6 @@
-// source: src/x86_64/gdt.c
+// source: src/x86_64/lib/gdt.c
 #include <kernel_test.h>
 #include <x86_64/gdt.h>
-#include <hal/tss.h>
 
 #define GDT_ENTRY_BASE(i)       (((uint64_t) gdt_table[i].base_0_15) + ((uint64_t) gdt_table[i].base_16_23 << 16) + ((uint64_t) gdt_table[i].base_24_31 << 24) + ((uint64_t) gdt_table[i].base_32_63 << 32))
 #define GDT_ENTRY_LIMIT(i)      (((uint64_t) gdt_table[i].limit_0_15) + ((uint64_t) gdt_table[i].limit_16_19 << 16))
@@ -12,9 +11,9 @@ void gdt_flush(uintptr_t base, uint16_t limit)
     gdt_flush_called = true;
 
     // assert size
-    TEST_ASSERT_EQUAL_UINT(sizeof(gdt_entry) * GDT_MAXIMUM_SIZE - 1, limit);
+    TEST_ASSERT_EQUAL_UINT(sizeof(gdt_entry_t) * GDT_MAXIMUM_SIZE - 1, limit);
 
-    gdt_entry* gdt_table = (gdt_entry*) base;
+    gdt_entry_t* gdt_table = (gdt_entry_t*) base;
 
     // check segment tables
     TEST_ASSERT_EQUAL_HEX64(0, GDT_ENTRY_BASE(0));

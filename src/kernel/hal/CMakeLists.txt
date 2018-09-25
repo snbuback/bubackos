@@ -1,17 +1,16 @@
 
 target_sources(${OS_EXEC_TARGET}
 PRIVATE
+    "${CMAKE_CURRENT_LIST_DIR}/src/x86_64/lib/gdt.c"
+    "${CMAKE_CURRENT_LIST_DIR}/src/x86_64/lib/idt_fill.S"
+    "${CMAKE_CURRENT_LIST_DIR}/src/x86_64/lib/idt.c"
+    "${CMAKE_CURRENT_LIST_DIR}/src/x86_64/lib/idt.S"
     "${CMAKE_CURRENT_LIST_DIR}/src/multiboot.c"
     "${CMAKE_CURRENT_LIST_DIR}/src/multiboot.S"
     "${CMAKE_CURRENT_LIST_DIR}/src/x86_64/boot.c"
     "${CMAKE_CURRENT_LIST_DIR}/src/x86_64/boot.S"
     "${CMAKE_CURRENT_LIST_DIR}/src/x86_64/crti.S"
     "${CMAKE_CURRENT_LIST_DIR}/src/x86_64/crtn.S"
-    "${CMAKE_CURRENT_LIST_DIR}/src/x86_64/gdt.c"
-    "${CMAKE_CURRENT_LIST_DIR}/src/x86_64/gdt.S"
-    "${CMAKE_CURRENT_LIST_DIR}/src/x86_64/idt_fill.S"
-    "${CMAKE_CURRENT_LIST_DIR}/src/x86_64/idt.c"
-    "${CMAKE_CURRENT_LIST_DIR}/src/x86_64/idt.S"
     "${CMAKE_CURRENT_LIST_DIR}/src/x86_64/native_logging.c"
     "${CMAKE_CURRENT_LIST_DIR}/src/x86_64/native_pagging.c"
     "${CMAKE_CURRENT_LIST_DIR}/src/x86_64/native_task.S"
@@ -24,13 +23,10 @@ PUBLIC
     "${CMAKE_CURRENT_LIST_DIR}/include/hal/multiboot2_spec.h"
     "${CMAKE_CURRENT_LIST_DIR}/include/hal/native_logging.h"
     "${CMAKE_CURRENT_LIST_DIR}/include/hal/native_task.h"
-    "${CMAKE_CURRENT_LIST_DIR}/include/hal/tss.h"
-
     "${CMAKE_CURRENT_LIST_DIR}/include/x86_64/gdt.h"
     "${CMAKE_CURRENT_LIST_DIR}/include/x86_64/idt.h"
     "${CMAKE_CURRENT_LIST_DIR}/include/x86_64/native_task.h"
     "${CMAKE_CURRENT_LIST_DIR}/include/x86_64/serial.h"
-    "${CMAKE_CURRENT_LIST_DIR}/include/x86_64/tss.h"
 )
 
 include_directories("${CMAKE_CURRENT_LIST_DIR}/include")

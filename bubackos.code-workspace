@@ -61,7 +61,9 @@
 			"services.h": "c",
 			"native_vmem.h": "c",
 			"ios": "c",
-			"algorithm": "c"
+			"algorithm": "c",
+			"system_error": "c",
+			"gdt.h": "c"
 		},
 		"files.exclude": {
 			"**/.git": true,

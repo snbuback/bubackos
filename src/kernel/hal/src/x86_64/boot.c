@@ -17,8 +17,12 @@
 extern uintptr_t __ADDR_KERNEL_START[];
 extern uintptr_t __ADDR_KERNEL_END[];
 
-// this reference should be allocate in the data section, to be available after this routine returns
 static platform_t platform;
+
+platform_t* get_platform_config()
+{
+	return &platform;
+}
 
 void native_boot(uint64_t magic, uintptr_t addr)
 {
@@ -46,14 +50,9 @@ void native_boot(uint64_t magic, uintptr_t addr)
 	gdt_install();
 	idt_initialize();
 
-	bubackos_init(&platform);
-
 	idt_install();
 
-    log_info("Intel System ready\n\n");
-}
+	bubackos_init(&platform);
 
-platform_t* get_platform_config()
-{
-	return &platform;
+    log_info("Native System ready");
 }

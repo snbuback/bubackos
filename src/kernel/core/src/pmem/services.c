@@ -84,9 +84,11 @@ error:
 bool pmem_set_as_system(uintptr_t addr, size_t total_in_bytes)
 {
     uintptr_t page = ADDR_TO_PAGE(addr);
-    for (size_t remaining = ADDR_TO_PAGE(ALIGN_NEXT(total_in_bytes, SYSTEM_PAGE_SIZE)); remaining > 0; --remaining) {
+    uintptr_t page_end = ADDR_TO_PAGE((addr + total_in_bytes));
+    while (page <= page_end) {
         // ignore errors, try to mark maximum pages as possible.
         pmem_set_page(page, PAGE_TYPE_SYSTEM);
+        ++page;
     }
     return true;
 }
