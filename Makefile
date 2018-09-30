@@ -15,7 +15,6 @@ else
 endif
 QEMU_ARGS=-m 128 -cpu Nehalem -boot order=d -cdrom $(BUILD_DIR)/bubackos.iso -no-reboot \
 	-no-shutdown -usb -device usb-tablet -icount auto,sleep=on \
-	-serial file:/dev/tty \
 	-show-cursor -d guest_errors,unimp,page,cpu_reset
 
 
@@ -65,10 +64,16 @@ iso: build module-build
 	grub-mkrescue -o $(BASE_DIR)/build/bubackos.iso $(BASE_DIR)/build/bootloader'
 
 run:
-	@qemu-system-x86_64 $(QEMU_ARGS) -monitor stdio
+	tmux new-session \
+		qemu-system-x86_64 $(QEMU_ARGS) -display curses -monitor /dev/pts/2 -serial file:/dev/pts/3 \; \
+	split-window -h -d \
+		bash -c 'sleep 1; tail --pid=`pgrep qemu-system` -f /dev/null' \; \
+	select-pane -R \; \
+	split-window -d \
+		bash -c 'sleep 1; tail --pid=`pgrep qemu-system` -f /dev/null'
 
 start-debug:
-	tmux new-session -d qemu-system-x86_64 $(QEMU_ARGS) -S -s
+	tmux new-session -d qemu-system-x86_64 $(QEMU_ARGS) -S -s -serial file:/dev/tty
 
 stop-debug:
 	killall qemu-system-x86_64
@@ -79,7 +84,7 @@ gdb:
 debug:
 	@$(CONTAINER) tmux \
 		new-session -d \
-			qemu-system-x86_64 $(QEMU_ARGS) -S -s -display none -monitor /dev/pts/3 -d guest_errors,unimp,page,in_asm,int,pcall -D /dev/pts/3 \; \
+			qemu-system-x86_64 $(QEMU_ARGS) -serial file:/dev/tty -S -s -display none -monitor /dev/pts/3 -d guest_errors,unimp,page,in_asm,int,pcall -D /dev/pts/3 \; \
 		split-window -d \
 			./tools/gdb-startup.sh $(KERNEL_IMAGE) localhost:1234 \; \
 		split-window -h -d \
