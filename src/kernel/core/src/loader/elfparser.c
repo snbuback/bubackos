@@ -2,8 +2,8 @@
 #include <stdlib.h>
 #include <stdbool.h>
 #include <logging.h>
-#include <core/loader/elf.h>
 #include <algorithms/linkedlist.h>
+#include <core/loader/elf.h>
 
 static const char* ELF_ERROR_MSG[] = {
     NULL, // ELF_SUCCESS

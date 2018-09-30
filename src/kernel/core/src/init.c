@@ -14,8 +14,18 @@ __attribute__((noreturn)) void welcome_message()
     for(;;);
 }
 
-// implicit argument platform_t platform
-void bubackos_init() {
+static void display_boot_info()
+{
+    platform_t* platform = get_platform_config();
+    size_t code = platform->memory.kernel.size;
+    size_t data = platform->memory.kernel_data.size;
+    log_info("Memory allocation: code %d KB / data %d KB / total %d KB", 
+        code/1024,
+        data/1024,
+        (code+data)/1024);
+}
+
+void kernel_main() {
 
     platform_t* platform = get_platform_config();
 
@@ -67,4 +77,6 @@ void bubackos_init() {
 
     // initialise modules
     module_initialize(platform);
+    
+    display_boot_info();
 }

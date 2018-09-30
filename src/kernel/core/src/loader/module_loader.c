@@ -2,12 +2,12 @@
 #include <string.h>
 #include <logging.h>
 #include <algorithms/linkedlist.h>
+#include <libutils/utils.h>
+#include <core/hal/platform.h>
 #include <core/loader/module_loader.h>
 #include <core/vmem/services.h>
 #include <core/task/services.h>
 #include <core/loader/elf.h>
-#include <libutils/utils.h>
-#include <core/hal/platform.h>
 
 // TODO change calls to memory management thru syscall so this is no more required.
 vmem_t* memory_handler;

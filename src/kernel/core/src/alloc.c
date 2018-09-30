@@ -9,7 +9,7 @@
 #include <core/hal/platform.h>
 #include <libutils/utils.h>
 
-#define KERNEL_MEMORY_PAGE_RESERVE       3*SYSTEM_PAGE_SIZE
+#define KERNEL_MEMORY_PAGE_RESERVE       10*SYSTEM_PAGE_SIZE
 
 static void* current_mem_ptr = NULL;
 bool mem_allocator_initialised = false;
@@ -53,7 +53,7 @@ static bool vmem_map_current_kernel_memory_address()
 
     // for data, always allocates more 1 page to ensure any allocation before the memory allocator module
     // initialise still fits in the region mapped.
-    size_t new_size = ALIGN_NEXT(platform->memory.kernel_data.size + 100*SYSTEM_PAGE_SIZE, SYSTEM_PAGE_SIZE);
+    size_t new_size = ALIGN_NEXT(platform->memory.kernel_data.size + KERNEL_MEMORY_PAGE_RESERVE, SYSTEM_PAGE_SIZE);
     if (!vmem_region_map_physical_address(
         kernel_data_vmem_region,
         platform->memory.kernel_data.addr_start,

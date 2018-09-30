@@ -1,10 +1,10 @@
 #include <stdint.h>
 #include <stdbool.h>
-#include <x86_64/native_pagging.h>
 #include <logging.h>
-#include <core/vmem/services.h>
-#include <core/hal/native_vmem.h>
+#include <x86_64/native_pagging.h>
 #include <core/alloc.h>
+#include <core/hal/native_vmem.h>
+#include <core/vmem/services.h>
 #include <core/hal/platform.h>
 #include <core/types.h>
 

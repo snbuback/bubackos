@@ -1,15 +1,13 @@
 #include <stdbool.h>
-#include <string.h>
-#include <stdlib.h>
-#include <core/hal/platform.h>
-#include <core/alloc.h>
 #include <logging.h>
+#include <core/alloc.h>
+#include <core/hal/platform.h>
 #include <x86_64/gdt.h>
-#include <libutils/utils.h>
 
 static gdt_entry_t gdt[GDT_MAXIMUM_SIZE] __attribute__ ((aligned));
 static tss_entry_t tss_entry __attribute__ ((aligned));
 static uintptr_t* kernel_stacks __attribute__ ((aligned)); // per cpu
+extern uintptr_t cpu0_kernel_stack[];
 
 /* Setup a descriptor in the Global Descriptor Table */
 uint16_t gdt_set_gate(uint16_t num, uint64_t base, uint32_t limit, uint8_t type, uint8_t ring)
@@ -60,15 +58,11 @@ uintptr_t* get_kernel_stack() {
     return kernel_stacks;
 }
 
-void gdt_install()
+void gdt_initialize()
 {
-    /* Clear GDT table. Also insert the NULL GDT */
-    memset(gdt, 0, sizeof(gdt));
-    memset(&tss_entry, 0, sizeof(tss_entry));
-
     // initialize kernel stack per cpu (currently 1)
     kernel_stacks = (uintptr_t*) kalloc(1 * sizeof(uintptr_t));
-    kernel_stacks[0] = ALIGN((uintptr_t) (kalloc(SYSTEM_STACKSIZE) + SYSTEM_STACKSIZE), SYSTEM_PAGE_SIZE);
+    kernel_stacks[0] = ((uintptr_t) cpu0_kernel_stack) + SYSTEM_STACKSIZE;
     log_trace("Kernel stack at %p (pointer to pointer at %p)", kernel_stacks[0], kernel_stacks);
     log_trace("*get_kernel_stack() = %p", *get_kernel_stack());
 

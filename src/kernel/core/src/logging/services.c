@@ -1,18 +1,7 @@
-#include <stdio.h>
 #include <logging.h>
-#include <hal/native_logging.h>
-#include <x86_64/serial.h>
+#include <stdio.h>
 #include <libutils/utils.h>
-
-/**
- * Logging write in the serial port
- */
-void native_logging_init() {
-    serial_init();
-
-    // always starts the logging with a new line
-    serial_write("\n\n", 2);
-}
+#include <core/hal/platform.h>
 
 void logging_write(int level, char* text, size_t text_size __attribute__((unused)))
 {
@@ -23,5 +12,6 @@ void logging_write(int level, char* text, size_t text_size __attribute__((unused
 	size = MIN(size, LOGGING_MAX_LINE);
     output[size] = '\0';
 
-	serial_write(output, size);
+	native_logging(output, size);
 }
+

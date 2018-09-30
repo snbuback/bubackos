@@ -1,5 +1,5 @@
 #include <logging.h>
-#include <core/syscall.h>
+#include <core/hal/hw_events.h>
 #include <core/scheduler/services.h>
 
 long syscall_log(int level, char* msg)
@@ -17,7 +17,7 @@ long syscall_exit()
     return 0; // never happens
 }
 
-long do_syscall(long syscall_number, long arg1, long arg2, long arg3, long arg4, long arg5)
+long handle_syscall(long syscall_number, long arg1, long arg2, long arg3, long arg4, long arg5)
 {
     log_trace("Syscall %x called from %s: arg1=0x%x arg2=0x%x arg3=0x%x arg4=0x%x arg5=0x%x", 
         syscall_number,

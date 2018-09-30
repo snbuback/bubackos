@@ -13,7 +13,7 @@
 
 #ifndef __ASSEMBLER__
 #include <stdint.h>
-#include <hal/native_task.h>
+#include <x86_64/native_task.h>
 
 /* Defines an IDT entry */
 typedef struct {

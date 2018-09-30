@@ -34,21 +34,22 @@ for mod in `cat src/modules/modules.list`; do
   echo "add-symbol-file ${module} 0x${addr}" >> $GDB_SCRIPT_1
 done
 
+BREAKPOINTS=$(objdump -d --section=.text build/bootloader/boot/kernel.elf | egrep -i 'xchg.*%bx,%bx' | cut -d: -f1 | sed -e 's/^[[:space:]]*//' -e "s/^/break *0x/")
+
 cat >> $GDB_SCRIPT_1 <<EOF
 target remote $ENDPOINT
-break native_boot
+break k_64bits
+$BREAKPOINTS
 continue
 # After change to long, gdb will disconnect. So, debugging continue on next script
 EOF
-
-BREAKPOINTS=$(objdump -t --section=.text $KERNEL_IMAGE | grep kernel_debug | egrep -io '([a-z0-9_.]*kernel_debug[a-z0-9_.]*)' | sed "s/^/break /")
 
 cat > $GDB_SCRIPT_2 <<EOF
 set architecture i386:x86-64
 disconnect
 target remote $ENDPOINT
 $BREAKPOINTS
-continue
+# continue
 EOF
 
 echo "####### GDB_SCRIPT_1 #########"

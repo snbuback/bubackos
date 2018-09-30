@@ -9,11 +9,8 @@ set(CMAKE_VERBOSE_MAKEFILE ON CACHE BOOL "ON")
 set(CMAKE_CROSSCOMPILING on)
 
 set(CMAKE_C_STANDARD 11)
-# string(APPEND CMAKE_C_FLAGS "${FLAGS_COMMON_ARCH} -g -ffreestanding -Wall -Werror -Wextra -DNDEBUG -include hal/debugger.h")
-set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} ${FLAGS_COMMON_ARCH} -fPIC -g -O0 -ffreestanding -Wall -Werror -Wextra -fdiagnostics-color=always")
-
-# TODO Move append of "-include", "hal/debugger.h" to Debug profile
-set(CMAKE_ASM_FLAGS "${CMAKE_ASM_FLAGS} ${FLAGS_COMMON_ARCH} -g -O0 -Wall -Werror -Wextra -DNDEBUG -fdiagnostics-color=always")
+set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} ${FLAGS_COMMON_ARCH} -fPIC -g -O0 -ffreestanding -Wall -Werror -Wextra -fdiagnostics-color=always -include x86_64/debugger.h")
+set(CMAKE_ASM_FLAGS "${CMAKE_ASM_FLAGS} ${FLAGS_COMMON_ARCH} -g -O0 -Wall -Werror -Wextra -fdiagnostics-color=always -include x86_64/debugger.h")
 set(UNITY_ROOT "${CMAKE_SOURCE_DIR}/kernel/tests/unity")
 
 include(CMakeListsUtils.txt)

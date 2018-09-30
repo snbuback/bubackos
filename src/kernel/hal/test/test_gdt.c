@@ -5,6 +5,8 @@
 #define GDT_ENTRY_BASE(i)       (((uint64_t) gdt_table[i].base_0_15) + ((uint64_t) gdt_table[i].base_16_23 << 16) + ((uint64_t) gdt_table[i].base_24_31 << 24) + ((uint64_t) gdt_table[i].base_32_63 << 32))
 #define GDT_ENTRY_LIMIT(i)      (((uint64_t) gdt_table[i].limit_0_15) + ((uint64_t) gdt_table[i].limit_16_19 << 16))
 
+uintptr_t* cpu0_kernel_stack;
+
 static bool gdt_flush_called = false;
 void gdt_flush(uintptr_t base, uint16_t limit)
 {
@@ -53,12 +55,13 @@ void setUp(void)
 {
     gdt_flush_called = false;
     tss_flush_called = false;
+    cpu0_kernel_stack = (uintptr_t*) malloc(4096); // any arbitraty value just to test.
 }
 
 // no format
-void test_gdt_install(void)
+void test_gdt_initialize(void)
 {
-    gdt_install();
+    gdt_initialize();
     /*uintptr_t* kstack = */get_kernel_stack();
     TEST_ASSERT_TRUE(tss_flush_called);
     TEST_ASSERT_TRUE(gdt_flush_called);

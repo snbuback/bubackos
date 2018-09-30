@@ -1,11 +1,10 @@
 #include <string.h>
 #include <stdbool.h>
-#include <stddef.h>
 #include <stdint.h>
-#include <core/hal/platform.h>
-#include <common/multiboot2.h>
 #include <logging.h>
+#include <common/multiboot2.h>
 #include <core/alloc.h>
+#include <core/hal/platform.h>
 
 /*  Check if MAGIC is valid and print the Multiboot information structure
   pointed by ADDR. */

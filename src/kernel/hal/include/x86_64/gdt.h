@@ -109,7 +109,7 @@ typedef struct {
 
 uintptr_t* get_kernel_stack();
 
-void gdt_install();
+void gdt_initialize();
 
 // assembly functions
 void gdt_flush(uintptr_t base, uint16_t limit);

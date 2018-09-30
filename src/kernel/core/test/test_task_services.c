@@ -8,9 +8,9 @@
 #include <string.h>
 #include <kernel_test.h>
 #include <core/task/services.h>
-#include <hal/native_task.h>
 #include <algorithms/linkedlist.h>
 #include <core/hal/platform.h>
+#include <x86_64/native_task.h>
 
 // pointer to 0x1 means native_task_sleep called
 #define TASK_SWITCH_SLEEP       ((native_task_t*) 0x1)

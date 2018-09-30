@@ -1,15 +1,12 @@
-#include <core/hal/platform.h>
-#include <x86_64/gdt.h>
-#include <x86_64/native_task.h>
 #include <logging.h>
 #include <core/task/services.h>
 #include <core/scheduler/services.h>
-#include <core/hal/native_task.h>
+#include <x86_64/gdt.h>
+#include <x86_64/native_task.h>
 
 bool native_task_create(task_t* task, uintptr_t code, uintptr_t stack, int permission_mode, uintptr_t userdata)
 {
-    // TODO FIX native_task size
-    native_task_t* ntask = (native_task_t*) kalloc(512);
+    native_task_t* ntask = (native_task_t*) kalloc(sizeof(native_task_t));
     if (!ntask) {
         return false;
     }
@@ -31,8 +28,6 @@ bool native_task_create(task_t* task, uintptr_t code, uintptr_t stack, int permi
     task->native_task = ntask;
     return true;
 }
-
-void intel_switch_task(native_task_t *task) __attribute__ ((noreturn));
 
 __attribute__ ((noreturn)) void native_task_switch(task_t* task)
 {

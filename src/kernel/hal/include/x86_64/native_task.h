@@ -119,6 +119,8 @@ typedef struct {
 
 native_task_t* hal_update_current_state(native_task_t *native_task_on_stack);
 
+void intel_switch_task(native_task_t *task) __attribute__ ((noreturn));
+
 #endif // __ASSEMBLER__
 
 #endif

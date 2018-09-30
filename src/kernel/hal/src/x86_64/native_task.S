@@ -43,16 +43,10 @@ intel_switch_task:
     REG_RESTORE(rdx, 12)
     REG_RESTORE(rsi, 13)
     REG_RESTORE(rdi, 14) // last to restore because pointer to all information
-    xchg %bx, %bx
     iretq
 
 .globl native_task_sleep
 native_task_sleep:
-    # adjust kernel stack to the begin
-    mov     $cpu0_kernel_stack, %rbp
-    addq    $SYSTEM_STACKSIZE, %rbp
-    mov     %rbp, %rsp
-
     sti
     hlt
     jmp native_task_sleep

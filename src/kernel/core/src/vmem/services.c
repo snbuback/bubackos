@@ -1,11 +1,10 @@
 #include <logging.h>
 #include <libutils/id_mapper.h>
-#include <core/hal/platform.h>
+#include <libutils/utils.h>
 #include <core/hal/platform.h>
 #include <core/alloc.h>
 #include <core/vmem/services.h>
 #include <core/hal/native_vmem.h>
-#include <libutils/utils.h>
 
 static id_mapper_t vmem_id_mapper;
 static vmem_t* kernel_vmem;

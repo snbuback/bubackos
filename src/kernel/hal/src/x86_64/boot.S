@@ -137,8 +137,8 @@ k_64bits:
 
   call  enable_sse
   call  native_boot
-  
-  // scheduler_switch_task should never returns... but just to ensure the return address is 1234
+
+  // scheduler_switch_task never returns
   jmp   scheduler_switch_task
 
 
@@ -173,8 +173,8 @@ gdt:
   // You'd want to have entries for other rings here, if you were using them.
 gdt_end:
 
-.bss
 .globl cpu0_kernel_stack
+.bss
 .lcomm cpu0_kernel_stack, SYSTEM_STACKSIZE
 
 .align 4096

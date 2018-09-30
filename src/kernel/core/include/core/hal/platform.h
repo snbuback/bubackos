@@ -43,6 +43,12 @@ typedef struct {
  */
 platform_t* get_platform_config();
 
+/**
+ * Basic logging mechanism used by the core during the boot process.
+ * After load the logging module, this function is not called.
+ */
+void native_logging(const char* msg, size_t size);
+
 #endif  // __ASSEMBLER__
 
 #endif

@@ -1,8 +1,8 @@
 #include <logging.h>
+#include <core/alloc.h>
 #include <core/hal/platform.h>
 #include <core/hal/native_vmem.h>
 #include <core/vmem/services.h>
-#include <core/alloc.h>
 #include <core/pmem/services.h>
 
 static id_mapper_t vmem_region_mapper;

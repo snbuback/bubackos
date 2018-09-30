@@ -8,6 +8,8 @@ target_sources(${OS_EXEC_TARGET}
         "${CMAKE_CURRENT_LIST_DIR}/src/scheduler/services.c"
         "${CMAKE_CURRENT_LIST_DIR}/src/loader/elfparser.c"
         "${CMAKE_CURRENT_LIST_DIR}/src/loader/module_loader.c"
+        "${CMAKE_CURRENT_LIST_DIR}/src/logging/services.c"
+        "${CMAKE_CURRENT_LIST_DIR}/src/hw_events.c"
         "${CMAKE_CURRENT_LIST_DIR}/src/alloc.c"
         "${CMAKE_CURRENT_LIST_DIR}/src/syscall.c"
         "${CMAKE_CURRENT_LIST_DIR}/src/init.c"
@@ -20,7 +22,6 @@ target_sources(${OS_EXEC_TARGET}
         "${CMAKE_CURRENT_LIST_DIR}/include/core/loader/elf.h"
         "${CMAKE_CURRENT_LIST_DIR}/include/core/loader/module_loader.h"
         "${CMAKE_CURRENT_LIST_DIR}/include/core/alloc.h"
-        "${CMAKE_CURRENT_LIST_DIR}/include/core/syscall.h"
         "${CMAKE_CURRENT_LIST_DIR}/include/core/types.h"
         "${CMAKE_CURRENT_LIST_DIR}/include/core/init.h"
 )

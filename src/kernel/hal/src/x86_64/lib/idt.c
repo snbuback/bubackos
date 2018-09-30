@@ -1,13 +1,10 @@
 #include <stdint.h>
-#include <string.h>
+#include <logging.h>
 #include <x86_64/gdt.h>
 #include <x86_64/idt.h>
-#include <logging.h>
-#include <core/scheduler/services.h>
-#include <core/syscall.h>
 #include <x86_64/intel.h>
 #include <core/scheduler/services.h>
-#include <core/hal/native_vmem.h>
+#include <core/hal/hw_events.h>
 
 /** Declare an IDT of 256 entries.  Although we will only use the
  * first 32 entries in this tutorial, the rest exists as a bit
@@ -35,46 +32,7 @@ void idt_set_gate(unsigned num, uintptr_t base, unsigned type, unsigned ring)
     idt[num].present = 1;
 }
 
-void handle_keyboard() {
-    outb(0x20, 0x20);
-    // uint8_t key = inb(0x60);
-    // log_trace("Key pressed: 0x%x", (unsigned int) key);
-}
-
-void handle_general_protection(native_task_t *native_task)
-{
-    task_t* task = scheduler_current_task();
-    log_fatal("GP: code=%p stack=%p task=%s", native_task->codeptr, native_task->stackptr, task_display_name(task));
-    if (task) {
-        log_fatal("General protection caused by task %s. Killing task.", task_display_name(task));
-        task_destroy(task);
-    } else {
-        log_fatal("General protection caused by kernel :,(");
-    }
-    scheduler_switch_task();
-}
-
-// TODO move CR2 interpreter to native method
-void handle_general_page_fault(native_task_t *native_task)
-{
-    uintptr_t memory;
-    asm volatile( "mov %%cr2, %0"
-                   : "=r" (memory));
-
-    task_t* task = scheduler_current_task();
-    log_fatal("PF: addr=%p cd=%p st=%p fl=%x tk=%s", memory, native_task->codeptr, native_task->stackptr, native_task->orig_rax, task_display_name(task));
-
-    if (task) {
-        log_fatal("Page fault caused by task %s. Killing task.", task_display_name(task));
-        task_destroy(task);
-    } else {
-        log_fatal("Page fault caused by kernel :,(");
-    }
-    native_vmem_dump(NULL);
-    scheduler_switch_task();
-}
-
-__attribute((noreturn)) void handle_task_switch(native_task_t *native_task)
+__attribute((noreturn)) static inline void handle_task_switch(native_task_t *native_task)
 {
     // ack int (PIC_MASTER_CMD, PIC_CMD_EOI)
     outb(0x20, 0x20);
@@ -84,59 +42,61 @@ __attribute((noreturn)) void handle_task_switch(native_task_t *native_task)
     scheduler_switch_task();
 }
 
-static uintptr_t get_stack_addr()
+native_task_t* pre_syscall(native_task_t* native_task)
 {
-    uintptr_t addr;
-    asm volatile ("movq %%rbp, %0" : "=r"(addr));
-    return addr;
-}
-
-__attribute((noreturn)) void pre_syscall(native_task_t* native_task)
-{
-    native_task->rax = do_syscall(
+    native_task->rax = handle_syscall(
         native_task->rdi,
         native_task->rsi,
         native_task->rdx,
         native_task->r10,
         native_task->r8,
         native_task->r9
-        );
-    handle_task_switch(native_task);
+    );
+    // the returning is important to the syscall_jumper
+    return native_task;
 }
 
 void interrupt_handler(native_task_t *native_task, int interrupt)
 {
-    log_debug("Interruption %d (0x%x) on task %s and stack=%p", interrupt, interrupt, task_display_name(scheduler_current_task()), get_stack_addr());
+    log_debug("Interruption %d (0x%x) on task %s. kernel-stack=%p",
+        interrupt,
+        interrupt,
+        task_display_name(scheduler_current_task()),
+        get_stack_base_addr()
+        );
 
     switch (interrupt) {
     case 0x8: // timer
         handle_task_switch(native_task);
         break;
 
-    case 0x9: // keyboard
-        handle_keyboard();
-        break;
-
     case 0xD: // GP
-        handle_general_protection(native_task);
+        handle_protection_fault();
         break;
 
-    case 0xE: // Page fault
-        handle_general_page_fault(native_task);
+    case 0xE: {  // Page fault
+        pagefault_status_t pf = {
+            .addr = page_fault_addr(),
+            // TODO Filling the other fields
+        };
+        handle_page_fault(pf);
         break;
+    }
 
     case 0x6: // Invalid OPCODE
-        log_info("Invalid OPCODE");
-        handle_general_protection(native_task);
+        handle_invalid_operation();
         break;
 
     case INT_SYSTEM_CALL:
         pre_syscall(native_task);
+        // in case the syscall returns, the caller task will still executes.
+        intel_switch_task(native_task);
         break;
 
     default:
         hal_update_current_state(native_task);
         log_info("Unmapped interruption %d (0x%x) with param %d called", interrupt, interrupt, native_task->orig_rax);
+        handle_generic_hw_events();
         break;
     }
 
@@ -146,6 +106,7 @@ void interrupt_handler(native_task_t *native_task, int interrupt)
 void idt_initialize()
 {
     idt_fill_table();
+    idt_install();
 }
 
 /**

@@ -3,11 +3,11 @@
  */
 #include <string.h>
 #include <stdlib.h>
+#include <logging.h>
+#include <libutils/utils.h>
 #include <core/hal/platform.h>
 #include <core/alloc.h>
 #include <core/pmem/services.h>
-#include <logging.h>
-#include <libutils/utils.h>
 
 #define PAGE_TO_ADDR(p)     (p << SYSTEM_PAGE_ALIGN)
 #define ADDR_TO_PAGE(a)     (a >> SYSTEM_PAGE_ALIGN)

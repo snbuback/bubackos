@@ -66,7 +66,10 @@
 			"gdt.h": "c",
 			"x86intrin.h": "c",
 			"immintrin.h": "c",
-			"ia32intrin.h": "c"
+			"ia32intrin.h": "c",
+			"alloc.h": "c",
+			"stddef.h": "c",
+			"module_loader.h": "c"
 		},
 		"files.exclude": {
 			"**/.git": true,

@@ -27,6 +27,22 @@ static inline uint64_t rdmsr(uint64_t msr)
 	return ((uint64_t)high << 32) | low;
 }
 
+static inline uintptr_t get_stack_base_addr()
+{
+    uintptr_t memory;
+    asm volatile( "mov %%rbp, %0"
+                   : "=r" (memory));
+    return memory;
+}
+
+static inline uintptr_t page_fault_addr()
+{
+    uintptr_t memory;
+    asm volatile( "mov %%cr2, %0"
+                   : "=r" (memory));
+    return memory;
+}
+
 static inline void lidt(void* base, uint16_t size)
 {   // This function works in 32 and 64bit mode
     struct {

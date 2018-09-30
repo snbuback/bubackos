@@ -80,6 +80,6 @@ syscall_jumper:
 
     call    pre_syscall
 
-    // IMPORTANT: sysret returns to a fixed cs/ss. Since drivers run in kernel mode, I'm using iret to return from system calls
-    // this function should not return
-    call    native_task_sleep
+    // rax contains point to native_task
+    movq    %rax, %rdi
+    call    intel_switch_task
