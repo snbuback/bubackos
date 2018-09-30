@@ -131,9 +131,6 @@ vmem_region_t* vmem_region_create(vmem_t* vmem, const char* name, uintptr_t star
     }
 
     // TODO There is any memory address constraint?
-    // if (start < ???) {
-    //  return NULL
-    // }
 
     vmem_region_t* vmem_region = NEW(vmem_region_t);
     if (!vmem_region) {

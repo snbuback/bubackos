@@ -4,8 +4,6 @@
 #include <string.h>
 #include <stdarg.h>
 
-// TODO Fix the differences between my implementation and the C standard lib
-
 #define BUFFER_SIZE     10000
 char buffer[BUFFER_SIZE];
 

@@ -89,5 +89,7 @@
 			"**/bower_components": true,
 			"**/build/**": true
 		},
+		"todo-tree.expanded": true,
+		"todo-tree.filterCaseSensitive": true,
 	}
 }

@@ -223,7 +223,6 @@ bool native_vmem_set(vmem_t* vmem, page_map_entry_t entry)
     }
 
     page_entry_t* entries_l4 = pt->entries;
-    // TODO Add Support to big pages
     for (size_t i=0; i<entry.size / PAGE_TABLE_NATIVE_SIZE_SMALL; i++) {
         set_entry(pt, 4, entries_l4, entry.virtual_addr, entry.physical_addr, !PERM_IS_KERNEL_MODE(entry.permission), 
             PERM_IS_EXEC(entry.permission), PERM_IS_WRITE(entry.permission));

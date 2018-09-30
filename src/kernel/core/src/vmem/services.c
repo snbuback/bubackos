@@ -159,7 +159,7 @@ bool vmem_attach(vmem_t* vmem, vmem_region_t* vmem_region)
 
 error:
     // rollback all changes.
-    // TODO Unfortunatelly vmem_notify_change could left the vmem in a invalid state.
+    // Unfortunatelly vmem_notify_change could left the vmem in a invalid state.
     linkedlist_remove_element(vmem->regions, vmem_region);
     linkedlist_remove_element(vmem_region->attached, vmem);
     log_error("Error attaching region %s on memory %p. Possible inconsistent state!", vmem_region->name, vmem);

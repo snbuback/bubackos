@@ -62,7 +62,6 @@ void test_get_entry_value()
 {
     page_entry_t entry;
 
-    // TODO Tests not working
     memset(&entry, 0, sizeof(entry));
     fill_entry_value(&entry, 0x0, false, true, true);
     TEST_ASSERT_PAGE_TABLE(0x3, &entry);
