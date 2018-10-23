@@ -91,5 +91,8 @@
 		},
 		"todo-tree.expanded": true,
 		"todo-tree.filterCaseSensitive": true,
+		"terminal.integrated.env.osx": {
+			"PATH": "${workspaceFolder}/.wrappers:${env:PATH}"
+		},
 	}
 }

@@ -1,7 +1,10 @@
 #!/bin/bash
 set -e
 
+[ "$NO_GDB" == "1" ] && exit 0
+
 if [ ! $# -eq 2 ]; then
+    # When runs in running mode (debug fails to initialize)
     echo "Missing gdb endpoint"
     exit 1
 fi

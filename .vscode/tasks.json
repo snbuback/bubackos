@@ -42,28 +42,12 @@
         {
             "label": "start-debug",
             "type": "shell",
-            "command": "make iso start-debug",
-            "presentation": {
-                "reveal": "always",
-                "panel": "dedicated"
-            },
-            "problemMatcher": [
-                "$gcc",
-                "$jshint"
-            ]
+            "command": "myos-start && ${workspaceFolder}/tools/open-terminal.sh ${workspaceFolder}/.wrappers/myos-connect"
         },
         {
             "label": "stop-debug",
             "type": "shell",
-            "command": "make stop-debug",
-            "presentation": {
-                "reveal": "always",
-                "panel": "dedicated"
-            },
-            "problemMatcher": [
-                "$gcc",
-                "$jshint"
-            ]
+            "command": "myos-stop"
         },
     ]
 }
