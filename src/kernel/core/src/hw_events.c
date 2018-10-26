@@ -2,6 +2,7 @@
 #include <core/hal/hw_events.h>
 #include <core/task/services.h>
 #include <core/scheduler/services.h>
+#include <core/vmem/services.h>
 
 void handle_protection_fault()
 {
@@ -25,6 +26,7 @@ void handle_page_fault(pagefault_status_t pf)
         pf.invalid_permission,
         pf.instruction_fetch,
         task_display_name(task));
+    vmem_dump(task->memory_handler);
 
     if (task) {
         log_fatal("Page fault caused by task %s. Killing task.", task_display_name(task));

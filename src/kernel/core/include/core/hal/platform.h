@@ -7,6 +7,7 @@
 #define SYSTEM_PAGE_SIZE                    (2 << (SYSTEM_PAGE_ALIGN-1))
 #define SYSTEM_STACKSIZE                    32768
 #define TASK_DEFAULT_STACK_SIZE             SYSTEM_PAGE_SIZE*10
+#define SYSCALL_MAX_NUMBER                  255
 
 #define REGION_ADDRESS_INCREMENT            (1*1024*1024)   // 1GB
 

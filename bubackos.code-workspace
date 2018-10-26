@@ -69,7 +69,9 @@
 			"ia32intrin.h": "c",
 			"alloc.h": "c",
 			"stddef.h": "c",
-			"module_loader.h": "c"
+			"module_loader.h": "c",
+			"syscall.h": "c",
+			"init.h": "c"
 		},
 		"files.exclude": {
 			"**/.git": true,

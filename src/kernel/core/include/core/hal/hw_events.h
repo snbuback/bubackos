@@ -25,7 +25,7 @@ void handle_invalid_operation();
 
 void handle_protection_fault();
 
-long handle_syscall(long syscall_number, long arg1, long arg2, long arg3, long arg4, long arg5);
+long handle_syscall(unsigned long syscall_number, long arg1, long arg2, long arg3, long arg4, long arg5);
 
 void handle_generic_hw_events();
 

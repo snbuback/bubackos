@@ -19,24 +19,10 @@ typedef struct {
     char** argument_list; // char* arguments[]
 } task_userdata_t;
 
-static void print(int line, int col, const char* msg)
-{
-    char c;
-    char* base = (char*) ((uintptr_t) 0xb8000 + (line*80+col)*2);
-    while ((c = *msg)) {
-        *base = c;
-        *(base+1) = ' ';
-        msg++;
-        base += 2;
-    }
-}
-
 task_userdata_t* userdata;
 void module_init(uintptr_t arg)
 {
     userdata = (task_userdata_t*) arg;
-
-    print(0, strlen("1234567890"), "Hello  Word");
 
     _syscall(0x1005, 0x2005, 0x3005, 0x4005, 0x5005, 0x6005);
 
@@ -50,14 +36,5 @@ void module_init(uintptr_t arg)
 
     _syscall0(0x1000);
 
-    _syscall2(2/*logging*/, 2 /*INFO*/, (long) "logging from application");
-
-    if (!userdata) {
-        print(1, 0, "NO Arguments!!!");
-    } else {
-        print(1, 0, "Arguments:");
-        for (uint64_t i=0; i<userdata->num_arguments; ++i) {
-            print(i+2, 0, userdata->argument_list[i]);
-        }
-    }
+    _syscall2(2/*logging*/, 2 /*INFO*/, (long) "\n\n\n******* System ready! ********\n\n");
 }

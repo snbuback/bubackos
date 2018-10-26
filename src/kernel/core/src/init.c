@@ -5,14 +5,8 @@
 #include <core/alloc.h>
 #include <core/loader/module_loader.h>
 #include <core/scheduler/services.h>
+#include <core/syscall/services.h>
 #include <string.h>
-
-__attribute__((noreturn)) void welcome_message()
-{
-    log_info("\n\n\n******* System ready! ********\n\n");
-    asm volatile ("movq $1, %rdi; int $50");
-    for(;;);
-}
 
 static void display_boot_info()
 {
@@ -70,10 +64,7 @@ void kernel_main() {
 
     task_service_initialize();
 
-    // say Welcome in another thread, to ensure the context switching is working properly.
-    task_t* welcome_task = task_create("welcome", vmem_create());
-    task_set_kernel_mode(welcome_task);
-    task_run(welcome_task, (uintptr_t) &welcome_message);
+    syscall_initialize();
 
     // initialise modules
     module_initialize(platform);

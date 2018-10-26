@@ -59,12 +59,6 @@ bool module_task_initialize()
 
         vmem_t* module_memory_handler = vmem_create();
 
-        // TODO TEMP
-        {
-            vmem_region_t* r = vmem_region_create(module_memory_handler, "video", 0xb8000, 0, true, true, true);
-            vmem_region_map_physical_address(r, 0xb8000, 16*1024);
-        }
-
         bool abort = false;
         WHILE_LINKEDLIST_ITER(elf.program_headers, elf_program_header_t*, program_header) {
             if (program_header->type == ELF_PT_LOAD) {

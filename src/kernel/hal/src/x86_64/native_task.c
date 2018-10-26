@@ -20,8 +20,8 @@ bool native_task_create(task_t* task, uintptr_t code, uintptr_t stack, int permi
         ntask->cs = (GDT_SEGMENT(GDT_ENTRY_KERNEL_CS)+GDT_RING_SYSTEM);
         ntask->ss = (GDT_SEGMENT(GDT_ENTRY_KERNEL_DS)+GDT_RING_SYSTEM);
     } else {
-        ntask->cs = (GDT_SEGMENT(GDT_ENTRY_KERNEL_CS)+GDT_RING_USER);
-        ntask->ss = (GDT_SEGMENT(GDT_ENTRY_KERNEL_DS)+GDT_RING_USER);
+        ntask->cs = (GDT_SEGMENT(GDT_ENTRY_USER_CS)+GDT_RING_USER);
+        ntask->ss = (GDT_SEGMENT(GDT_ENTRY_USER_DS)+GDT_RING_USER);
     }
 
     ntask->rdi = userdata;
@@ -38,7 +38,6 @@ __attribute__ ((noreturn)) void native_task_switch(task_t* task)
             task->task_id,
             ntask->codeptr,
             ntask->stackptr);
-
         intel_switch_task(ntask);
     } else {
         native_task_sleep();

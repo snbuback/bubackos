@@ -1,0 +1,7 @@
+#ifndef _CORE_SYSCALL_SYSCALLS_H_
+#define _CORE_SYSCALL_SYSCALLS_H_
+
+#define SYSCALL_EXIT					1
+#define SYSCALL_LOGGING					2
+
+#endif
