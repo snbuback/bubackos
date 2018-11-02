@@ -13,7 +13,7 @@ echo "args=$#"
 
 QEMU_ARGS="-m 128 -cpu Skylake-Server -boot order=d -cdrom $ISO -no-reboot \
 -no-shutdown -usb -device usb-tablet -icount auto,sleep=on \
--show-cursor -d guest_errors,unimp,page,cpu_reset"
+-show-cursor -d guest_errors,unimp,page,in_asm,int,pcall"
 
 # if there is the kernel image, means we are running in debug mode
 if [ ! -z "$KERNEL_IMAGE" ]; then
@@ -29,7 +29,7 @@ NO_INPUT='bash -c "sleep 1; tail --pid=`pgrep qemu-system` -f /dev/null"'
 cat > $TMUX_CONF <<EOF
 # pts/1
 new-session -n run -x "80" -y "25" \
-	qemu-system-x86_64 $QEMU_EXTRA_ARGS $QEMU_ARGS -serial file:/dev/pts/3 -s -display curses -monitor /dev/pts/4 -d guest_errors,unimp,page,in_asm,int,pcall -D /dev/pts/4
+	qemu-system-x86_64 $QEMU_EXTRA_ARGS $QEMU_ARGS -serial file:/dev/pts/3 -s -display curses -monitor /dev/pts/4 -D /dev/pts/4
 # pts/2
 split-window -v -d \
 	./tools/gdb-startup.sh $KERNEL_IMAGE localhost:1234

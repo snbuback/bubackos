@@ -5,10 +5,10 @@
 
 typedef struct {
     uintptr_t addr;
-    bool instruction_fetch;
-    bool reading;
-    bool writing;
-    bool invalid_permission;
+    bool no_execution_access;
+    bool no_reading_access;
+    bool no_writing_access;
+    bool is_reference_valid;
 } pagefault_status_t;
 
 //---------- implemented by Core ----------//

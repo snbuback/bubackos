@@ -11,6 +11,12 @@
 
 #define INT_SYSTEM_CALL   50      // 0x32
 
+// from https://wiki.osdev.org/Page_Fault
+#define PF_FLAG_PRESENT         (0<<1)
+#define PF_FLAG_READ_WRITE      (1<<1)
+#define PF_FLAG_USER_SYSTEM     (2<<1)
+#define PF_FLAG_INSTRUCTION     (4<<1)
+
 #ifndef __ASSEMBLER__
 #include <stdint.h>
 #include <x86_64/native_task.h>

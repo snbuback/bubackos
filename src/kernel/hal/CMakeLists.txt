@@ -29,4 +29,5 @@ PUBLIC
 include_directories("${CMAKE_CURRENT_LIST_DIR}/include")
 
 target_add_test(${OS_EXEC_TARGET} test_gdt ${CMAKE_CURRENT_LIST_DIR}/test/test_gdt.c)
+target_add_test(${OS_EXEC_TARGET} test_idt ${CMAKE_CURRENT_LIST_DIR}/test/test_idt.c)
 target_add_test(${OS_EXEC_TARGET} test_native_pagging ${CMAKE_CURRENT_LIST_DIR}/test/test_native_pagging.c)

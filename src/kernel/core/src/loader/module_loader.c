@@ -82,7 +82,6 @@ bool module_task_initialize()
         task_run(task, elf.entry_point);
     }
     return true;
-
 }
 
 bool module_initialize()

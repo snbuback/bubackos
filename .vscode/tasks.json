@@ -42,7 +42,7 @@
         {
             "label": "start-debug",
             "type": "shell",
-            "command": "myos-start && ${workspaceFolder}/tools/open-terminal.sh ${workspaceFolder}/.wrappers/myos-connect"
+            "command": "make iso && myos-start && ${workspaceFolder}/tools/open-terminal.sh ${workspaceFolder}/.wrappers/myos-connect"
         },
         {
             "label": "stop-debug",

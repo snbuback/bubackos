@@ -56,6 +56,14 @@ native_task_t* pre_syscall(native_task_t* native_task)
     return native_task;
 }
 
+void parse_intel_pagefault_flag(pagefault_status_t* pf, unsigned int pf_flag)
+{
+    pf->is_reference_valid = !(pf_flag & PF_FLAG_PRESENT);
+    pf->no_execution_access = pf_flag & PF_FLAG_INSTRUCTION;
+    pf->no_reading_access = !(pf_flag & PF_FLAG_READ_WRITE);
+    pf->no_writing_access = pf_flag & PF_FLAG_READ_WRITE;
+}
+
 void interrupt_handler(native_task_t *native_task, int interrupt)
 {
     log_debug("Interruption %d (0x%x) on task %s. kernel-stack=%p",
@@ -76,9 +84,9 @@ void interrupt_handler(native_task_t *native_task, int interrupt)
 
     case 0xE: {  // Page fault
         pagefault_status_t pf = {
-            .addr = page_fault_addr(),
-            // TODO Filling the other fields
+            .addr = page_fault_addr()
         };
+        parse_intel_pagefault_flag(&pf, native_task->orig_rax);
         handle_page_fault(pf);
         break;
     }

@@ -42,10 +42,14 @@ function(generate_test test_name test_file)
             ${CMAKE_C_FLAGS}
             -O0
             -g
+            -DDEBUG_MODE
             --coverage
             -fno-sanitize-recover=all
             -fsanitize=undefined
             -fno-sanitize=alignment
+            -fdata-sections
+            -ffunction-sections
+            -Wl,--gc-sections
             -I${UNITY_ROOT}/src
             -I${UNITY_ROOT}/../
             -I${CMAKE_CURRENT_SOURCE_DIR}/../tests
