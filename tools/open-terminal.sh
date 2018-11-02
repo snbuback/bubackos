@@ -19,9 +19,11 @@ EOF
 
 run_on_osx_iterm() {
     osascript <<EOF
-    tell application "iTerm2"
-        create window with default profile command "${CMD}"
-        activate
+    tell application "iTerm"
+        tell create window with default profile command "${CMD}"
+            set zoomed to true
+            activate
+        end tell
     end tell
 EOF
 }
