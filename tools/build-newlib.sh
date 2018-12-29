@@ -4,7 +4,6 @@ set -e
 set -x
 
 # requires: BUILD_DIR, SYSROOT, CROSS_TRIPLE
-# patch file generated after git add . with: git diff --cached --binary > /tmp/mypatch.patch
 
 if [ ! "$#" -eq "2" ]; then
     echo "Missing gcc and newlib version number"
@@ -20,7 +19,6 @@ mkdir -p ${BUILD_DIR}
 echo "Building Newlib ${NEWLIB_VERSION}"
 curl -s ftp://sourceware.org/pub/newlib/newlib-${NEWLIB_VERSION}.tar.gz | tar -zx -C ${BUILD_DIR}
 cd ${BUILD_DIR}/newlib-${NEWLIB_VERSION}
-# patch -p1 < ${BUILD_DIR}/patches/newlib.patch
 ./configure --target=${CROSS_TRIPLE} --disable-nls --disable-werror
 make
 make install
