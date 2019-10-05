@@ -19,7 +19,8 @@ intel_switch_task:
     pushq   REG_ENTRY(16)
 
     // change other register segments
-    movq    $(GDT_SEGMENT(GDT_ENTRY_USER_DS)+GDT_RING_USER), %rax
+    // movq    $(GDT_SEGMENT(GDT_ENTRY_USER_DS)+GDT_RING_USER), %rax
+    movq    $0, %rax
     mov     %ax, %ds
     mov     %ax, %es
     mov     %ax, %fs

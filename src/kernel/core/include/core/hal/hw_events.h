@@ -4,6 +4,8 @@
 #include <stdbool.h>
 
 typedef struct {
+    uintptr_t code_addr;
+    uintptr_t stack_addr;
     uintptr_t addr;
     bool no_execution_access;
     bool no_reading_access;

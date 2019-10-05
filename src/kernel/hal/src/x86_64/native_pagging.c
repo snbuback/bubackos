@@ -31,6 +31,8 @@ inline int index_for_level(int level, uintptr_t virtual_addr)
 /// debugging functions ///
 static void log_pagetable_entry(page_map_entry_t* entry)
 {
+    // When using QEMU info tlb the fields are describe here: 
+    // https://github.com/qemu/qemu/blob/e8c858944ea61923ca563bb5905bf04624d05f16/target/i386/monitor.c#L55
     log_debug("==> vaddr=%p \t - %p  \tpaddr=%p-%p \t size=%d KB \t %cr%c%c",
         entry->virtual_addr,
         entry->virtual_addr + entry->size - 1,

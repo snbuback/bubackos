@@ -1,11 +1,7 @@
 #include <stdint.h>
 #include <string.h>
-// x86_64-elf-gcc -g0 -march=nehalem -std=gnu99 -ffreestanding -Wall -Werror -Wextra -mno-red-zone -c hello.c
-// x86_64-elf-readelf -aw ./a.out 
-// x86_64-elf-ld --gc-sections -T module.ld hello.o
-// x86_64-elf-objdump -dxs ./a.out 
 
-const char stack[] __attribute__ ((section (".interp"))) = "KERNEL_MODULE";
+const char MODULE_TYPE[] __attribute__ ((section (".interp"))) = "KERNEL_MODULE";
 
 extern long _syscall0(long syscall_number);
 extern long _syscall1(long syscall_number, long arg1);

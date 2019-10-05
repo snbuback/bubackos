@@ -26,7 +26,7 @@ static bool vmem_map_current_kernel_memory_address()
         "kernel-code",
         platform->memory.kernel.addr_start,
         0,
-        false,
+        true, // TODO Why the kernel code needs be executable by user?
         true,
         true
     );
@@ -48,7 +48,7 @@ static bool vmem_map_current_kernel_memory_address()
         0,
         false,
         true,
-        true
+        true // TODO don't use data as kernel stack memory
     );
 
     // for data, always allocates more 1 page to ensure any allocation before the memory allocator module

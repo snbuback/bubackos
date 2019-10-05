@@ -83,7 +83,7 @@ uintptr_t vmem_region_map_physical_address(vmem_region_t* vmem_region, uintptr_t
     }
 
     log_trace("Mapped on region %s virtual address %p-%p to physical %p-%p", 
-        vmem_region->name, returning_addr, returning_addr + size, physical_start_addr, physical_start_addr + size);
+        vmem_region->name, returning_addr, returning_addr + size - 1, physical_start_addr, physical_start_addr + size - 1);
     flush_if_required();
     // vmem_region_dump(region);
     return returning_addr;

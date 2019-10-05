@@ -51,7 +51,7 @@ static inline bool pmem_set_page(uintptr_t page_number, page_type page_type)
 static size_t pmem_next_page_available(page_type pagetype)
 {
     // TODO search for page only after 64mb until ensure everything is safe
-    for (size_t p = ADDR_TO_PAGE(64*1024*1024); p < total_of_pages; ++p) {
+    for (size_t p = ADDR_TO_PAGE(66*1024*1024); p < total_of_pages; ++p) {
         if (pages[p] == pagetype) {
             return p;
         }

@@ -56,12 +56,16 @@ native_task_t* pre_syscall(native_task_t* native_task)
     return native_task;
 }
 
-void parse_intel_pagefault_flag(pagefault_status_t* pf, unsigned int pf_flag)
+void parse_intel_pagefault_flag(pagefault_status_t* pf, uintptr_t pagefault_addr, native_task_t* native_task)
 {
+    unsigned int pf_flag = native_task->orig_rax;
     pf->is_reference_valid = !(pf_flag & PF_FLAG_PRESENT);
     pf->no_execution_access = pf_flag & PF_FLAG_INSTRUCTION;
     pf->no_reading_access = !(pf_flag & PF_FLAG_READ_WRITE);
     pf->no_writing_access = pf_flag & PF_FLAG_READ_WRITE;
+    pf->addr = pagefault_addr;
+    pf->code_addr = native_task->codeptr;
+    pf->stack_addr = native_task->stackptr;
 }
 
 void interrupt_handler(native_task_t *native_task, int interrupt)
@@ -83,10 +87,8 @@ void interrupt_handler(native_task_t *native_task, int interrupt)
         break;
 
     case 0xE: {  // Page fault
-        pagefault_status_t pf = {
-            .addr = page_fault_addr()
-        };
-        parse_intel_pagefault_flag(&pf, native_task->orig_rax);
+        pagefault_status_t pf;
+        parse_intel_pagefault_flag(&pf, page_fault_addr(), native_task);
         handle_page_fault(pf);
         break;
     }
