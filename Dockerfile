@@ -1,10 +1,11 @@
-FROM ubuntu:18.10
+FROM ubuntu:20.04
 ARG LOCALE=en_GB.UTF-8
 ARG BINUTILS_VERSION
 ARG GCC_VERSION
 ARG NEWLIB_VERSION
 ARG SYSROOT
 ARG CROSS_TRIPLE
+ARG DEBIAN_FRONTEND=noninteractive
 ENV PYTHONUNBUFFERED=1
 ENV BUILD_DIR=/build-tools
 ENV CROSS_TRIPLE=${CROSS_TRIPLE}
@@ -21,7 +22,7 @@ RUN apt-get -qq update && \
     apt-get -qq -y full-upgrade && \
     apt-get -qq -y install locales bash curl wget pkg-config build-essential make automake autogen \
         tar xz-utils bzip2 gzip file rsync sed vim binutils gcc nasm grub-pc-bin xorriso python3 python \
-        gdb git libtool cmake automake autoconf gawk ruby qemu-system-x86 tmux lcov ninja-build && \
+        gdb git libtool cmake automake autoconf gawk ruby qemu-system-x86 tmux lcov ninja-build texinfo && \
     rm -rf /var/lib/apt/lists/*
 
 RUN curl -SsL https://github.com/oclint/oclint/releases/download/v0.13.1/oclint-0.13.1-x86_64-linux-4.4.0-112-generic.tar.gz | tar -zxv -C /usr/local
