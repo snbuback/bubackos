@@ -37,7 +37,7 @@ for mod in `cat src/modules/modules.list`; do
   echo "add-symbol-file ${module} 0x${addr}" >> $GDB_SCRIPT_1
 done
 
-BREAKPOINTS=$(objdump -d --section=.text build/bootloader/boot/kernel.elf | egrep -i 'xchg.*%bx,%bx' | cut -d: -f1 | sed -e 's/^[[:space:]]*//' -e "s/^/break *0x/")
+BREAKPOINTS=$(objdump -d --section=.text build/bootloader/boot/{kernel.elf,*.mod} | egrep -i 'xchg.*%bx,%bx' | cut -d: -f1 | sed -e 's/^[[:space:]]*//' -e "s/^/break *0x/")
 
 cat >> $GDB_SCRIPT_1 <<EOF
 target remote $ENDPOINT

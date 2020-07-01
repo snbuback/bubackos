@@ -28,7 +28,7 @@ NO_INPUT='bash -c "sleep 1; tail --pid=`pgrep qemu-system` -f /dev/null"'
 
 cat > $TMUX_CONF <<EOF
 # pts/1
-new-session -n run -x "80" -y "25" \
+new-session -n run  \
 	qemu-system-x86_64 $QEMU_EXTRA_ARGS $QEMU_ARGS -serial file:/dev/pts/3 -s -display curses -monitor /dev/pts/4 -D /dev/pts/4
 # pts/2
 split-window -v -d \
@@ -44,7 +44,7 @@ split-window -h -d -t tools \
 	bash -c 'make dump-asm | less'
 
 # ensure the qemu have 25 lines. Doesn't work every time, why?
-resize-pane -t 0 -y 25 -x 80
+# resize-pane -t 0 -y 25 -x 80
 
 # select gdb
 select-pane -t 2

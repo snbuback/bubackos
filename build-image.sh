@@ -4,7 +4,7 @@ set -xue
 SYSROOT=$PWD/sysroot
 source dependencies.properties
 
-docker build --pull --rm --build-arg SYSROOT=$SYSROOT \
+docker image build --pull --squash --build-arg SYSROOT=$SYSROOT \
 --build-arg CROSS_TRIPLE=$TARGET \
 --build-arg BINUTILS_VERSION=$BINUTILS_VERSION \
 --build-arg GCC_VERSION=$GCC_VERSION \
