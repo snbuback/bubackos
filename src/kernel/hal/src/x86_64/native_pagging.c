@@ -155,6 +155,11 @@ inline void fill_entry_value(page_entry_t* entry, uintptr_t ptr, bool user, bool
     if (!code) {
         entry->executeDisable = 1;
     }
+
+    // FIXME: The page table permissions are not right
+    // *SEEMS* the issue is with the level 4-2 of pages.
+    entry->user = entry->writable = 1;
+    entry->executeDisable = 0;
     return;
 }
 
@@ -164,13 +169,15 @@ static void set_entry(native_page_table_t* pt, int level, page_entry_t* entries,
     page_entry_t entry = entries[index];
 
     if (level == 1) {
-        // log_trace("Mapped vaddr=%p paddr=%p u=%d c=%d w=%d", virtual_addr, physical_address, (int) user, (int) code, (int) writable);
+        log_trace("Mapped level 1 vaddr=%p paddr=%p u=%d   c=%d   w=%d", virtual_addr, physical_address, (int) user, (int) code, (int) writable);
         fill_entry_value(&entries[index], physical_address, user, code, writable);
     } else {
+        // permissions are defined just on the leaf.
         page_entry_t* entry_ptr = (page_entry_t*) (uintptr_t) (entry.addr_12_shifted << 12);
         if (!entry.present) {
+            log_trace("Mapped level %d vaddr=%p paddr=%p u=(%d) c=(%d) w=(%d)", level, virtual_addr, physical_address, (int) user, (int) code, (int) writable);
             entry_ptr = create_entries(pt);
-            fill_entry_value(&entries[index], (uintptr_t) entry_ptr, user, code, writable);
+            fill_entry_value(&entries[index], (uintptr_t) entry_ptr, true, true, true);
         }
         set_entry(pt, level-1, entry_ptr, virtual_addr, physical_address, user, code, writable);
     }

@@ -14,15 +14,24 @@ extern long _syscall3(long syscall_number, long arg1, long arg2, long arg3);
 extern long _syscall4(long syscall_number, long arg1, long arg2, long arg3, long arg4);
 extern long _syscall(long syscall_number, long arg1, long arg2, long arg3, long arg4, long arg5);
 
+// from debugger.h
+#define DEBUGGER                      asm volatile ("xchg %bx, %bx");
+
 typedef struct {
     uint64_t num_arguments;
     char** argument_list; // char* arguments[]
 } task_userdata_t;
 
+char* xpto = "hrllfkksd jldsf s";
+
 task_userdata_t* userdata;
 void module_init(uintptr_t arg)
 {
-    userdata = (task_userdata_t*) arg;
+    DEBUGGER
+    userdata = NULL;
+    if (arg) {
+        userdata = (task_userdata_t*) arg;
+    }
 
     _syscall(0x1005, 0x2005, 0x3005, 0x4005, 0x5005, 0x6005);
 

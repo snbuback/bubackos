@@ -5,6 +5,8 @@
 
 typedef struct {
     uintptr_t addr;
+    uintptr_t codeptr;
+    uintptr_t stackptr;
     bool no_execution_access;
     bool no_reading_access;
     bool no_writing_access;

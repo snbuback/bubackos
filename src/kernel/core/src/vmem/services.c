@@ -79,6 +79,7 @@ vmem_t* vmem_get(vmem_id_t vmem_id)
 
 /**
  * Notify a memory handler that a region of memory was updated
+ * TODO: mark all changes pending and apply only before swap task
  */
 bool vmem_notify_change(vmem_t* vmem, vmem_region_t* region, uintptr_t paddr, uintptr_t vaddr)
 {

@@ -20,13 +20,16 @@ void handle_protection_fault()
 void handle_page_fault(pagefault_status_t pf)
 {
     task_t* task = scheduler_current_task();
-    log_fatal("PF: addr=%p valid=%d !r=%d !w=%d !x=%d task=%s",
+    log_fatal("PF: addr=%p valid=%d !r=%d !w=%d !x=%d task=%s codeptr=%p stackptr=%p",
         pf.addr,
         pf.is_reference_valid,
         pf.no_reading_access,
         pf.no_writing_access,
         pf.no_execution_access,
-        task_display_name(task));
+        task_display_name(task),
+        pf.codeptr,
+        pf.stackptr
+        );
     native_vmem_dump(NULL);
 
     if (task) {

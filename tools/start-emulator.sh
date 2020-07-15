@@ -13,7 +13,7 @@ echo "args=$#"
 
 QEMU_ARGS="-m 128 -cpu Skylake-Server -boot order=d -cdrom $ISO -no-reboot \
 -no-shutdown -usb -device usb-tablet -icount auto,sleep=on \
--show-cursor -d guest_errors,unimp,page,in_asm,int,pcall"
+-show-cursor -d guest_errors,unimp,page,int,pcall"
 
 # if there is the kernel image, means we are running in debug mode
 if [ ! -z "$KERNEL_IMAGE" ]; then

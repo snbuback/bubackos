@@ -2,7 +2,9 @@ set(CMAKE_VERBOSE_MAKEFILE on)
 set(CMAKE_CROSSCOMPILING on)
 
 set(CMAKE_C_STANDARD 11)
-string(APPEND CMAKE_C_FLAGS "${FLAGS_COMMON_ARCH} -g -ffreestanding -Wall -Werror -Wextra")
+string(APPEND CMAKE_C_FLAGS "${FLAGS_COMMON_ARCH} -g0 -ffreestanding -Wall -Werror -Wextra")
 
-string(APPEND CMAKE_ASM_FLAGS "${FLAGS_COMMON_ARCH} -g -Wall -Werror -Wextra")
+string(APPEND CMAKE_ASM_FLAGS "${FLAGS_COMMON_ARCH} -g0 -Wall -Werror -Wextra")
 string(APPEND CMAKE_EXE_LINKER_FLAGS "-nostdlib -static -lm -Wl,-z,common-page-size=4096,-z,max-page-size=4096 -T ${CMAKE_CURRENT_LIST_DIR}/module.ld")
+
+

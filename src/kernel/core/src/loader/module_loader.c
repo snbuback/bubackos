@@ -15,7 +15,7 @@ vmem_t* memory_handler;
 bool allocate_program_header(elf_t* elf, elf_program_header_t* ph, vmem_t* module_memory_handler)
 {
     bool writable = ph->flags & ELF_PF_FLAGS_W;
-    bool code = true; //ph->flags & ELF_PF_FLAGS_X;
+    bool code = ph->flags & ELF_PF_FLAGS_X;
     vmem_region_t* region = vmem_region_create(module_memory_handler, "elf-loader", ph->vaddr, 0, true, writable, code);
     if (!region) {
         return false;
@@ -76,7 +76,7 @@ bool module_task_initialize()
         }
 
         task_t* task = task_create(module_name, module_memory_handler);
-        task_set_kernel_mode(task);
+        // task_set_kernel_mode(task);
         // const char* args[] = {"primeiro", "segundo", "terceiro!!!"};
         // task_set_arguments(task, 3, args);
         task_run(task, elf.entry_point);

@@ -72,6 +72,9 @@ void interrupt_handler(native_task_t *native_task, int interrupt)
         task_display_name(scheduler_current_task()),
         get_stack_base_addr()
         );
+    if (interrupt != 0x8) {
+        DEBUGGER;
+    }
 
     switch (interrupt) {
     case 0x8: // timer
@@ -84,7 +87,10 @@ void interrupt_handler(native_task_t *native_task, int interrupt)
 
     case 0xE: {  // Page fault
         pagefault_status_t pf = {
-            .addr = page_fault_addr()
+            .addr = page_fault_addr(),
+            .codeptr = native_task->codeptr,
+            .stackptr = native_task->stackptr
+
         };
         parse_intel_pagefault_flag(&pf, native_task->orig_rax);
         handle_page_fault(pf);

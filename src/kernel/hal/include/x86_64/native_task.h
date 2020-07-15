@@ -45,7 +45,7 @@
 
 
 // from linux: https://github.com/torvalds/linux/blob/ead751507de86d90fa250431e9990a8b881f713c/arch/x86/include/asm/sighandling.h
-#define INITIAL_EFLAGS	(X86_EFLAGS_IOPL | X86_EFLAGS_FIXED | X86_EFLAGS_IF | X86_EFLAGS_ID)
+#define INITIAL_EFLAGS	(X86_EFLAGS_FIXED | X86_EFLAGS_IF)
 
 // register save by the hardware context switch: SS, rsp, rip (pointer), rflags
 #define hal_save_task_state() \
